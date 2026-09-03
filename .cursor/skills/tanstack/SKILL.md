@@ -11,11 +11,11 @@ Load official intents when needed (`npx @tanstack/intent@latest load ...`). This
 
 | URL | File |
 |-----|------|
-| `/` | `src/routes/index.tsx` |
+| `/` | `src/routes/index.tsx` (landing) |
 | `/sign-in` | `src/routes/sign-in.tsx` |
-| `/workspaces` | `src/routes/workspaces.tsx` (auth layout) + `workspaces.index.tsx` |
-| `/workspaces/$code` | `src/routes/workspaces.$code.tsx` (sidebar layout) |
-| `/workspaces/$code/issues/$issueNumber` | `src/routes/workspaces.$code.issues.$issueNumber.tsx` |
+| `/app` | `src/routes/app.tsx` (auth layout) + `app.index.tsx` |
+| `/app/$code` | `src/routes/app.$code.tsx` (sidebar layout) |
+| `/app/$code/issues/$issueNumber` | `src/routes/app.$code.issues.$issueNumber.tsx` |
 | `/invites/$token` | `src/routes/invites.$token.tsx` |
 
 - Auth: `beforeLoad` + `getAuthSession()` + `throw redirect({ to: "/sign-in", search: { redirect: location.href } })`.

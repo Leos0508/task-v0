@@ -164,7 +164,7 @@ export default function DocumentLinkedIssues({
 							className="group flex items-start gap-1 rounded-md px-1 py-1 hover:bg-accent"
 						>
 							<Link
-								to="/workspaces/$code/issues/$issueNumber"
+								to="/app/$code/issues/$issueNumber"
 								params={{
 									code: workspaceCode,
 									issueNumber: String(issue.number),

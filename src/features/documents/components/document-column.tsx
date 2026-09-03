@@ -10,7 +10,7 @@ export function createDocumentColumns(workspaceCode: string) {
 			header: "Title",
 			cell: ({ row, getValue }) => (
 				<Link
-					to="/workspaces/$code/documents/$documentId"
+					to="/app/$code/documents/$documentId"
 					params={{ code: workspaceCode, documentId: row.original.id }}
 					className="hover:underline font-medium"
 				>

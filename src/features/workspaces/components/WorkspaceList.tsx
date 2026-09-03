@@ -76,7 +76,7 @@ export default function WorkspaceList() {
 				</div>
 				<div className="flex items-center gap-2">
 					<Button asChild>
-						<Link to="/workspaces/create-workspace">
+						<Link to="/app/create-workspace">
 							New
 							<PlusIcon />
 						</Link>

@@ -36,7 +36,7 @@ export default function PageError({ error }: ErrorComponentProps) {
 						Retry
 					</Button>
 					<Button variant="outline" asChild>
-						<Link to="/workspaces">Workspaces</Link>
+						<Link to="/app">App</Link>
 					</Button>
 				</div>
 			</div>

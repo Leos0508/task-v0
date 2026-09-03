@@ -29,7 +29,7 @@ import { signInSchema } from "#/features/auth/schema";
 import { authClient } from "#/lib/auth-client";
 import { safeInternalPath } from "#/lib/safe-path";
 
-const SignInForm = ({ next = "/workspaces" }: { next?: string }) => {
+const SignInForm = ({ next = "/app" }: { next?: string }) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const navigate = useNavigate();
 	const form = useForm({

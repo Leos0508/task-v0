@@ -1,6 +1,6 @@
 export function safeInternalPath(
 	value: string | undefined | null,
-	fallback = "/workspaces",
+	fallback = "/app",
 ) {
 	if (!value || !value.startsWith("/") || value.startsWith("//")) {
 		return fallback;

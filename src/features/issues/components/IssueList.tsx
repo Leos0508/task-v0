@@ -64,7 +64,7 @@ export default function IssueList({
 				queryKey: issueKeys.all(workspaceCode),
 			});
 			navigate({
-				to: "/workspaces/$code/issues/$issueNumber",
+				to: "/app/$code/issues/$issueNumber",
 				params: {
 					code: workspaceCode,
 					issueNumber: String(result.data.number),

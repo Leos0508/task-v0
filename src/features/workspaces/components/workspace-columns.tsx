@@ -27,7 +27,7 @@ export const workspaceColumns = columnHelper.columns([
 		sortFn: "text",
 		cell: ({ row, getValue }) => (
 			<Link
-				to="/workspaces/$code"
+				to="/app/$code"
 				params={{ code: row.original.code }}
 				className="hover:underline font-medium"
 			>

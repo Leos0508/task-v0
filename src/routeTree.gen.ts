@@ -10,26 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppCodeRouteImport } from './routes/app.$code'
+import { Route as AppCreateWorkspaceRouteImport } from './routes/app.create-workspace'
 import { Route as InvitesTokenRouteImport } from './routes/invites.$token'
-import { Route as WorkspacesIndexRouteImport } from './routes/workspaces.index'
-import { Route as WorkspacesCodeRouteImport } from './routes/workspaces.$code'
-import { Route as WorkspacesCreateWorkspaceRouteImport } from './routes/workspaces.create-workspace'
+import { Route as WorkspacesSplatRouteImport } from './routes/workspaces.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as WorkspacesCodeIndexRouteImport } from './routes/workspaces.$code.index'
-import { Route as WorkspacesCodeDocumentsRouteImport } from './routes/workspaces.$code.documents'
-import { Route as WorkspacesCodeIssuesRouteImport } from './routes/workspaces.$code.issues'
-import { Route as WorkspacesCodeSettingsRouteImport } from './routes/workspaces.$code.settings'
-import { Route as WorkspacesCodeDocumentsIndexRouteImport } from './routes/workspaces.$code.documents.index'
-import { Route as WorkspacesCodeDocumentsDocumentIdRouteImport } from './routes/workspaces.$code.documents.$documentId'
-import { Route as WorkspacesCodeIssuesIndexRouteImport } from './routes/workspaces.$code.issues.index'
-import { Route as WorkspacesCodeIssuesIssueNumberRouteImport } from './routes/workspaces.$code.issues.$issueNumber'
+import { Route as AppCodeIndexRouteImport } from './routes/app.$code.index'
+import { Route as AppCodeDocumentsRouteImport } from './routes/app.$code.documents'
+import { Route as AppCodeIssuesRouteImport } from './routes/app.$code.issues'
+import { Route as AppCodeSettingsRouteImport } from './routes/app.$code.settings'
+import { Route as AppCodeDocumentsIndexRouteImport } from './routes/app.$code.documents.index'
+import { Route as AppCodeDocumentsDocumentIdRouteImport } from './routes/app.$code.documents.$documentId'
+import { Route as AppCodeIssuesIndexRouteImport } from './routes/app.$code.issues.index'
+import { Route as AppCodeIssuesIssueNumberRouteImport } from './routes/app.$code.issues.$issueNumber'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -47,189 +54,204 @@ const WorkspacesRoute = WorkspacesRouteImport.update({
   path: '/workspaces',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCodeRoute = AppCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCreateWorkspaceRoute = AppCreateWorkspaceRouteImport.update({
+  id: '/create-workspace',
+  path: '/create-workspace',
+  getParentRoute: () => AppRoute,
+} as any)
 const InvitesTokenRoute = InvitesTokenRouteImport.update({
   id: '/invites/$token',
   path: '/invites/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspacesIndexRoute = WorkspacesIndexRouteImport.update({
-  id: '/',
-  path: '/',
+const WorkspacesSplatRoute = WorkspacesSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => WorkspacesRoute,
 } as any)
-const WorkspacesCodeRoute = WorkspacesCodeRouteImport.update({
-  id: '/$code',
-  path: '/$code',
-  getParentRoute: () => WorkspacesRoute,
-} as any)
-const WorkspacesCreateWorkspaceRoute =
-  WorkspacesCreateWorkspaceRouteImport.update({
-    id: '/create-workspace',
-    path: '/create-workspace',
-    getParentRoute: () => WorkspacesRoute,
-  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspacesCodeIndexRoute = WorkspacesCodeIndexRouteImport.update({
+const AppCodeIndexRoute = AppCodeIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => WorkspacesCodeRoute,
+  getParentRoute: () => AppCodeRoute,
 } as any)
-const WorkspacesCodeDocumentsRoute = WorkspacesCodeDocumentsRouteImport.update({
+const AppCodeDocumentsRoute = AppCodeDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
-  getParentRoute: () => WorkspacesCodeRoute,
+  getParentRoute: () => AppCodeRoute,
 } as any)
-const WorkspacesCodeIssuesRoute = WorkspacesCodeIssuesRouteImport.update({
+const AppCodeIssuesRoute = AppCodeIssuesRouteImport.update({
   id: '/issues',
   path: '/issues',
-  getParentRoute: () => WorkspacesCodeRoute,
+  getParentRoute: () => AppCodeRoute,
 } as any)
-const WorkspacesCodeSettingsRoute = WorkspacesCodeSettingsRouteImport.update({
+const AppCodeSettingsRoute = AppCodeSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => WorkspacesCodeRoute,
+  getParentRoute: () => AppCodeRoute,
 } as any)
-const WorkspacesCodeDocumentsIndexRoute =
-  WorkspacesCodeDocumentsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WorkspacesCodeDocumentsRoute,
-  } as any)
-const WorkspacesCodeDocumentsDocumentIdRoute =
-  WorkspacesCodeDocumentsDocumentIdRouteImport.update({
+const AppCodeDocumentsIndexRoute = AppCodeDocumentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCodeDocumentsRoute,
+} as any)
+const AppCodeDocumentsDocumentIdRoute =
+  AppCodeDocumentsDocumentIdRouteImport.update({
     id: '/$documentId',
     path: '/$documentId',
-    getParentRoute: () => WorkspacesCodeDocumentsRoute,
+    getParentRoute: () => AppCodeDocumentsRoute,
   } as any)
-const WorkspacesCodeIssuesIndexRoute =
-  WorkspacesCodeIssuesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WorkspacesCodeIssuesRoute,
-  } as any)
-const WorkspacesCodeIssuesIssueNumberRoute =
-  WorkspacesCodeIssuesIssueNumberRouteImport.update({
+const AppCodeIssuesIndexRoute = AppCodeIssuesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCodeIssuesRoute,
+} as any)
+const AppCodeIssuesIssueNumberRoute =
+  AppCodeIssuesIssueNumberRouteImport.update({
     id: '/$issueNumber',
     path: '/$issueNumber',
-    getParentRoute: () => WorkspacesCodeIssuesRoute,
+    getParentRoute: () => AppCodeIssuesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
+  '/app/$code': typeof AppCodeRouteWithChildren
+  '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
-  '/workspaces/$code': typeof WorkspacesCodeRouteWithChildren
-  '/workspaces/create-workspace': typeof WorkspacesCreateWorkspaceRoute
-  '/workspaces/': typeof WorkspacesIndexRoute
+  '/workspaces/$': typeof WorkspacesSplatRoute
+  '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/workspaces/$code/documents': typeof WorkspacesCodeDocumentsRouteWithChildren
-  '/workspaces/$code/issues': typeof WorkspacesCodeIssuesRouteWithChildren
-  '/workspaces/$code/settings': typeof WorkspacesCodeSettingsRoute
-  '/workspaces/$code/': typeof WorkspacesCodeIndexRoute
-  '/workspaces/$code/documents/$documentId': typeof WorkspacesCodeDocumentsDocumentIdRoute
-  '/workspaces/$code/issues/$issueNumber': typeof WorkspacesCodeIssuesIssueNumberRoute
-  '/workspaces/$code/documents/': typeof WorkspacesCodeDocumentsIndexRoute
-  '/workspaces/$code/issues/': typeof WorkspacesCodeIssuesIndexRoute
+  '/app/$code/documents': typeof AppCodeDocumentsRouteWithChildren
+  '/app/$code/issues': typeof AppCodeIssuesRouteWithChildren
+  '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/app/$code/': typeof AppCodeIndexRoute
+  '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
+  '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/app/$code/documents/': typeof AppCodeDocumentsIndexRoute
+  '/app/$code/issues/': typeof AppCodeIssuesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/workspaces': typeof WorkspacesRouteWithChildren
+  '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
-  '/workspaces/create-workspace': typeof WorkspacesCreateWorkspaceRoute
-  '/workspaces': typeof WorkspacesIndexRoute
+  '/workspaces/$': typeof WorkspacesSplatRoute
+  '/app': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/workspaces/$code/settings': typeof WorkspacesCodeSettingsRoute
-  '/workspaces/$code': typeof WorkspacesCodeIndexRoute
-  '/workspaces/$code/documents/$documentId': typeof WorkspacesCodeDocumentsDocumentIdRoute
-  '/workspaces/$code/issues/$issueNumber': typeof WorkspacesCodeIssuesIssueNumberRoute
-  '/workspaces/$code/documents': typeof WorkspacesCodeDocumentsIndexRoute
-  '/workspaces/$code/issues': typeof WorkspacesCodeIssuesIndexRoute
+  '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/app/$code': typeof AppCodeIndexRoute
+  '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
+  '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/app/$code/documents': typeof AppCodeDocumentsIndexRoute
+  '/app/$code/issues': typeof AppCodeIssuesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
+  '/app/$code': typeof AppCodeRouteWithChildren
+  '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
-  '/workspaces/$code': typeof WorkspacesCodeRouteWithChildren
-  '/workspaces/create-workspace': typeof WorkspacesCreateWorkspaceRoute
-  '/workspaces/': typeof WorkspacesIndexRoute
+  '/workspaces/$': typeof WorkspacesSplatRoute
+  '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/workspaces/$code/documents': typeof WorkspacesCodeDocumentsRouteWithChildren
-  '/workspaces/$code/issues': typeof WorkspacesCodeIssuesRouteWithChildren
-  '/workspaces/$code/settings': typeof WorkspacesCodeSettingsRoute
-  '/workspaces/$code/': typeof WorkspacesCodeIndexRoute
-  '/workspaces/$code/documents/$documentId': typeof WorkspacesCodeDocumentsDocumentIdRoute
-  '/workspaces/$code/issues/$issueNumber': typeof WorkspacesCodeIssuesIssueNumberRoute
-  '/workspaces/$code/documents/': typeof WorkspacesCodeDocumentsIndexRoute
-  '/workspaces/$code/issues/': typeof WorkspacesCodeIssuesIndexRoute
+  '/app/$code/documents': typeof AppCodeDocumentsRouteWithChildren
+  '/app/$code/issues': typeof AppCodeIssuesRouteWithChildren
+  '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/app/$code/': typeof AppCodeIndexRoute
+  '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
+  '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/app/$code/documents/': typeof AppCodeDocumentsIndexRoute
+  '/app/$code/issues/': typeof AppCodeIssuesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
+    | '/app/$code'
+    | '/app/create-workspace'
     | '/invites/$token'
-    | '/workspaces/$code'
-    | '/workspaces/create-workspace'
-    | '/workspaces/'
+    | '/workspaces/$'
+    | '/app/'
     | '/api/auth/$'
-    | '/workspaces/$code/documents'
-    | '/workspaces/$code/issues'
-    | '/workspaces/$code/settings'
-    | '/workspaces/$code/'
-    | '/workspaces/$code/documents/$documentId'
-    | '/workspaces/$code/issues/$issueNumber'
-    | '/workspaces/$code/documents/'
-    | '/workspaces/$code/issues/'
+    | '/app/$code/documents'
+    | '/app/$code/issues'
+    | '/app/$code/settings'
+    | '/app/$code/'
+    | '/app/$code/documents/$documentId'
+    | '/app/$code/issues/$issueNumber'
+    | '/app/$code/documents/'
+    | '/app/$code/issues/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/invites/$token'
-    | '/workspaces/create-workspace'
     | '/workspaces'
+    | '/app/create-workspace'
+    | '/invites/$token'
+    | '/workspaces/$'
+    | '/app'
     | '/api/auth/$'
-    | '/workspaces/$code/settings'
-    | '/workspaces/$code'
-    | '/workspaces/$code/documents/$documentId'
-    | '/workspaces/$code/issues/$issueNumber'
-    | '/workspaces/$code/documents'
-    | '/workspaces/$code/issues'
+    | '/app/$code/settings'
+    | '/app/$code'
+    | '/app/$code/documents/$documentId'
+    | '/app/$code/issues/$issueNumber'
+    | '/app/$code/documents'
+    | '/app/$code/issues'
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
+    | '/app/$code'
+    | '/app/create-workspace'
     | '/invites/$token'
-    | '/workspaces/$code'
-    | '/workspaces/create-workspace'
-    | '/workspaces/'
+    | '/workspaces/$'
+    | '/app/'
     | '/api/auth/$'
-    | '/workspaces/$code/documents'
-    | '/workspaces/$code/issues'
-    | '/workspaces/$code/settings'
-    | '/workspaces/$code/'
-    | '/workspaces/$code/documents/$documentId'
-    | '/workspaces/$code/issues/$issueNumber'
-    | '/workspaces/$code/documents/'
-    | '/workspaces/$code/issues/'
+    | '/app/$code/documents'
+    | '/app/$code/issues'
+    | '/app/$code/settings'
+    | '/app/$code/'
+    | '/app/$code/documents/$documentId'
+    | '/app/$code/issues/$issueNumber'
+    | '/app/$code/documents/'
+    | '/app/$code/issues/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   WorkspacesRoute: typeof WorkspacesRouteWithChildren
@@ -244,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -267,6 +296,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspacesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/$code': {
+      id: '/app/$code'
+      path: '/$code'
+      fullPath: '/app/$code'
+      preLoaderRoute: typeof AppCodeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/create-workspace': {
+      id: '/app/create-workspace'
+      path: '/create-workspace'
+      fullPath: '/app/create-workspace'
+      preLoaderRoute: typeof AppCreateWorkspaceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/invites/$token': {
       id: '/invites/$token'
       path: '/invites/$token'
@@ -274,25 +324,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitesTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/workspaces/': {
-      id: '/workspaces/'
-      path: '/'
-      fullPath: '/workspaces/'
-      preLoaderRoute: typeof WorkspacesIndexRouteImport
-      parentRoute: typeof WorkspacesRoute
-    }
-    '/workspaces/$code': {
-      id: '/workspaces/$code'
-      path: '/$code'
-      fullPath: '/workspaces/$code'
-      preLoaderRoute: typeof WorkspacesCodeRouteImport
-      parentRoute: typeof WorkspacesRoute
-    }
-    '/workspaces/create-workspace': {
-      id: '/workspaces/create-workspace'
-      path: '/create-workspace'
-      fullPath: '/workspaces/create-workspace'
-      preLoaderRoute: typeof WorkspacesCreateWorkspaceRouteImport
+    '/workspaces/$': {
+      id: '/workspaces/$'
+      path: '/$'
+      fullPath: '/workspaces/$'
+      preLoaderRoute: typeof WorkspacesSplatRouteImport
       parentRoute: typeof WorkspacesRoute
     }
     '/api/auth/$': {
@@ -302,123 +338,129 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/workspaces/$code/': {
-      id: '/workspaces/$code/'
+    '/app/$code/': {
+      id: '/app/$code/'
       path: '/'
-      fullPath: '/workspaces/$code/'
-      preLoaderRoute: typeof WorkspacesCodeIndexRouteImport
-      parentRoute: typeof WorkspacesCodeRoute
+      fullPath: '/app/$code/'
+      preLoaderRoute: typeof AppCodeIndexRouteImport
+      parentRoute: typeof AppCodeRoute
     }
-    '/workspaces/$code/documents': {
-      id: '/workspaces/$code/documents'
+    '/app/$code/documents': {
+      id: '/app/$code/documents'
       path: '/documents'
-      fullPath: '/workspaces/$code/documents'
-      preLoaderRoute: typeof WorkspacesCodeDocumentsRouteImport
-      parentRoute: typeof WorkspacesCodeRoute
+      fullPath: '/app/$code/documents'
+      preLoaderRoute: typeof AppCodeDocumentsRouteImport
+      parentRoute: typeof AppCodeRoute
     }
-    '/workspaces/$code/issues': {
-      id: '/workspaces/$code/issues'
+    '/app/$code/issues': {
+      id: '/app/$code/issues'
       path: '/issues'
-      fullPath: '/workspaces/$code/issues'
-      preLoaderRoute: typeof WorkspacesCodeIssuesRouteImport
-      parentRoute: typeof WorkspacesCodeRoute
+      fullPath: '/app/$code/issues'
+      preLoaderRoute: typeof AppCodeIssuesRouteImport
+      parentRoute: typeof AppCodeRoute
     }
-    '/workspaces/$code/settings': {
-      id: '/workspaces/$code/settings'
+    '/app/$code/settings': {
+      id: '/app/$code/settings'
       path: '/settings'
-      fullPath: '/workspaces/$code/settings'
-      preLoaderRoute: typeof WorkspacesCodeSettingsRouteImport
-      parentRoute: typeof WorkspacesCodeRoute
+      fullPath: '/app/$code/settings'
+      preLoaderRoute: typeof AppCodeSettingsRouteImport
+      parentRoute: typeof AppCodeRoute
     }
-    '/workspaces/$code/documents/': {
-      id: '/workspaces/$code/documents/'
+    '/app/$code/documents/': {
+      id: '/app/$code/documents/'
       path: '/'
-      fullPath: '/workspaces/$code/documents/'
-      preLoaderRoute: typeof WorkspacesCodeDocumentsIndexRouteImport
-      parentRoute: typeof WorkspacesCodeDocumentsRoute
+      fullPath: '/app/$code/documents/'
+      preLoaderRoute: typeof AppCodeDocumentsIndexRouteImport
+      parentRoute: typeof AppCodeDocumentsRoute
     }
-    '/workspaces/$code/documents/$documentId': {
-      id: '/workspaces/$code/documents/$documentId'
+    '/app/$code/documents/$documentId': {
+      id: '/app/$code/documents/$documentId'
       path: '/$documentId'
-      fullPath: '/workspaces/$code/documents/$documentId'
-      preLoaderRoute: typeof WorkspacesCodeDocumentsDocumentIdRouteImport
-      parentRoute: typeof WorkspacesCodeDocumentsRoute
+      fullPath: '/app/$code/documents/$documentId'
+      preLoaderRoute: typeof AppCodeDocumentsDocumentIdRouteImport
+      parentRoute: typeof AppCodeDocumentsRoute
     }
-    '/workspaces/$code/issues/': {
-      id: '/workspaces/$code/issues/'
+    '/app/$code/issues/': {
+      id: '/app/$code/issues/'
       path: '/'
-      fullPath: '/workspaces/$code/issues/'
-      preLoaderRoute: typeof WorkspacesCodeIssuesIndexRouteImport
-      parentRoute: typeof WorkspacesCodeIssuesRoute
+      fullPath: '/app/$code/issues/'
+      preLoaderRoute: typeof AppCodeIssuesIndexRouteImport
+      parentRoute: typeof AppCodeIssuesRoute
     }
-    '/workspaces/$code/issues/$issueNumber': {
-      id: '/workspaces/$code/issues/$issueNumber'
+    '/app/$code/issues/$issueNumber': {
+      id: '/app/$code/issues/$issueNumber'
       path: '/$issueNumber'
-      fullPath: '/workspaces/$code/issues/$issueNumber'
-      preLoaderRoute: typeof WorkspacesCodeIssuesIssueNumberRouteImport
-      parentRoute: typeof WorkspacesCodeIssuesRoute
+      fullPath: '/app/$code/issues/$issueNumber'
+      preLoaderRoute: typeof AppCodeIssuesIssueNumberRouteImport
+      parentRoute: typeof AppCodeIssuesRoute
     }
   }
 }
 
-interface WorkspacesCodeDocumentsRouteChildren {
-  WorkspacesCodeDocumentsDocumentIdRoute: typeof WorkspacesCodeDocumentsDocumentIdRoute
-  WorkspacesCodeDocumentsIndexRoute: typeof WorkspacesCodeDocumentsIndexRoute
+interface AppCodeDocumentsRouteChildren {
+  AppCodeDocumentsDocumentIdRoute: typeof AppCodeDocumentsDocumentIdRoute
+  AppCodeDocumentsIndexRoute: typeof AppCodeDocumentsIndexRoute
 }
 
-const WorkspacesCodeDocumentsRouteChildren: WorkspacesCodeDocumentsRouteChildren =
-  {
-    WorkspacesCodeDocumentsDocumentIdRoute:
-      WorkspacesCodeDocumentsDocumentIdRoute,
-    WorkspacesCodeDocumentsIndexRoute: WorkspacesCodeDocumentsIndexRoute,
-  }
-
-const WorkspacesCodeDocumentsRouteWithChildren =
-  WorkspacesCodeDocumentsRoute._addFileChildren(
-    WorkspacesCodeDocumentsRouteChildren,
-  )
-
-interface WorkspacesCodeIssuesRouteChildren {
-  WorkspacesCodeIssuesIssueNumberRoute: typeof WorkspacesCodeIssuesIssueNumberRoute
-  WorkspacesCodeIssuesIndexRoute: typeof WorkspacesCodeIssuesIndexRoute
+const AppCodeDocumentsRouteChildren: AppCodeDocumentsRouteChildren = {
+  AppCodeDocumentsDocumentIdRoute: AppCodeDocumentsDocumentIdRoute,
+  AppCodeDocumentsIndexRoute: AppCodeDocumentsIndexRoute,
 }
 
-const WorkspacesCodeIssuesRouteChildren: WorkspacesCodeIssuesRouteChildren = {
-  WorkspacesCodeIssuesIssueNumberRoute: WorkspacesCodeIssuesIssueNumberRoute,
-  WorkspacesCodeIssuesIndexRoute: WorkspacesCodeIssuesIndexRoute,
+const AppCodeDocumentsRouteWithChildren =
+  AppCodeDocumentsRoute._addFileChildren(AppCodeDocumentsRouteChildren)
+
+interface AppCodeIssuesRouteChildren {
+  AppCodeIssuesIssueNumberRoute: typeof AppCodeIssuesIssueNumberRoute
+  AppCodeIssuesIndexRoute: typeof AppCodeIssuesIndexRoute
 }
 
-const WorkspacesCodeIssuesRouteWithChildren =
-  WorkspacesCodeIssuesRoute._addFileChildren(WorkspacesCodeIssuesRouteChildren)
-
-interface WorkspacesCodeRouteChildren {
-  WorkspacesCodeDocumentsRoute: typeof WorkspacesCodeDocumentsRouteWithChildren
-  WorkspacesCodeIssuesRoute: typeof WorkspacesCodeIssuesRouteWithChildren
-  WorkspacesCodeSettingsRoute: typeof WorkspacesCodeSettingsRoute
-  WorkspacesCodeIndexRoute: typeof WorkspacesCodeIndexRoute
+const AppCodeIssuesRouteChildren: AppCodeIssuesRouteChildren = {
+  AppCodeIssuesIssueNumberRoute: AppCodeIssuesIssueNumberRoute,
+  AppCodeIssuesIndexRoute: AppCodeIssuesIndexRoute,
 }
 
-const WorkspacesCodeRouteChildren: WorkspacesCodeRouteChildren = {
-  WorkspacesCodeDocumentsRoute: WorkspacesCodeDocumentsRouteWithChildren,
-  WorkspacesCodeIssuesRoute: WorkspacesCodeIssuesRouteWithChildren,
-  WorkspacesCodeSettingsRoute: WorkspacesCodeSettingsRoute,
-  WorkspacesCodeIndexRoute: WorkspacesCodeIndexRoute,
-}
-
-const WorkspacesCodeRouteWithChildren = WorkspacesCodeRoute._addFileChildren(
-  WorkspacesCodeRouteChildren,
+const AppCodeIssuesRouteWithChildren = AppCodeIssuesRoute._addFileChildren(
+  AppCodeIssuesRouteChildren,
 )
 
+interface AppCodeRouteChildren {
+  AppCodeDocumentsRoute: typeof AppCodeDocumentsRouteWithChildren
+  AppCodeIssuesRoute: typeof AppCodeIssuesRouteWithChildren
+  AppCodeSettingsRoute: typeof AppCodeSettingsRoute
+  AppCodeIndexRoute: typeof AppCodeIndexRoute
+}
+
+const AppCodeRouteChildren: AppCodeRouteChildren = {
+  AppCodeDocumentsRoute: AppCodeDocumentsRouteWithChildren,
+  AppCodeIssuesRoute: AppCodeIssuesRouteWithChildren,
+  AppCodeSettingsRoute: AppCodeSettingsRoute,
+  AppCodeIndexRoute: AppCodeIndexRoute,
+}
+
+const AppCodeRouteWithChildren =
+  AppCodeRoute._addFileChildren(AppCodeRouteChildren)
+
+interface AppRouteChildren {
+  AppCodeRoute: typeof AppCodeRouteWithChildren
+  AppCreateWorkspaceRoute: typeof AppCreateWorkspaceRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCodeRoute: AppCodeRouteWithChildren,
+  AppCreateWorkspaceRoute: AppCreateWorkspaceRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 interface WorkspacesRouteChildren {
-  WorkspacesCodeRoute: typeof WorkspacesCodeRouteWithChildren
-  WorkspacesCreateWorkspaceRoute: typeof WorkspacesCreateWorkspaceRoute
-  WorkspacesIndexRoute: typeof WorkspacesIndexRoute
+  WorkspacesSplatRoute: typeof WorkspacesSplatRoute
 }
 
 const WorkspacesRouteChildren: WorkspacesRouteChildren = {
-  WorkspacesCodeRoute: WorkspacesCodeRouteWithChildren,
-  WorkspacesCreateWorkspaceRoute: WorkspacesCreateWorkspaceRoute,
-  WorkspacesIndexRoute: WorkspacesIndexRoute,
+  WorkspacesSplatRoute: WorkspacesSplatRoute,
 }
 
 const WorkspacesRouteWithChildren = WorkspacesRoute._addFileChildren(
@@ -427,6 +469,7 @@ const WorkspacesRouteWithChildren = WorkspacesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   WorkspacesRoute: WorkspacesRouteWithChildren,

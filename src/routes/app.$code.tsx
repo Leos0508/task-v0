@@ -12,7 +12,7 @@ import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
 import { workspacesQueryOptions } from "#/features/workspaces/queries";
 import { getWorkspaceAccessFn } from "#/lib/functions/workspaces.functions";
 
-export const Route = createFileRoute("/workspaces/$code")({
+export const Route = createFileRoute("/app/$code")({
 	beforeLoad: async ({ params, location }) => {
 		try {
 			const access = await getWorkspaceAccessFn({

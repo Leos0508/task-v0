@@ -5,7 +5,7 @@ import { Separator } from "#/components/ui/separator";
 import DocumentList from "#/features/documents/components/DocumentList";
 import { documentsQueryOptions } from "#/features/documents/queries";
 
-export const Route = createFileRoute("/workspaces/$code/documents/")({
+export const Route = createFileRoute("/app/$code/documents/")({
 	loader: async ({ context, params }) => {
 		await context.queryClient.ensureQueryData(
 			documentsQueryOptions(params.code),

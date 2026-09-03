@@ -5,7 +5,7 @@ import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
 import CreateWorkspaceForm from "#/features/workspaces/components/CreateWorkspaceForm";
 
-export const Route = createFileRoute("/workspaces/create-workspace")({
+export const Route = createFileRoute("/app/create-workspace")({
 	pendingComponent: PageLoading,
 	errorComponent: PageError,
 	component: CreateWorkspacePage,
@@ -15,7 +15,7 @@ function CreateWorkspacePage() {
 	return (
 		<div className="flex h-full min-h-0 w-full flex-col overflow-hidden p-4">
 			<Button variant="ghost" className="w-fit" asChild>
-				<Link to="/workspaces">
+				<Link to="/app">
 					<ChevronLeft />
 					Back
 				</Link>

@@ -173,7 +173,7 @@ export default function IssueLinkedDocuments({
 							className="group flex items-start gap-1 rounded-md px-1 py-1 hover:bg-accent"
 						>
 							<Link
-								to="/workspaces/$code/documents/$documentId"
+								to="/app/$code/documents/$documentId"
 								params={{ code: workspaceCode, documentId: document.id }}
 								className="min-w-0 flex-1 line-clamp-2 text-sm font-medium"
 							>

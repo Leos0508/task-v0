@@ -35,7 +35,7 @@ export function createIssueColumns(workspaceCode: string) {
 			header: "Title",
 			cell: ({ row, getValue }) => (
 				<Link
-					to="/workspaces/$code/issues/$issueNumber"
+					to="/app/$code/issues/$issueNumber"
 					params={{
 						code: workspaceCode,
 						issueNumber: String(row.original.number),

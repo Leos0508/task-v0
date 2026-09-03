@@ -50,7 +50,7 @@ export default function WorkspaceGeneralForm({
 			await queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
 			if (result.data?.code && result.data.code !== workspace.code) {
 				navigate({
-					to: "/workspaces/$code/settings",
+					to: "/app/$code/settings",
 					params: { code: result.data.code },
 				});
 			}

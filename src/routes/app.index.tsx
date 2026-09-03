@@ -6,7 +6,7 @@ import { Separator } from "#/components/ui/separator";
 import WorkspaceList from "#/features/workspaces/components/WorkspaceList";
 import { workspacesQueryOptions } from "#/features/workspaces/queries";
 
-export const Route = createFileRoute("/workspaces/")({
+export const Route = createFileRoute("/app/")({
 	loader: async ({ context }) => {
 		await context.queryClient.ensureQueryData(workspacesQueryOptions);
 		return { user: context.session.user };

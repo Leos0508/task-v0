@@ -1,5 +1,5 @@
 export function workspacePath(code: string, ...segments: string[]) {
-	return ["/workspaces", code, ...segments].join("/");
+	return ["/app", code, ...segments].join("/");
 }
 
 export function issuePath(workspaceCode: string, issueNumber: number | string) {

@@ -35,7 +35,7 @@ export default function AcceptInviteCard({
 		await queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
 		toast.success("Joined workspace");
 		navigate({
-			to: "/workspaces/$code",
+			to: "/app/$code",
 			params: { code: result.data?.code ?? "" },
 		});
 	}

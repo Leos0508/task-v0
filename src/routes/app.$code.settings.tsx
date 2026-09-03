@@ -12,7 +12,7 @@ import {
 	listMembersFn,
 } from "#/lib/functions/members.functions";
 
-export const Route = createFileRoute("/workspaces/$code/settings")({
+export const Route = createFileRoute("/app/$code/settings")({
 	loader: async ({ context, params }) => {
 		const { access } = context;
 		const members = await listMembersFn({ data: { code: params.code } });

@@ -214,7 +214,7 @@ export default function IssueDetailForm({
 		});
 		toast.success("Issue deleted");
 		navigate({
-			to: "/workspaces/$code/issues",
+			to: "/app/$code/issues",
 			params: { code: workspaceCode },
 		});
 	}
@@ -228,7 +228,7 @@ export default function IssueDetailForm({
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
 									<Link
-										to="/workspaces/$code/issues"
+										to="/app/$code/issues"
 										params={{ code: workspaceCode }}
 									>
 										Issues

@@ -36,7 +36,7 @@ export default function DeleteWorkspaceCard({
 		}
 		await queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
 		toast.success("Workspace deleted");
-		navigate({ to: "/workspaces" });
+		navigate({ to: "/app" });
 	}
 
 	return (

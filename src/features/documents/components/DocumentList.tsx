@@ -80,7 +80,7 @@ export default function DocumentList({
 				queryKey: documentKeys.all(workspaceCode),
 			});
 			navigate({
-				to: "/workspaces/$code/documents/$documentId",
+				to: "/app/$code/documents/$documentId",
 				params: { code: workspaceCode, documentId: result.data.id },
 			});
 		});

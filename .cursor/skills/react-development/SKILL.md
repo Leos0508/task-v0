@@ -36,7 +36,7 @@ TanStack Form + Zod. Auto-save editors debounce (~700ms) and skip unchanged JSON
 ```tsx
 import { Link, useNavigate, useLocation } from "@tanstack/react-router"
 
-<Link to="/workspaces/$code" params={{ code: workspace.code }}>Issues</Link>
+<Link to="/app/$code" params={{ code: workspace.code }}>Issues</Link>
 ```
 
 Never interpolate into `to`. Use `params` and `search`.

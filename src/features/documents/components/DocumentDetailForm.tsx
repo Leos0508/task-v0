@@ -208,7 +208,7 @@ export default function DocumentDetailForm({
 		});
 		toast.success("Document deleted");
 		navigate({
-			to: "/workspaces/$code/documents",
+			to: "/app/$code/documents",
 			params: { code: workspaceCode },
 		});
 	}
@@ -222,7 +222,7 @@ export default function DocumentDetailForm({
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
 									<Link
-										to="/workspaces/$code/documents"
+										to="/app/$code/documents"
 										params={{ code: workspaceCode }}
 									>
 										Documents

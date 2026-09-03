@@ -14,7 +14,7 @@ export default function PageNotFound({
 				<p className="font-heading text-lg font-semibold">{title}</p>
 				<p className="text-sm text-muted-foreground">{description}</p>
 				<Button asChild>
-					<Link to="/workspaces">Back to workspaces</Link>
+					<Link to="/app">Back to app</Link>
 				</Button>
 			</div>
 		</div>

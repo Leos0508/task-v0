@@ -7,7 +7,7 @@ import { canManageMembers } from "#/lib/authz/roles";
 import { getIssueFn } from "#/lib/functions/issues.functions";
 import { parseIssueNumber } from "#/lib/workspace-path";
 
-export const Route = createFileRoute("/workspaces/$code/issues/$issueNumber")({
+export const Route = createFileRoute("/app/$code/issues/$issueNumber")({
 	loader: async ({ context, params }) => {
 		const issueNumber = parseIssueNumber(params.issueNumber);
 		if (issueNumber == null) {

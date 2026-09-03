@@ -6,7 +6,7 @@ import DocumentDetailForm from "#/features/documents/components/DocumentDetailFo
 import { canManageMembers } from "#/lib/authz/roles";
 import { getDocumentFn } from "#/lib/functions/documents.functions";
 
-export const Route = createFileRoute("/workspaces/$code/documents/$documentId")(
+export const Route = createFileRoute("/app/$code/documents/$documentId")(
 	{
 		loader: async ({ context, params }) => {
 			try {
