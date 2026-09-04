@@ -19,3 +19,19 @@ export default function Logo({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function LogoSmall({ className }: { className?: string }) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("h-6 w-auto aspect-square text-foreground", className)}
+    >
+      <rect x="2" y="2" width="4" height="20" fill="currentColor" />
+      <rect x="8" y="2" width="14" height="20" fill="currentColor" />
+    </svg>
+  );
+}
