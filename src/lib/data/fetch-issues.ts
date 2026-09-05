@@ -1,12 +1,15 @@
 import type { User } from "better-auth";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
 import {
 	type IssuePriority,
 	type IssueStatus,
 	issue,
+	issueTag,
+	tag,
 	user as userTable,
 } from "#/db/schema";
+import type { IssueTag } from "./fetch-tags";
 import { getWorkspaceAccess } from "./require-workspace-access";
 
 export type IssueListItem = {
@@ -21,6 +24,7 @@ export type IssueListItem = {
 	createdAt: string;
 	updatedAt: string;
 	reporterName: string;
+	tags: IssueTag[];
 };
 
 export async function fetchIssues(
@@ -48,6 +52,28 @@ export async function fetchIssues(
 		.where(eq(issue.workspaceId, workspace.id))
 		.orderBy(desc(issue.number));
 
+	const tagRows =
+		rows.length === 0
+			? []
+			: await db
+					.select({
+						issueId: issueTag.issueId,
+						id: tag.id,
+						name: tag.name,
+						color: tag.color,
+					})
+					.from(issueTag)
+					.innerJoin(tag, eq(issueTag.tagId, tag.id))
+					.where(eq(tag.workspaceId, workspace.id))
+					.orderBy(asc(tag.name));
+
+	const tagsByIssue = new Map<string, IssueTag[]>();
+	for (const row of tagRows) {
+		const current = tagsByIssue.get(row.issueId) ?? [];
+		current.push({ id: row.id, name: row.name, color: row.color });
+		tagsByIssue.set(row.issueId, current);
+	}
+
 	return rows.map((row) => ({
 		id: row.id,
 		number: row.number,
@@ -60,5 +86,6 @@ export async function fetchIssues(
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
 		reporterName: row.reporterName,
+		tags: tagsByIssue.get(row.id) ?? [],
 	}));
 }

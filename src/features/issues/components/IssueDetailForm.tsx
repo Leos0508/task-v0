@@ -60,6 +60,7 @@ import {
 import { Textarea } from "#/components/ui/textarea";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import type { IssueLinkedDocument } from "#/lib/data/fetch-issue";
+import type { IssueTag } from "#/lib/data/fetch-tags";
 import { deleteIssueFn, updateIssueFn } from "#/lib/functions/issues.functions";
 import { cn } from "#/lib/utils";
 import { issueCode as formatIssueCode, issuePath } from "#/lib/workspace-path";
@@ -71,7 +72,9 @@ import {
 	STATUSES,
 	StatusBadge,
 } from "./IssueBadges";
+import IssueComments from "./IssueComments";
 import IssueLinkedDocuments from "./IssueLinkedDocuments";
+import IssueTags from "./IssueTags";
 
 const IssueEditorLazy = lazy(() => import("./IssueEditor"));
 
@@ -121,19 +124,25 @@ type IssueDetailFormProps = {
 		description: unknown;
 		reporterName: string;
 		linkedDocuments: IssueLinkedDocument[];
+		tags: IssueTag[];
 	};
 	canDelete: boolean;
+	currentUserId: string;
+	canModerate: boolean;
 };
 
 export default function IssueDetailForm({
 	workspaceCode,
 	issue,
 	canDelete,
+	currentUserId,
+	canModerate,
 }: IssueDetailFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [linkedDocuments, setLinkedDocuments] = useState(issue.linkedDocuments);
+	const [tags, setTags] = useState(issue.tags);
 	const [saveState, setSaveState] = useState<
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
@@ -227,10 +236,7 @@ export default function IssueDetailForm({
 						<BreadcrumbList className="flex-nowrap">
 							<BreadcrumbItem>
 								<BreadcrumbLink asChild>
-									<Link
-										to="/app/$code/issues"
-										params={{ code: workspaceCode }}
-									>
+									<Link to="/app/$code/issues" params={{ code: workspaceCode }}>
 										Issues
 									</Link>
 								</BreadcrumbLink>
@@ -317,6 +323,12 @@ export default function IssueDetailForm({
 								</Field>
 							)}
 						</form.Field>
+						<IssueComments
+							workspaceCode={workspaceCode}
+							issueNumber={issue.number}
+							currentUserId={currentUserId}
+							canModerate={canModerate}
+						/>
 					</div>
 
 					<aside className="flex flex-col gap-8">
@@ -415,6 +427,13 @@ export default function IssueDetailForm({
 								);
 							}}
 						</form.Field>
+						<IssueTags
+							workspaceCode={workspaceCode}
+							issueNumber={issue.number}
+							tags={tags}
+							canManageTags={canModerate}
+							onTagsChange={setTags}
+						/>
 						<IssueLinkedDocuments
 							workspaceCode={workspaceCode}
 							issueNumber={issue.number}

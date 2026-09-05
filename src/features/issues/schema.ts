@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TAG_COLOR_IDS } from "./tag-colors";
 
 const issueStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]);
 
@@ -62,3 +63,38 @@ export const reorderIssueSchema = z
 export type IssueFormValues = z.infer<typeof issueFormFields>;
 export type UpdateIssueInput = z.infer<typeof updateIssueSchema>;
 export type ReorderIssueInput = z.infer<typeof reorderIssueSchema>;
+
+export const tagColorSchema = z.enum(TAG_COLOR_IDS);
+
+export const createTagSchema = z.object({
+	name: z.string().trim().min(1, "Name is required").max(40),
+	color: tagColorSchema.optional(),
+});
+
+export const updateTagSchema = z
+	.object({
+		name: z.string().trim().min(1, "Name is required").max(40).optional(),
+		color: tagColorSchema.optional(),
+	})
+	.refine((value) => value.name !== undefined || value.color !== undefined, {
+		message: "No changes provided",
+	});
+
+export const commentBodySchema = z
+	.string()
+	.trim()
+	.min(1, "Comment is required")
+	.max(4000);
+
+export const createCommentSchema = z.object({
+	body: commentBodySchema,
+});
+
+export const updateCommentSchema = z.object({
+	body: commentBodySchema,
+});
+
+export type CreateTagInput = z.infer<typeof createTagSchema>;
+export type UpdateTagInput = z.infer<typeof updateTagSchema>;
+export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;

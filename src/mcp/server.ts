@@ -2,17 +2,30 @@ import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import type { User } from "better-auth";
 import { z } from "zod";
 import { updateDocumentSchema } from "#/features/documents/schema";
-import { updateIssueSchema } from "#/features/issues/schema";
+import {
+	createCommentSchema,
+	createTagSchema,
+	tagColorSchema,
+	updateIssueSchema,
+	updateTagSchema,
+} from "#/features/issues/schema";
+import { createComment } from "#/lib/data/create-comment";
 import { createDocument } from "#/lib/data/create-document";
 import { createIssue } from "#/lib/data/create-issue";
+import { createTag } from "#/lib/data/create-tag";
 import { fetchDocument } from "#/lib/data/fetch-document";
 import { fetchDocuments } from "#/lib/data/fetch-documents";
 import { fetchIssue } from "#/lib/data/fetch-issue";
+import { fetchIssueComments } from "#/lib/data/fetch-issue-comments";
 import { fetchIssues } from "#/lib/data/fetch-issues";
+import { fetchTags } from "#/lib/data/fetch-tags";
 import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
+import { linkTagToIssue } from "#/lib/data/link-tag-to-issue";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { unlinkTagFromIssue } from "#/lib/data/unlink-tag-from-issue";
 import { updateDocument } from "#/lib/data/update-document";
 import { updateIssue } from "#/lib/data/update-issue";
+import { updateTag } from "#/lib/data/update-tag";
 import { formatMcpError } from "#/mcp/errors";
 import { markdownToTipTap, tipTapToMarkdown } from "#/mcp/markdown";
 
@@ -230,6 +243,149 @@ function createTaskMcpServer(user: User) {
 					...issue,
 					description: tipTapToMarkdown(issue.description),
 				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"list_tags",
+		{
+			description: "List tags in a workspace.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode }) => {
+			try {
+				return jsonResult(await fetchTags(user, workspaceCode));
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"create_tag",
+		{
+			description:
+				"Create a workspace tag with a name and optional palette color.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				name: createTagSchema.shape.name,
+				color: tagColorSchema.optional(),
+			}),
+		},
+		async ({ workspaceCode, name, color }) => {
+			try {
+				return jsonResult(
+					await createTag(user, workspaceCode, { name, color }),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"update_tag",
+		{
+			description: "Rename or recolor a workspace tag. Requires ADMIN.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				tagId: z.string().min(1),
+				name: createTagSchema.shape.name.optional(),
+				color: tagColorSchema.optional(),
+			}),
+		},
+		async ({ workspaceCode, tagId, name, color }) => {
+			try {
+				const input = updateTagSchema.parse({ name, color });
+				return jsonResult(await updateTag(user, workspaceCode, tagId, input));
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"link_tag",
+		{
+			description: "Attach a workspace tag to an issue.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+				tagId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, issueNumber, tagId }) => {
+			try {
+				return jsonResult(
+					await linkTagToIssue(user, workspaceCode, issueNumber, tagId),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"unlink_tag",
+		{
+			description: "Remove a workspace tag from an issue.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+				tagId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, issueNumber, tagId }) => {
+			try {
+				return jsonResult(
+					await unlinkTagFromIssue(user, workspaceCode, issueNumber, tagId),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"list_comments",
+		{
+			description: "List comments on an issue, oldest first.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+			}),
+		},
+		async ({ workspaceCode, issueNumber }) => {
+			try {
+				return jsonResult(
+					await fetchIssueComments(user, workspaceCode, issueNumber),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"create_comment",
+		{
+			description: "Add a plain-text comment to an issue.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+				body: createCommentSchema.shape.body,
+			}),
+		},
+		async ({ workspaceCode, issueNumber, body }) => {
+			try {
+				return jsonResult(
+					await createComment(user, workspaceCode, issueNumber, { body }),
+				);
 			} catch (error) {
 				return errorResult(error);
 			}

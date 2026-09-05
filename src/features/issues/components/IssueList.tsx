@@ -12,12 +12,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import IssueBoardView from "#/features/issues/components/IssueBoardView";
 import IssueTableView from "#/features/issues/components/IssueTableView";
-import { issueKeys, issuesQueryOptions } from "#/features/issues/queries";
-import { ISSUE_VIEWS, type IssueView } from "#/features/issues/view-search";
+import {
+	issueKeys,
+	issuesQueryOptions,
+	tagsQueryOptions,
+} from "#/features/issues/queries";
+import type { IssueView } from "#/features/issues/view-search";
 import { createIssueFn } from "#/lib/functions/issues.functions";
 import { cn } from "#/lib/utils";
 
@@ -28,20 +31,20 @@ const IssueGanttView = lazy(
 export default function IssueList({
 	workspaceCode,
 	view,
-	onViewChange,
 }: {
 	workspaceCode: string;
 	view: IssueView;
-	onViewChange: (view: IssueView) => void;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: issues } = useQuery(issuesQueryOptions(workspaceCode));
+	const { data: tags = [] } = useQuery(tagsQueryOptions(workspaceCode));
 	const [isCreating, startCreate] = useTransition();
 	const [statusFilter, setStatusFilter] = useState<IssueStatus | "ALL">("ALL");
 	const [priorityFilter, setPriorityFilter] = useState<IssuePriority | "ALL">(
 		"ALL",
 	);
+	const [tagFilter, setTagFilter] = useState<string>("ALL");
 
 	const filteredIssues = useMemo(() => {
 		if (!issues) return [];
@@ -50,9 +53,15 @@ export default function IssueList({
 			if (priorityFilter !== "ALL" && issue.priority !== priorityFilter) {
 				return false;
 			}
+			if (
+				tagFilter !== "ALL" &&
+				!issue.tags.some((tag) => tag.id === tagFilter)
+			) {
+				return false;
+			}
 			return true;
 		});
-	}, [issues, priorityFilter, statusFilter]);
+	}, [issues, priorityFilter, statusFilter, tagFilter]);
 
 	function handleNewIssue() {
 		if (isCreating) return;
@@ -78,11 +87,6 @@ export default function IssueList({
 				},
 			});
 		});
-	}
-
-	function handleViewChange(next: string) {
-		if (!ISSUE_VIEWS.includes(next as IssueView)) return;
-		onViewChange(next as IssueView);
 	}
 
 	if (issues === undefined) return <PageLoading />;
@@ -116,13 +120,6 @@ export default function IssueList({
 			</div>
 			<div className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-2">
-					<Tabs value={view} onValueChange={handleViewChange}>
-						<TabsList>
-							<TabsTrigger value="list">List</TabsTrigger>
-							<TabsTrigger value="board">Board</TabsTrigger>
-							<TabsTrigger value="gantt">Gantt</TabsTrigger>
-						</TabsList>
-					</Tabs>
 					<Select
 						value={statusFilter}
 						onValueChange={(value) =>
@@ -157,6 +154,19 @@ export default function IssueList({
 							<SelectItem value="MEDIUM">Medium</SelectItem>
 							<SelectItem value="HIGH">High</SelectItem>
 							<SelectItem value="URGENT">Urgent</SelectItem>
+						</SelectContent>
+					</Select>
+					<Select value={tagFilter} onValueChange={setTagFilter}>
+						<SelectTrigger className="w-44">
+							<SelectValue placeholder="Tag" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="ALL">All tags</SelectItem>
+							{tags.map((tag) => (
+								<SelectItem key={tag.id} value={tag.id}>
+									{tag.name}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 				</div>
