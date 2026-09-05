@@ -308,6 +308,78 @@ export const issueDocument = pgTable(
 	],
 );
 
+export const tag = pgTable(
+	"tag",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		name: text("name").notNull(),
+		color: text("color").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		workspaceId: text("workspace_id")
+			.notNull()
+			.references(() => workspace.id, { onDelete: "cascade" }),
+	},
+	(table) => [
+		uniqueIndex("tag_workspaceId_name_uidx").on(table.workspaceId, table.name),
+		index("tag_workspaceId_idx").on(table.workspaceId),
+	],
+);
+
+export const issueTag = pgTable(
+	"issue_tag",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		tagId: text("tag_id")
+			.notNull()
+			.references(() => tag.id, { onDelete: "cascade" }),
+		issueId: text("issue_id")
+			.notNull()
+			.references(() => issue.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("issue_tag_issueId_tagId_uidx").on(table.issueId, table.tagId),
+		index("issue_tag_tagId_idx").on(table.tagId),
+	],
+);
+
+export const issueComment = pgTable(
+	"issue_comment",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		body: text("body").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		issueId: text("issue_id")
+			.notNull()
+			.references(() => issue.id, { onDelete: "cascade" }),
+		authorId: text("author_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		index("issue_comment_issueId_idx").on(table.issueId),
+		index("issue_comment_authorId_idx").on(table.authorId),
+	],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
@@ -315,6 +387,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	workspaceUsers: many(workspaceUser),
 	invitesSent: many(workspaceInvite),
 	issuesReported: many(issue),
+	issueComments: many(issueComment),
 }));
 
 export const apikeyRelations = relations(apikey, ({ one }) => ({
@@ -343,6 +416,7 @@ export const workspaceRelations = relations(workspace, ({ many }) => ({
 	workspaceUsers: many(workspaceUser),
 	invites: many(workspaceInvite),
 	documents: many(document),
+	tags: many(tag),
 }));
 
 export const workspaceUserRelations = relations(workspaceUser, ({ one }) => ({
@@ -380,6 +454,8 @@ export const issueRelations = relations(issue, ({ one, many }) => ({
 		references: [user.id],
 	}),
 	issueDocuments: many(issueDocument),
+	issueTags: many(issueTag),
+	issueComments: many(issueComment),
 }));
 
 export const documentRelations = relations(document, ({ one, many }) => ({
@@ -398,5 +474,35 @@ export const issueDocumentRelations = relations(issueDocument, ({ one }) => ({
 	document: one(document, {
 		fields: [issueDocument.documentId],
 		references: [document.id],
+	}),
+}));
+
+export const tagRelations = relations(tag, ({ one, many }) => ({
+	workspace: one(workspace, {
+		fields: [tag.workspaceId],
+		references: [workspace.id],
+	}),
+	issueTags: many(issueTag),
+}));
+
+export const issueTagRelations = relations(issueTag, ({ one }) => ({
+	issue: one(issue, {
+		fields: [issueTag.issueId],
+		references: [issue.id],
+	}),
+	tag: one(tag, {
+		fields: [issueTag.tagId],
+		references: [tag.id],
+	}),
+}));
+
+export const issueCommentRelations = relations(issueComment, ({ one }) => ({
+	issue: one(issue, {
+		fields: [issueComment.issueId],
+		references: [issue.id],
+	}),
+	author: one(user, {
+		fields: [issueComment.authorId],
+		references: [user.id],
 	}),
 }));

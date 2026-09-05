@@ -1,7 +1,14 @@
 import type { User } from "better-auth";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
-import { document, issue, issueDocument, user as userTable } from "#/db/schema";
+import {
+	document,
+	issue,
+	issueDocument,
+	issueTag,
+	tag,
+	user as userTable,
+} from "#/db/schema";
 import type { JsonValue } from "#/types/json";
 import { AppError } from "#/types/result";
 import { getWorkspaceAccess } from "./require-workspace-access";
@@ -44,16 +51,28 @@ export async function fetchIssue(
 		throw new AppError("NOT_FOUND", "Issue not found");
 	}
 
-	const linked = await db
-		.select({
-			id: document.id,
-			title: document.title,
-			updatedAt: document.updatedAt,
-		})
-		.from(issueDocument)
-		.innerJoin(document, eq(issueDocument.documentId, document.id))
-		.where(eq(issueDocument.issueId, row.id))
-		.orderBy(desc(issueDocument.createdAt));
+	const [linked, tags] = await Promise.all([
+		db
+			.select({
+				id: document.id,
+				title: document.title,
+				updatedAt: document.updatedAt,
+			})
+			.from(issueDocument)
+			.innerJoin(document, eq(issueDocument.documentId, document.id))
+			.where(eq(issueDocument.issueId, row.id))
+			.orderBy(desc(issueDocument.createdAt)),
+		db
+			.select({
+				id: tag.id,
+				name: tag.name,
+				color: tag.color,
+			})
+			.from(issueTag)
+			.innerJoin(tag, eq(issueTag.tagId, tag.id))
+			.where(eq(issueTag.issueId, row.id))
+			.orderBy(asc(tag.name)),
+	]);
 
 	return {
 		id: row.id,
@@ -67,6 +86,7 @@ export async function fetchIssue(
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
 		reporter: { name: row.reporterName },
+		tags,
 		linkedDocuments: linked.map((item) => ({
 			id: item.id,
 			title: item.title,
