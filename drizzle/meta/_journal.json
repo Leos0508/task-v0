@@ -15,6 +15,13 @@
       "when": 1788143829981,
       "tag": "0001_windy_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788636618705,
+      "tag": "0002_add_apikey",
+      "breakpoints": true
     }
   ]
 }

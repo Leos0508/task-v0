@@ -92,6 +92,42 @@ export const verification = pgTable(
 	(table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const apikey = pgTable(
+	"apikey",
+	{
+		id: text("id").primaryKey(),
+		configId: text("config_id").notNull().default("default"),
+		name: text("name"),
+		start: text("start"),
+		prefix: text("prefix"),
+		key: text("key").notNull(),
+		referenceId: text("reference_id").notNull(),
+		refillInterval: integer("refill_interval"),
+		refillAmount: integer("refill_amount"),
+		lastRefillAt: timestamp("last_refill_at"),
+		enabled: boolean("enabled").default(true),
+		rateLimitEnabled: boolean("rate_limit_enabled").default(true),
+		rateLimitTimeWindow: integer("rate_limit_time_window"),
+		rateLimitMax: integer("rate_limit_max"),
+		requestCount: integer("request_count"),
+		remaining: integer("remaining"),
+		lastRequest: timestamp("last_request"),
+		expiresAt: timestamp("expires_at"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		permissions: text("permissions"),
+		metadata: text("metadata"),
+	},
+	(table) => [
+		index("apikey_key_idx").on(table.key),
+		index("apikey_referenceId_idx").on(table.referenceId),
+		index("apikey_configId_idx").on(table.configId),
+	],
+);
+
 export const workspaceRole = pgEnum("workspace_role", [
 	"MEMBER",
 	"ADMIN",
@@ -269,9 +305,17 @@ export const issueDocument = pgTable(
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	apiKeys: many(apikey),
 	workspaceUsers: many(workspaceUser),
 	invitesSent: many(workspaceInvite),
 	issuesReported: many(issue),
+}));
+
+export const apikeyRelations = relations(apikey, ({ one }) => ({
+	user: one(user, {
+		fields: [apikey.referenceId],
+		references: [user.id],
+	}),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
