@@ -1,23 +1,20 @@
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
-import { toast } from "sonner";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "#/components/ui/popover";
-import type { IssuePriority, IssueStatus } from "#/db/schema";
 import {
 	PRIORITIES,
 	PriorityBadge,
 	STATUSES,
 	StatusBadge,
 } from "#/features/issues/components/IssueBadges";
-import { issueKeys } from "#/features/issues/queries";
+import { patchIssue } from "#/features/issues/patch-issue";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
 import { createAppColumnHelper } from "#/lib/data-table";
-import { updateIssueFn } from "#/lib/functions/issues.functions";
 import { cn } from "#/lib/utils";
 
 const columnHelper = createAppColumnHelper<IssueListItem>();
@@ -191,39 +188,3 @@ const lastEditedFormatter = new Intl.DateTimeFormat(undefined, {
 	day: "numeric",
 	year: "numeric",
 });
-
-async function patchIssue(
-	queryClient: QueryClient,
-	workspaceCode: string,
-	issue: IssueListItem,
-	patch: {
-		status?: IssueStatus;
-		priority?: IssuePriority | null;
-	},
-) {
-	const key = issueKeys.all(workspaceCode);
-	const previous = queryClient.getQueryData<IssueListItem[]>(key);
-
-	queryClient.setQueryData<IssueListItem[]>(key, (rows) =>
-		rows?.map((row) =>
-			row.id === issue.id
-				? { ...row, ...patch, updatedAt: new Date().toISOString() }
-				: row,
-		),
-	);
-
-	const result = await updateIssueFn({
-		data: {
-			workspaceCode,
-			issueNumber: issue.number,
-			input: patch,
-		},
-	});
-	if (!result.success) {
-		queryClient.setQueryData(key, previous);
-		toast.error(result.error.message);
-		return;
-	}
-
-	await queryClient.invalidateQueries({ queryKey: key });
-}

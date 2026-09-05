@@ -1,9 +1,10 @@
 import type { User } from "better-auth";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import { issue } from "#/db/schema";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { RANK_GAP } from "#/lib/issue-rank";
 import { AppError, isUniqueConstraintError } from "#/types/result";
 
 export type CreateIssueInput = {
@@ -42,6 +43,16 @@ export async function createIssue(
 
 			const number = (latest?.number ?? 0) + 1;
 			const title = input?.title?.trim() || `New Issue #${number}`;
+			const status = input?.status ?? "TODO";
+
+			const [first] = await db
+				.select({ rank: issue.rank })
+				.from(issue)
+				.where(
+					and(eq(issue.workspaceId, workspace.id), eq(issue.status, status)),
+				)
+				.orderBy(asc(issue.rank))
+				.limit(1);
 
 			const [row] = await db
 				.insert(issue)
@@ -50,7 +61,8 @@ export async function createIssue(
 					reporterId: user.id,
 					number,
 					title,
-					status: input?.status ?? "TODO",
+					status,
+					rank: (first?.rank ?? RANK_GAP) - RANK_GAP,
 					priority: input?.priority ?? null,
 					startDate: input?.startDate,
 					endDate: input?.endDate,

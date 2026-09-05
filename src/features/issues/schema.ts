@@ -48,5 +48,17 @@ export const updateIssueSchema = issueFormFields
 		path: ["endDate"],
 	});
 
+export const reorderIssueSchema = z
+	.object({
+		status: issueStatusSchema,
+		targetIssueId: z.string().min(1).optional(),
+		edge: z.enum(["top", "bottom"]).optional(),
+	})
+	.refine((value) => value.targetIssueId == null || value.edge != null, {
+		message: "Drop edge is required when targeting an issue",
+		path: ["edge"],
+	});
+
 export type IssueFormValues = z.infer<typeof issueFormFields>;
 export type UpdateIssueInput = z.infer<typeof updateIssueSchema>;
+export type ReorderIssueInput = z.infer<typeof reorderIssueSchema>;

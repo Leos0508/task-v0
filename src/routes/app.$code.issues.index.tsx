@@ -1,11 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	stripSearchParams,
+	useNavigate,
+} from "@tanstack/react-router";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import { Separator } from "#/components/ui/separator";
 import IssueList from "#/features/issues/components/IssueList";
 import { issuesQueryOptions } from "#/features/issues/queries";
+import { issueViewSearchSchema } from "#/features/issues/view-search";
 
 export const Route = createFileRoute("/app/$code/issues/")({
+	validateSearch: issueViewSearchSchema,
+	search: {
+		middlewares: [stripSearchParams({ view: "list" })],
+	},
 	loader: async ({ context, params }) => {
 		await context.queryClient.ensureQueryData(issuesQueryOptions(params.code));
 		return { code: context.access.workspace.code };
@@ -17,6 +26,8 @@ export const Route = createFileRoute("/app/$code/issues/")({
 
 function IssuesPage() {
 	const { code } = Route.useLoaderData();
+	const { view } = Route.useSearch();
+	const navigate = useNavigate({ from: Route.fullPath });
 
 	return (
 		<div className="dashboard-page">
@@ -27,8 +38,14 @@ function IssuesPage() {
 				</p>
 			</div>
 			<Separator />
-			<div className="flex-1 overflow-y-auto">
-				<IssueList workspaceCode={code} />
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+				<IssueList
+					workspaceCode={code}
+					view={view}
+					onViewChange={(next) =>
+						navigate({ search: (prev) => ({ ...prev, view: next }) })
+					}
+				/>
 			</div>
 		</div>
 	);

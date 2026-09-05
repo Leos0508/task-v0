@@ -1,9 +1,10 @@
 import type { User } from "better-auth";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
 import { issue } from "#/db/schema";
 import type { UpdateIssueInput } from "#/features/issues/schema";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { RANK_GAP } from "#/lib/issue-rank";
 import { AppError } from "#/types/result";
 
 export async function updateIssue(
@@ -15,7 +16,11 @@ export async function updateIssue(
 	const { workspace } = await getWorkspaceAccess(sessionUser, workspaceCode);
 
 	const [existing] = await db
-		.select({ id: issue.id, number: issue.number })
+		.select({
+			id: issue.id,
+			number: issue.number,
+			status: issue.status,
+		})
 		.from(issue)
 		.where(
 			and(eq(issue.workspaceId, workspace.id), eq(issue.number, issueNumber)),
@@ -33,6 +38,7 @@ export async function updateIssue(
 		startDate?: string | null;
 		endDate?: string | null;
 		description?: unknown;
+		rank?: number;
 	} = {};
 
 	if (input.title !== undefined) {
@@ -40,6 +46,20 @@ export async function updateIssue(
 	}
 	if (input.status !== undefined) {
 		patch.status = input.status;
+		if (input.status !== existing.status) {
+			const [last] = await db
+				.select({ rank: issue.rank })
+				.from(issue)
+				.where(
+					and(
+						eq(issue.workspaceId, workspace.id),
+						eq(issue.status, input.status),
+					),
+				)
+				.orderBy(desc(issue.rank))
+				.limit(1);
+			patch.rank = (last?.rank ?? 0) + RANK_GAP;
+		}
 	}
 	if (input.priority !== undefined) {
 		patch.priority = input.priority;

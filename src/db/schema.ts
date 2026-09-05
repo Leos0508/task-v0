@@ -232,6 +232,7 @@ export const issue = pgTable(
 		priority: issuePriority("priority"),
 		startDate: date("start_date"),
 		endDate: date("end_date"),
+		rank: integer("rank").notNull().default(0),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -252,6 +253,11 @@ export const issue = pgTable(
 		index("issue_workspaceId_idx").on(table.workspaceId),
 		index("issue_reporterId_idx").on(table.reporterId),
 		index("issue_status_idx").on(table.status),
+		index("issue_workspaceId_status_rank_idx").on(
+			table.workspaceId,
+			table.status,
+			table.rank,
+		),
 	],
 );
 

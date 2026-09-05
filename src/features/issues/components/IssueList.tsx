@@ -1,11 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, PlusIcon } from "lucide-react";
-import { useMemo, useTransition } from "react";
+import { lazy, Suspense, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
-import { DataTable } from "#/components/ui/data-table";
 import {
 	Select,
 	SelectContent,
@@ -13,39 +12,47 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
-import type { IssueStatus } from "#/db/schema";
-import { createIssueColumns } from "#/features/issues/components/issue-columns";
+import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import type { IssuePriority, IssueStatus } from "#/db/schema";
+import IssueBoardView from "#/features/issues/components/IssueBoardView";
+import IssueTableView from "#/features/issues/components/IssueTableView";
 import { issueKeys, issuesQueryOptions } from "#/features/issues/queries";
-import type { IssueListItem } from "#/lib/data/fetch-issues";
-import { useAppTable } from "#/lib/data-table";
+import { ISSUE_VIEWS, type IssueView } from "#/features/issues/view-search";
 import { createIssueFn } from "#/lib/functions/issues.functions";
+import { cn } from "#/lib/utils";
 
-const EMPTY_ISSUES: IssueListItem[] = [];
-
-function getIssueRowId(row: IssueListItem) {
-	return row.id;
-}
+const IssueGanttView = lazy(
+	() => import("#/features/issues/components/IssueGanttView"),
+);
 
 export default function IssueList({
 	workspaceCode,
+	view,
+	onViewChange,
 }: {
 	workspaceCode: string;
+	view: IssueView;
+	onViewChange: (view: IssueView) => void;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: issues } = useQuery(issuesQueryOptions(workspaceCode));
 	const [isCreating, startCreate] = useTransition();
-
-	const columns = useMemo(
-		() => createIssueColumns(workspaceCode),
-		[workspaceCode],
+	const [statusFilter, setStatusFilter] = useState<IssueStatus | "ALL">("ALL");
+	const [priorityFilter, setPriorityFilter] = useState<IssuePriority | "ALL">(
+		"ALL",
 	);
 
-	const table = useAppTable({
-		columns,
-		data: issues ?? EMPTY_ISSUES,
-		getRowId: getIssueRowId,
-	});
+	const filteredIssues = useMemo(() => {
+		if (!issues) return [];
+		return issues.filter((issue) => {
+			if (statusFilter !== "ALL" && issue.status !== statusFilter) return false;
+			if (priorityFilter !== "ALL" && issue.priority !== priorityFilter) {
+				return false;
+			}
+			return true;
+		});
+	}, [issues, priorityFilter, statusFilter]);
 
 	function handleNewIssue() {
 		if (isCreating) return;
@@ -73,6 +80,11 @@ export default function IssueList({
 		});
 	}
 
+	function handleViewChange(next: string) {
+		if (!ISSUE_VIEWS.includes(next as IssueView)) return;
+		onViewChange(next as IssueView);
+	}
+
 	if (issues === undefined) return <PageLoading />;
 
 	const counts = { total: issues.length, todo: 0, inProgress: 0, done: 0 };
@@ -82,12 +94,8 @@ export default function IssueList({
 		else if (issue.status === "DONE") counts.done += 1;
 	}
 
-	const statusFilter =
-		(table.getColumn("status")?.getFilterValue() as IssueStatus | undefined) ??
-		"ALL";
-
 	return (
-		<div className="flex flex-col gap-4 p-4">
+		<div className="flex h-full min-h-0 min-w-0 flex-col gap-4 p-4">
 			<div className="grid gap-3 sm:grid-cols-4">
 				<div className="rounded-lg border p-3">
 					<p className="text-xs text-muted-foreground">Total</p>
@@ -106,26 +114,52 @@ export default function IssueList({
 					<p className="text-lg font-semibold">{counts.done}</p>
 				</div>
 			</div>
-			<div className="flex items-center justify-between gap-4">
-				<Select
-					value={statusFilter}
-					onValueChange={(value) =>
-						table
-							.getColumn("status")
-							?.setFilterValue(value === "ALL" ? undefined : value)
-					}
-				>
-					<SelectTrigger className="w-44">
-						<SelectValue placeholder="Status" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="ALL">All statuses</SelectItem>
-						<SelectItem value="TODO">Todo</SelectItem>
-						<SelectItem value="IN_PROGRESS">In progress</SelectItem>
-						<SelectItem value="DONE">Done</SelectItem>
-						<SelectItem value="CANCELLED">Cancelled</SelectItem>
-					</SelectContent>
-				</Select>
+			<div className="flex flex-wrap items-center justify-between gap-4">
+				<div className="flex flex-wrap items-center gap-2">
+					<Tabs value={view} onValueChange={handleViewChange}>
+						<TabsList>
+							<TabsTrigger value="list">List</TabsTrigger>
+							<TabsTrigger value="board">Board</TabsTrigger>
+							<TabsTrigger value="gantt">Gantt</TabsTrigger>
+						</TabsList>
+					</Tabs>
+					<Select
+						value={statusFilter}
+						onValueChange={(value) =>
+							setStatusFilter(value === "ALL" ? "ALL" : (value as IssueStatus))
+						}
+					>
+						<SelectTrigger className="w-44">
+							<SelectValue placeholder="Status" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="ALL">All statuses</SelectItem>
+							<SelectItem value="TODO">Todo</SelectItem>
+							<SelectItem value="IN_PROGRESS">In progress</SelectItem>
+							<SelectItem value="DONE">Done</SelectItem>
+							<SelectItem value="CANCELLED">Cancelled</SelectItem>
+						</SelectContent>
+					</Select>
+					<Select
+						value={priorityFilter}
+						onValueChange={(value) =>
+							setPriorityFilter(
+								value === "ALL" ? "ALL" : (value as IssuePriority),
+							)
+						}
+					>
+						<SelectTrigger className="w-44">
+							<SelectValue placeholder="Priority" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="ALL">All priorities</SelectItem>
+							<SelectItem value="LOW">Low</SelectItem>
+							<SelectItem value="MEDIUM">Medium</SelectItem>
+							<SelectItem value="HIGH">High</SelectItem>
+							<SelectItem value="URGENT">Urgent</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 				<Button onClick={handleNewIssue} disabled={isCreating}>
 					{isCreating ? (
 						<Loader2Icon className="size-4 animate-spin" />
@@ -135,10 +169,33 @@ export default function IssueList({
 					New issue
 				</Button>
 			</div>
-			<DataTable
-				table={table}
-				emptyMessage="No issues yet. Create one to get started."
-			/>
+			<div
+				className={cn(
+					"min-h-0 min-w-0 flex-1",
+					view === "gantt" ? "overflow-hidden" : "overflow-auto",
+				)}
+			>
+				{view === "list" ? (
+					<IssueTableView
+						workspaceCode={workspaceCode}
+						issues={filteredIssues}
+					/>
+				) : null}
+				{view === "board" ? (
+					<IssueBoardView
+						workspaceCode={workspaceCode}
+						issues={filteredIssues}
+					/>
+				) : null}
+				{view === "gantt" ? (
+					<Suspense fallback={<PageLoading />}>
+						<IssueGanttView
+							workspaceCode={workspaceCode}
+							issues={filteredIssues}
+						/>
+					</Suspense>
+				) : null}
+			</div>
 		</div>
 	);
 }

@@ -15,6 +15,9 @@ export type IssueListItem = {
 	title: string;
 	status: IssueStatus;
 	priority: IssuePriority | null;
+	startDate: string | null;
+	endDate: string | null;
+	rank: number;
 	createdAt: string;
 	updatedAt: string;
 	reporterName: string;
@@ -33,6 +36,9 @@ export async function fetchIssues(
 			title: issue.title,
 			status: issue.status,
 			priority: issue.priority,
+			startDate: issue.startDate,
+			endDate: issue.endDate,
+			rank: issue.rank,
 			createdAt: issue.createdAt,
 			updatedAt: issue.updatedAt,
 			reporterName: userTable.name,
@@ -48,6 +54,9 @@ export async function fetchIssues(
 		title: row.title,
 		status: row.status,
 		priority: row.priority,
+		startDate: row.startDate ?? null,
+		endDate: row.endDate ?? null,
+		rank: row.rank,
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
 		reporterName: row.reporterName,

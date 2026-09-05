@@ -1,0 +1,58 @@
+@import "../../../../node_modules/frappe-gantt/dist/frappe-gantt.css";
+
+.issue-gantt {
+	display: flex;
+	height: 100%;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	contain: inline-size;
+	--g-arrow-color: var(--primary);
+	--g-bar-color: var(--primary);
+	--g-bar-border: var(--primary);
+	--g-tick-color-thick: var(--border);
+	--g-tick-color: var(--border);
+	--g-actions-background: var(--secondary);
+	--g-border-color: var(--border);
+	--g-text-muted: var(--muted-foreground);
+	--g-text-light: var(--primary-foreground);
+	--g-text-dark: var(--foreground);
+	--g-progress-color: color-mix(in oklch, var(--primary) 72%, white);
+	--g-handle-color: var(--primary-foreground);
+	--g-weekend-label-color: var(--muted);
+	--g-header-background: var(--background);
+	--g-row-color: var(--card);
+	--g-row-border-color: var(--border);
+	--g-today-highlight: var(--primary);
+	--g-popup-actions: var(--secondary);
+	--g-weekend-highlight-color: var(--muted);
+}
+
+.issue-gantt .gantt-container {
+	box-sizing: border-box;
+	flex: 1;
+	width: 100% !important;
+	max-width: 100%;
+	height: 100% !important;
+	min-height: 0;
+	overflow: auto;
+	border: 1px solid var(--border);
+}
+
+.issue-gantt .gantt .bar-label {
+	fill: var(--primary-foreground);
+}
+
+.issue-gantt .gantt .bar-label.big {
+	fill: var(--foreground);
+}
+
+.issue-gantt .gantt-container .side-header * {
+	color: var(--foreground);
+}
+
+.issue-gantt .gantt-container .current-date-highlight {
+	background: var(--primary);
+	color: var(--primary-foreground);
+}

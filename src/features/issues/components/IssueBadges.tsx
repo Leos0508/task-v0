@@ -24,7 +24,7 @@ export const PRIORITIES: Array<IssuePriority | null> = [
 	null,
 ];
 
-const statusLabel: Record<IssueStatus, string> = {
+export const STATUS_LABELS: Record<IssueStatus, string> = {
 	TODO: "Todo",
 	IN_PROGRESS: "In progress",
 	DONE: "Done",
@@ -56,7 +56,7 @@ export function StatusBadge({ status }: { status: IssueStatus }) {
 	return (
 		<span className="inline-flex items-center gap-2">
 			<span className={cn("size-3 rounded-full", statusDot[status])} />
-			{statusLabel[status]}
+			{STATUS_LABELS[status]}
 		</span>
 	);
 }
