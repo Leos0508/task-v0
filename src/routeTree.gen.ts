@@ -14,8 +14,10 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppCodeRouteImport } from './routes/app.$code'
+import { Route as AppAccountRouteImport } from './routes/app.account'
 import { Route as AppCreateWorkspaceRouteImport } from './routes/app.create-workspace'
 import { Route as InvitesTokenRouteImport } from './routes/invites.$token'
 import { Route as WorkspacesSplatRouteImport } from './routes/workspaces.$'
@@ -54,6 +56,11 @@ const WorkspacesRoute = WorkspacesRouteImport.update({
   path: '/workspaces',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -62,6 +69,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppCodeRoute = AppCodeRouteImport.update({
   id: '/$code',
   path: '/$code',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCreateWorkspaceRoute = AppCreateWorkspaceRouteImport.update({
@@ -133,7 +145,9 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
   '/app/$code': typeof AppCodeRouteWithChildren
+  '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
@@ -153,6 +167,8 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
@@ -172,7 +188,9 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
   '/app/$code': typeof AppCodeRouteWithChildren
+  '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
@@ -195,7 +213,9 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
+    | '/api/mcp'
     | '/app/$code'
+    | '/app/account'
     | '/app/create-workspace'
     | '/invites/$token'
     | '/workspaces/$'
@@ -215,6 +235,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
+    | '/api/mcp'
+    | '/app/account'
     | '/app/create-workspace'
     | '/invites/$token'
     | '/workspaces/$'
@@ -233,7 +255,9 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
+    | '/api/mcp'
     | '/app/$code'
+    | '/app/account'
     | '/app/create-workspace'
     | '/invites/$token'
     | '/workspaces/$'
@@ -255,6 +279,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   WorkspacesRoute: typeof WorkspacesRouteWithChildren
+  ApiMcpRoute: typeof ApiMcpRoute
   InvitesTokenRoute: typeof InvitesTokenRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -296,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspacesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/': {
       id: '/app/'
       path: '/'
@@ -308,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/$code'
       fullPath: '/app/$code'
       preLoaderRoute: typeof AppCodeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/account': {
+      id: '/app/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/create-workspace': {
@@ -443,12 +482,14 @@ const AppCodeRouteWithChildren =
 
 interface AppRouteChildren {
   AppCodeRoute: typeof AppCodeRouteWithChildren
+  AppAccountRoute: typeof AppAccountRoute
   AppCreateWorkspaceRoute: typeof AppCreateWorkspaceRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCodeRoute: AppCodeRouteWithChildren,
+  AppAccountRoute: AppAccountRoute,
   AppCreateWorkspaceRoute: AppCreateWorkspaceRoute,
   AppIndexRoute: AppIndexRoute,
 }
@@ -473,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   WorkspacesRoute: WorkspacesRouteWithChildren,
+  ApiMcpRoute: ApiMcpRoute,
   InvitesTokenRoute: InvitesTokenRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

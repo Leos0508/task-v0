@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
+import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
@@ -122,6 +122,15 @@ export default function UserMenu({
 					</div>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					disabled={isSigningOut}
+					onSelect={() => {
+						navigate({ to: "/app/account" });
+					}}
+				>
+					<KeyRoundIcon />
+					API keys
+				</DropdownMenuItem>
 				<DropdownMenuItem
 					disabled={isSigningOut}
 					onSelect={() => {

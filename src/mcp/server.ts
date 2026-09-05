@@ -1,0 +1,348 @@
+import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
+import type { User } from "better-auth";
+import { z } from "zod";
+import { updateDocumentSchema } from "#/features/documents/schema";
+import { updateIssueSchema } from "#/features/issues/schema";
+import { createDocument } from "#/lib/data/create-document";
+import { createIssue } from "#/lib/data/create-issue";
+import { fetchDocument } from "#/lib/data/fetch-document";
+import { fetchDocuments } from "#/lib/data/fetch-documents";
+import { fetchIssue } from "#/lib/data/fetch-issue";
+import { fetchIssues } from "#/lib/data/fetch-issues";
+import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
+import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { updateDocument } from "#/lib/data/update-document";
+import { updateIssue } from "#/lib/data/update-issue";
+import { formatMcpError } from "#/mcp/errors";
+import { markdownToTipTap, tipTapToMarkdown } from "#/mcp/markdown";
+
+const issueStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]);
+const issuePrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
+const dateOnlySchema = z
+	.string()
+	.regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date")
+	.nullable();
+
+function jsonResult(data: unknown) {
+	return {
+		content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
+	};
+}
+
+function errorResult(error: unknown) {
+	return {
+		content: [{ type: "text" as const, text: formatMcpError(error) }],
+		isError: true as const,
+	};
+}
+
+function createTaskMcpServer(user: User) {
+	const server = new McpServer({
+		name: "task-v0",
+		version: "1.0.0",
+	});
+
+	server.registerTool(
+		"list_workspaces",
+		{
+			description: "List workspaces the authenticated user belongs to.",
+			inputSchema: z.object({}),
+		},
+		async () => {
+			try {
+				return jsonResult(await fetchWorkspaces(user));
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"get_workspace",
+		{
+			description:
+				"Get a workspace the user belongs to by code. Does not include members.",
+			inputSchema: z.object({
+				code: z.string().min(1),
+			}),
+		},
+		async ({ code }) => {
+			try {
+				const access = await getWorkspaceAccess(user, code);
+				return jsonResult({
+					id: access.workspace.id,
+					code: access.workspace.code,
+					name: access.workspace.name,
+					color: access.workspace.color,
+					role: access.role,
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"list_issues",
+		{
+			description: "List issues in a workspace, optionally filtered.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				status: issueStatusSchema.optional(),
+				priority: issuePrioritySchema.nullable().optional(),
+			}),
+		},
+		async ({ workspaceCode, status, priority }) => {
+			try {
+				let issues = await fetchIssues(user, workspaceCode);
+				if (status !== undefined) {
+					issues = issues.filter((item) => item.status === status);
+				}
+				if (priority !== undefined) {
+					issues = issues.filter((item) => item.priority === priority);
+				}
+				return jsonResult(issues);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"get_issue",
+		{
+			description:
+				"Get one issue by workspace code and issue number. Description is markdown.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+			}),
+		},
+		async ({ workspaceCode, issueNumber }) => {
+			try {
+				const issue = await fetchIssue(user, workspaceCode, issueNumber);
+				return jsonResult({
+					...issue,
+					description: tipTapToMarkdown(issue.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"create_issue",
+		{
+			description:
+				"Create an issue with a title and optional markdown description.",
+			inputSchema: z
+				.object({
+					workspaceCode: z.string().min(1),
+					title: z.string().min(1).max(200),
+					status: issueStatusSchema.optional(),
+					priority: issuePrioritySchema.nullable().optional(),
+					startDate: dateOnlySchema.optional(),
+					endDate: dateOnlySchema.optional(),
+					description: z.string().optional(),
+				})
+				.refine(
+					(value) =>
+						!value.startDate ||
+						!value.endDate ||
+						value.startDate <= value.endDate,
+					{ message: "End must be on or after start", path: ["endDate"] },
+				),
+		},
+		async ({
+			workspaceCode,
+			title,
+			status,
+			priority,
+			startDate,
+			endDate,
+			description,
+		}) => {
+			try {
+				const created = await createIssue(user, workspaceCode, {
+					title,
+					status,
+					priority,
+					startDate,
+					endDate,
+					description:
+						description === undefined
+							? undefined
+							: markdownToTipTap(description),
+				});
+				const issue = await fetchIssue(user, workspaceCode, created.number);
+				return jsonResult({
+					...issue,
+					description: tipTapToMarkdown(issue.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"update_issue",
+		{
+			description:
+				"Update an issue. Pass only fields to change. Description is markdown.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+				title: z.string().min(1).max(200).optional(),
+				status: issueStatusSchema.optional(),
+				priority: issuePrioritySchema.nullable().optional(),
+				startDate: dateOnlySchema.optional(),
+				endDate: dateOnlySchema.optional(),
+				description: z.string().optional(),
+			}),
+		},
+		async ({
+			workspaceCode,
+			issueNumber,
+			title,
+			status,
+			priority,
+			startDate,
+			endDate,
+			description,
+		}) => {
+			try {
+				const input = updateIssueSchema.parse({
+					title,
+					status,
+					priority,
+					startDate,
+					endDate,
+					description:
+						description === undefined
+							? undefined
+							: markdownToTipTap(description),
+				});
+				await updateIssue(user, workspaceCode, issueNumber, input);
+				const issue = await fetchIssue(user, workspaceCode, issueNumber);
+				return jsonResult({
+					...issue,
+					description: tipTapToMarkdown(issue.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"list_documents",
+		{
+			description: "List documents in a workspace.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode }) => {
+			try {
+				return jsonResult(await fetchDocuments(user, workspaceCode));
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"get_document",
+		{
+			description:
+				"Get one document by workspace code and document id. Description is markdown.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				documentId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, documentId }) => {
+			try {
+				const document = await fetchDocument(user, workspaceCode, documentId);
+				return jsonResult({
+					...document,
+					description: tipTapToMarkdown(document.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"create_document",
+		{
+			description:
+				"Create a document with a title and optional markdown description.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				title: z.string().min(1).max(200),
+				description: z.string().optional(),
+			}),
+		},
+		async ({ workspaceCode, title, description }) => {
+			try {
+				const created = await createDocument(user, workspaceCode, {
+					title,
+					description:
+						description === undefined
+							? undefined
+							: markdownToTipTap(description),
+				});
+				const document = await fetchDocument(user, workspaceCode, created.id);
+				return jsonResult({
+					...document,
+					description: tipTapToMarkdown(document.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"update_document",
+		{
+			description:
+				"Update a document. Pass only fields to change. Description is markdown.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				documentId: z.string().min(1),
+				title: z.string().min(1).max(200).optional(),
+				description: z.string().optional(),
+			}),
+		},
+		async ({ workspaceCode, documentId, title, description }) => {
+			try {
+				const input = updateDocumentSchema.parse({
+					title,
+					description:
+						description === undefined
+							? undefined
+							: markdownToTipTap(description),
+				});
+				await updateDocument(user, workspaceCode, documentId, input);
+				const document = await fetchDocument(user, workspaceCode, documentId);
+				return jsonResult({
+					...document,
+					description: tipTapToMarkdown(document.description),
+				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	return server;
+}
+
+export function createTaskMcpHandler(user: User) {
+	return createMcpHandler(() => createTaskMcpServer(user));
+}

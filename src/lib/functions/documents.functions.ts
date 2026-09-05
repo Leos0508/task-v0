@@ -3,13 +3,12 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db";
 import { document, issue, issueDocument } from "#/db/schema";
-import {
-	emptyDocumentDescription,
-	updateDocumentSchema,
-} from "#/features/documents/schema";
+import { updateDocumentSchema } from "#/features/documents/schema";
+import { createDocument } from "#/lib/data/create-document";
 import { fetchDocument } from "#/lib/data/fetch-document";
 import { fetchDocuments } from "#/lib/data/fetch-documents";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { updateDocument } from "#/lib/data/update-document";
 import { mapActionError } from "#/lib/map-action-error";
 import { authMiddleware } from "#/middlewares/auth-middleware";
 import { AppError } from "#/types/result";
@@ -33,20 +32,7 @@ export const createDocumentFn = createServerFn({ method: "POST" })
 	.validator(z.object({ workspaceCode: z.string() }))
 	.handler(async ({ data, context }) => {
 		try {
-			const { workspace } = await getWorkspaceAccess(
-				context.user,
-				data.workspaceCode,
-			);
-
-			const [created] = await db
-				.insert(document)
-				.values({
-					title: "New Document",
-					description: emptyDocumentDescription,
-					workspaceId: workspace.id,
-				})
-				.returning({ id: document.id });
-
+			const created = await createDocument(context.user, data.workspaceCode);
 			return { success: true as const, data: created };
 		} catch (error) {
 			return mapActionError(error, "Failed to create document");
@@ -64,44 +50,13 @@ export const updateDocumentFn = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data, context }) => {
 		try {
-			const { workspace } = await getWorkspaceAccess(
+			const updated = await updateDocument(
 				context.user,
 				data.workspaceCode,
+				data.documentId,
+				data.input,
 			);
-
-			const [existing] = await db
-				.select({ id: document.id })
-				.from(document)
-				.where(
-					and(
-						eq(document.id, data.documentId),
-						eq(document.workspaceId, workspace.id),
-					),
-				)
-				.limit(1);
-
-			if (!existing) {
-				throw new AppError("NOT_FOUND", "Document not found");
-			}
-
-			const patch: { title?: string; description?: unknown } = {};
-			if (data.input.title !== undefined) {
-				patch.title = data.input.title.trim();
-			}
-			if (data.input.description !== undefined) {
-				patch.description = JSON.parse(JSON.stringify(data.input.description));
-			}
-
-			const [updated] = await db
-				.update(document)
-				.set(patch)
-				.where(eq(document.id, existing.id))
-				.returning({ id: document.id, updatedAt: document.updatedAt });
-
-			return {
-				success: true as const,
-				data: { id: updated.id, updatedAt: updated.updatedAt.toISOString() },
-			};
+			return { success: true as const, data: updated };
 		} catch (error) {
 			return mapActionError(error, "Failed to update document");
 		}
