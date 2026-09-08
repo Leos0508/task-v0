@@ -1,9 +1,18 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Link, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Button } from "#/components/ui/button";
+import {
+	isStaleDynamicImportError,
+	reloadOnceForStaleDynamicImport,
+} from "#/lib/stale-dynamic-import";
 
 function getErrorMessage(error: unknown) {
 	const message = error instanceof Error ? error.message : String(error);
+
+	if (isStaleDynamicImportError(error)) {
+		return "This page is out of date. Refresh to continue.";
+	}
 
 	if (message.includes("hung and would never generate a response")) {
 		return "The server took too long to respond. Please try again.";
@@ -21,6 +30,12 @@ function getErrorMessage(error: unknown) {
 
 export default function PageError({ error }: ErrorComponentProps) {
 	const router = useRouter();
+	const staleImport = isStaleDynamicImportError(error);
+
+	useEffect(() => {
+		if (!staleImport) return;
+		reloadOnceForStaleDynamicImport();
+	}, [staleImport]);
 
 	return (
 		<div className="flex h-full min-h-40 w-full items-center justify-center p-6">
@@ -32,7 +47,16 @@ export default function PageError({ error }: ErrorComponentProps) {
 					{getErrorMessage(error)}
 				</p>
 				<div className="flex flex-wrap items-center justify-center gap-2">
-					<Button type="button" onClick={() => router.invalidate()}>
+					<Button
+						type="button"
+						onClick={() => {
+							if (staleImport) {
+								window.location.reload();
+								return;
+							}
+							void router.invalidate();
+						}}
+					>
 						Retry
 					</Button>
 					<Button variant="outline" asChild>

@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import {
 	type ComponentProps,
-	lazy,
 	type ReactNode,
 	Suspense,
 	useEffect,
@@ -57,6 +56,7 @@ import {
 	updateDocumentFn,
 } from "#/lib/functions/documents.functions";
 import { uploadDescriptionImage } from "#/lib/functions/files.functions";
+import { lazyImport } from "#/lib/stale-dynamic-import";
 import { cn, formatDateTime } from "#/lib/utils";
 import { documentPath } from "#/lib/workspace-path";
 import { documentKeys } from "../queries";
@@ -67,13 +67,13 @@ import {
 } from "../schema";
 import DocumentLinkedIssues from "./DocumentLinkedIssues";
 
-const IssueEditorLazy = lazy(
+const IssueEditorLazy = lazyImport(
 	() => import("#/features/issues/components/IssueEditor"),
 );
 
 const editorFallback = (
-	<div className="min-h-64 py-2 text-sm text-muted-foreground">
-		Loading editor…
+	<div className="tiptap-editor text-sm text-muted-foreground">
+		<span className="sr-only">Loading editor</span>
 	</div>
 );
 
@@ -94,11 +94,13 @@ function ClientOnly({
 
 function IssueEditor(props: ComponentProps<typeof IssueEditorLazy>) {
 	return (
-		<ClientOnly fallback={editorFallback}>
-			<Suspense fallback={editorFallback}>
-				<IssueEditorLazy {...props} />
-			</Suspense>
-		</ClientOnly>
+		<div className="min-h-64 min-w-0 w-full" style={{ minHeight: "16rem" }}>
+			<ClientOnly fallback={editorFallback}>
+				<Suspense fallback={editorFallback}>
+					<IssueEditorLazy {...props} />
+				</Suspense>
+			</ClientOnly>
+		</div>
 	);
 }
 
@@ -130,7 +132,7 @@ export default function DocumentDetailForm({
 }: DocumentDetailFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const [mode, setMode] = useState<"edit" | "readonly">("readonly");
+	const [mode, setMode] = useState<"edit" | "readonly">("edit");
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [linkedIssues, setLinkedIssues] = useState(document.linkedIssues);
 	const [updatedAt, setUpdatedAt] = useState(document.updatedAt);
@@ -278,11 +280,20 @@ export default function DocumentDetailForm({
 			</header>
 
 			<div className="min-h-0 flex-1 overflow-y-auto">
-				<form
-					className="grid gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_15rem] mx-auto max-w-6xl w-full"
-					onSubmit={(event) => event.preventDefault()}
+				<div
+					className="detail-form-layout"
+					style={{
+						display: "grid",
+						gridTemplateColumns: "minmax(0, 1fr) 15rem",
+						alignItems: "start",
+						gap: "2rem",
+						width: "100%",
+						maxWidth: "72rem",
+						marginInline: "auto",
+						padding: "2rem 1.5rem",
+					}}
 				>
-					<div className="min-w-0 flex flex-col gap-4">
+					<div className="detail-form-main">
 						<form.Field name="title">
 							{(field) => {
 								const isInvalid =
@@ -306,7 +317,7 @@ export default function DocumentDetailForm({
 											readOnly={mode === "readonly"}
 											className={cn(
 												unstyledControl,
-												"min-h-0 resize-none px-0 py-0 text-3xl font-heading font-semibold leading-tight md:text-2xl",
+												"min-h-0 min-w-0 resize-none px-0 py-0 text-3xl font-heading font-semibold leading-tight md:text-2xl",
 												mode === "readonly" && "cursor-default",
 											)}
 										/>
@@ -323,7 +334,7 @@ export default function DocumentDetailForm({
 									<IssueEditor
 										value={field.state.value}
 										onChange={field.handleChange}
-										placeholder="Start writing…"
+										placeholder="Start writing… Type / for commands"
 										mode={mode}
 										onUploadImage={(file) =>
 											uploadDescriptionImage(workspaceCode, file)
@@ -334,7 +345,7 @@ export default function DocumentDetailForm({
 						</form.Field>
 					</div>
 
-					<aside className="flex flex-col gap-8">
+					<aside className="detail-form-aside">
 						<DocumentLinkedIssues
 							workspaceCode={workspaceCode}
 							documentId={document.id}
@@ -342,7 +353,7 @@ export default function DocumentDetailForm({
 							onLinkedIssuesChange={setLinkedIssues}
 						/>
 					</aside>
-				</form>
+				</div>
 			</div>
 
 			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

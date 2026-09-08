@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, PlusIcon } from "lucide-react";
-import { lazy, Suspense, useMemo, useState, useTransition } from "react";
+import { Suspense, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
@@ -22,9 +22,10 @@ import {
 } from "#/features/issues/queries";
 import type { IssueView } from "#/features/issues/view-search";
 import { createIssueFn } from "#/lib/functions/issues.functions";
+import { lazyImport } from "#/lib/stale-dynamic-import";
 import { cn } from "#/lib/utils";
 
-const IssueGanttView = lazy(
+const IssueGanttView = lazyImport(
 	() => import("#/features/issues/components/IssueGanttView"),
 );
 
