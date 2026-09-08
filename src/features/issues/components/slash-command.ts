@@ -17,14 +17,19 @@ import {
 	Heading6Icon,
 	ImageIcon,
 	ItalicIcon,
+	LinkIcon,
 	ListIcon,
 	ListOrderedIcon,
 	MinusIcon,
 	SquareCodeIcon,
 	StrikethroughIcon,
+	TableIcon,
 	TextQuoteIcon,
 	TypeIcon,
+	UnderlineIcon,
+	WorkflowIcon,
 } from "lucide-react";
+import { promptEditorLink } from "./editor-link";
 import {
 	type SlashCommandItem,
 	SlashCommandList,
@@ -150,6 +155,27 @@ export function getSlashCommandItems({
 			},
 		},
 		{
+			id: "underline",
+			title: "Underline",
+			keywords: ["underline", "u", "format"],
+			group: "Format",
+			icon: UnderlineIcon,
+			command: ({ editor, range }) => {
+				chainFrom(editor, range).toggleUnderline().run();
+			},
+		},
+		{
+			id: "link",
+			title: "Link",
+			keywords: ["link", "url", "href", "anchor", "format"],
+			group: "Format",
+			icon: LinkIcon,
+			command: ({ editor, range }) => {
+				chainFrom(editor, range).run();
+				promptEditorLink(editor);
+			},
+		},
+		{
 			id: "blockquote",
 			title: "Quote",
 			keywords: ["quote", "blockquote", "citation"],
@@ -167,6 +193,28 @@ export function getSlashCommandItems({
 			icon: SquareCodeIcon,
 			command: ({ editor, range }) => {
 				chainFrom(editor, range).toggleCodeBlock().run();
+			},
+		},
+		{
+			id: "table",
+			title: "Table",
+			keywords: ["table", "grid", "cells", "spreadsheet"],
+			group: "Blocks",
+			icon: TableIcon,
+			command: ({ editor, range }) => {
+				chainFrom(editor, range)
+					.insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+					.run();
+			},
+		},
+		{
+			id: "diagram",
+			title: "Diagram",
+			keywords: ["mermaid", "diagram", "flowchart", "sequence", "chart"],
+			group: "Blocks",
+			icon: WorkflowIcon,
+			command: ({ editor, range }) => {
+				chainFrom(editor, range).insertMermaid().run();
 			},
 		},
 		{

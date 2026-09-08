@@ -1,7 +1,9 @@
 import type { Editor } from "@tiptap/core";
 import FileHandler from "@tiptap/extension-file-handler";
 import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { TableKit } from "@tiptap/extension-table";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useRef } from "react";
@@ -11,7 +13,12 @@ import {
 	DESCRIPTION_IMAGE_ACCEPT,
 	DESCRIPTION_IMAGE_MIME_TYPES,
 } from "#/lib/description-image";
+import { promptEditorLink } from "./editor-link";
+import { EditorUnderline } from "./editor-underline";
+import { MarkdownClipboard } from "./markdown-clipboard";
+import { Mermaid } from "./mermaid-extension";
 import { SlashCommand } from "./slash-command";
+import TableToolbar from "./TableToolbar";
 
 type IssueEditorProps = {
 	value: unknown;
@@ -25,6 +32,39 @@ const emptyDoc = {
 	type: "doc",
 	content: [{ type: "paragraph" }],
 };
+
+const EditorLink = Link.extend({
+	addKeyboardShortcuts() {
+		return {
+			...this.parent?.(),
+			"Mod-k": () => {
+				promptEditorLink(this.editor);
+				return true;
+			},
+		};
+	},
+}).configure({
+	autolink: true,
+	markdownLinks: true,
+	defaultProtocol: "https",
+	openOnClick: true,
+	protocols: ["http", "https"],
+	HTMLAttributes: {
+		rel: "noopener noreferrer",
+		target: "_blank",
+	},
+	isAllowedUri: (url, ctx) => {
+		if (!ctx.defaultValidate(url)) return false;
+		try {
+			const parsed = new URL(
+				url.includes(":") ? url : `${ctx.defaultProtocol}://${url}`,
+			);
+			return parsed.protocol === "http:" || parsed.protocol === "https:";
+		} catch {
+			return false;
+		}
+	},
+});
 
 async function insertUploadedImages({
 	editor,
@@ -91,9 +131,19 @@ export default function IssueEditor({
 		immediatelyRender: false,
 		editable: isEditable,
 		extensions: [
-			StarterKit,
+			StarterKit.configure({
+				link: false,
+				underline: false,
+			}),
 			Placeholder.configure({ placeholder }),
 			Image.configure({ allowBase64: false }),
+			EditorLink,
+			EditorUnderline,
+			TableKit.configure({
+				table: { resizable: false },
+			}),
+			Mermaid,
+			MarkdownClipboard,
 			SlashCommand.configure({
 				getPickImage: () =>
 					onUploadImageRef.current
@@ -181,6 +231,7 @@ export default function IssueEditor({
 					}}
 				/>
 			) : null}
+			<TableToolbar editor={editor} />
 			<EditorContent editor={editor} />
 		</div>
 	);
