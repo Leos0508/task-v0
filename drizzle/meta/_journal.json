@@ -43,6 +43,13 @@
       "when": 1788858881335,
       "tag": "0005_workspace_file",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788883952470,
+      "tag": "0006_document_tag",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
+import { tagsQueryOptions } from "#/features/issues/queries";
 import type { DocumentListItem } from "#/lib/data/fetch-documents";
 import { useAppTable } from "#/lib/data-table";
 import { createDocumentFn } from "#/lib/functions/documents.functions";
@@ -44,7 +45,9 @@ export default function DocumentList({
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: documents } = useQuery(documentsQueryOptions(workspaceCode));
+	const { data: tags = [] } = useQuery(tagsQueryOptions(workspaceCode));
 	const [sort, setSort] = useState<DocumentSort>("updatedAt");
+	const [tagFilter, setTagFilter] = useState<string>("ALL");
 	const [isCreating, startCreate] = useTransition();
 
 	const columns = useMemo(
@@ -52,10 +55,13 @@ export default function DocumentList({
 		[workspaceCode],
 	);
 
-	const sortedDocuments = useMemo(
-		() => sortDocuments(documents ?? EMPTY_DOCUMENT, sort),
-		[documents, sort],
-	);
+	const sortedDocuments = useMemo(() => {
+		const filtered = (documents ?? EMPTY_DOCUMENT).filter((document) => {
+			if (tagFilter === "ALL") return true;
+			return document.tags.some((tag) => tag.id === tagFilter);
+		});
+		return sortDocuments(filtered, sort);
+	}, [documents, sort, tagFilter]);
 
 	const table = useAppTable({
 		columns,
@@ -91,19 +97,34 @@ export default function DocumentList({
 	return (
 		<div className="w-full space-y-2">
 			<div className="flex w-full items-center justify-between gap-4">
-				<Select
-					value={sort}
-					onValueChange={(value) => setSort(value as DocumentSort)}
-				>
-					<SelectTrigger className="w-44">
-						<SelectValue placeholder="Sort by" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="updatedAt">Last edited</SelectItem>
-						<SelectItem value="createdAt">Date created</SelectItem>
-						<SelectItem value="title">Title</SelectItem>
-					</SelectContent>
-				</Select>
+				<div className="flex flex-wrap items-center gap-2">
+					<Select
+						value={sort}
+						onValueChange={(value) => setSort(value as DocumentSort)}
+					>
+						<SelectTrigger className="w-44">
+							<SelectValue placeholder="Sort by" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="updatedAt">Last edited</SelectItem>
+							<SelectItem value="createdAt">Date created</SelectItem>
+							<SelectItem value="title">Title</SelectItem>
+						</SelectContent>
+					</Select>
+					<Select value={tagFilter} onValueChange={setTagFilter}>
+						<SelectTrigger className="w-44">
+							<SelectValue placeholder="Tag" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="ALL">All tags</SelectItem>
+							{tags.map((tag) => (
+								<SelectItem key={tag.id} value={tag.id}>
+									{tag.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 				<Button onClick={handleCreateNew} disabled={isCreating}>
 					{isCreating ? (
 						<Loader2Icon className="size-4 animate-spin" />
@@ -115,7 +136,11 @@ export default function DocumentList({
 			</div>
 			<DataTable
 				table={table}
-				emptyMessage="No documents yet. Create one to get started."
+				emptyMessage={
+					tagFilter === "ALL"
+						? "No documents yet. Create one to get started."
+						: "No documents with this tag."
+				}
 			/>
 		</div>
 	);

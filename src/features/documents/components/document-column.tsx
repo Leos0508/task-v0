@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import IssueTagBadge from "#/features/issues/components/IssueTagBadge";
 import type { DocumentListItem } from "#/lib/data/fetch-documents";
 import { createAppColumnHelper } from "#/lib/data-table";
 
@@ -18,6 +19,23 @@ export function createDocumentColumns(workspaceCode: string) {
 				</Link>
 			),
 			meta: { className: "w-full whitespace-nowrap" },
+		}),
+		columnHelper.accessor("tags", {
+			header: "Tags",
+			cell: ({ getValue }) => {
+				const tags = getValue();
+				if (tags.length === 0) {
+					return <span className="text-muted-foreground">—</span>;
+				}
+				return (
+					<div className="flex flex-wrap gap-1">
+						{tags.map((tag) => (
+							<IssueTagBadge key={tag.id} tag={tag} />
+						))}
+					</div>
+				);
+			},
+			meta: { className: "min-w-40" },
 		}),
 		columnHelper.accessor("updatedAt", {
 			header: "Last edited",

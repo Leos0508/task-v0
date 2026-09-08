@@ -51,6 +51,7 @@ import {
 import { Field, FieldError } from "#/components/ui/field";
 import { Textarea } from "#/components/ui/textarea";
 import type { DocumentLinkedIssue } from "#/lib/data/fetch-document";
+import type { IssueTag } from "#/lib/data/fetch-tags";
 import {
 	deleteDocumentFn,
 	updateDocumentFn,
@@ -66,6 +67,7 @@ import {
 	emptyDocumentDescription,
 } from "../schema";
 import DocumentLinkedIssues from "./DocumentLinkedIssues";
+import DocumentTags from "./DocumentTags";
 
 const IssueEditorLazy = lazyImport(
 	() => import("#/features/issues/components/IssueEditor"),
@@ -115,9 +117,11 @@ type DocumentDetailFormProps = {
 		description: unknown;
 		createdAt: string;
 		updatedAt: string;
+		tags: IssueTag[];
 		linkedIssues: DocumentLinkedIssue[];
 	};
 	canDelete: boolean;
+	canManageTags: boolean;
 };
 
 function normalizeDescription(value: unknown) {
@@ -129,12 +133,14 @@ export default function DocumentDetailForm({
 	workspaceCode,
 	document,
 	canDelete,
+	canManageTags,
 }: DocumentDetailFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [mode, setMode] = useState<"edit" | "readonly">("edit");
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [linkedIssues, setLinkedIssues] = useState(document.linkedIssues);
+	const [tags, setTags] = useState(document.tags);
 	const [updatedAt, setUpdatedAt] = useState(document.updatedAt);
 	const [saveState, setSaveState] = useState<
 		"idle" | "saving" | "saved" | "error"
@@ -346,6 +352,13 @@ export default function DocumentDetailForm({
 					</div>
 
 					<aside className="detail-form-aside">
+						<DocumentTags
+							workspaceCode={workspaceCode}
+							documentId={document.id}
+							tags={tags}
+							canManageTags={canManageTags}
+							onTagsChange={setTags}
+						/>
 						<DocumentLinkedIssues
 							workspaceCode={workspaceCode}
 							documentId={document.id}
