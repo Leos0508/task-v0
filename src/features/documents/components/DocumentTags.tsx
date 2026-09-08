@@ -10,6 +10,7 @@ import {
 	PopoverTrigger,
 } from "#/components/ui/popover";
 import { documentKeys } from "#/features/documents/queries";
+import IssueTagBadge from "#/features/issues/components/IssueTagBadge";
 import {
 	issueKeys,
 	tagKeys,
@@ -24,27 +25,26 @@ import type { IssueTag } from "#/lib/data/fetch-tags";
 import {
 	createTagFn,
 	deleteTagFn,
-	linkTagToIssueFn,
-	unlinkTagFromIssueFn,
+	linkTagToDocumentFn,
+	unlinkTagFromDocumentFn,
 } from "#/lib/functions/tags.functions";
 import { cn } from "#/lib/utils";
-import IssueTagBadge from "./IssueTagBadge";
 
-type IssueTagsProps = {
+type DocumentTagsProps = {
 	workspaceCode: string;
-	issueNumber: number;
+	documentId: string;
 	tags: IssueTag[];
 	canManageTags: boolean;
 	onTagsChange: (tags: IssueTag[]) => void;
 };
 
-export default function IssueTags({
+export default function DocumentTags({
 	workspaceCode,
-	issueNumber,
+	documentId,
 	tags,
 	canManageTags,
 	onTagsChange,
-}: IssueTagsProps) {
+}: DocumentTagsProps) {
 	const queryClient = useQueryClient();
 	const { data: catalog = [] } = useQuery(tagsQueryOptions(workspaceCode));
 	const [open, setOpen] = useState(false);
@@ -73,19 +73,19 @@ export default function IssueTags({
 				queryKey: tagKeys.all(workspaceCode),
 			}),
 			queryClient.invalidateQueries({
-				queryKey: issueKeys.all(workspaceCode),
+				queryKey: documentKeys.all(workspaceCode),
 			}),
 			queryClient.invalidateQueries({
-				queryKey: documentKeys.all(workspaceCode),
+				queryKey: issueKeys.all(workspaceCode),
 			}),
 		]);
 	}
 
 	async function handleLink(next: IssueTag) {
-		const result = await linkTagToIssueFn({
+		const result = await linkTagToDocumentFn({
 			data: {
 				workspaceCode,
-				issueNumber,
+				documentId,
 				tagId: next.id,
 			},
 		});
@@ -103,10 +103,10 @@ export default function IssueTags({
 	}
 
 	async function handleUnlink(tagId: string) {
-		const result = await unlinkTagFromIssueFn({
+		const result = await unlinkTagFromDocumentFn({
 			data: {
 				workspaceCode,
-				issueNumber,
+				documentId,
 				tagId,
 			},
 		});

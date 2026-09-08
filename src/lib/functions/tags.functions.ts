@@ -4,7 +4,9 @@ import { createTagSchema, updateTagSchema } from "#/features/issues/schema";
 import { createTag } from "#/lib/data/create-tag";
 import { deleteTag } from "#/lib/data/delete-tag";
 import { fetchTags } from "#/lib/data/fetch-tags";
+import { linkTagToDocument } from "#/lib/data/link-tag-to-document";
 import { linkTagToIssue } from "#/lib/data/link-tag-to-issue";
+import { unlinkTagFromDocument } from "#/lib/data/unlink-tag-from-document";
 import { unlinkTagFromIssue } from "#/lib/data/unlink-tag-from-issue";
 import { updateTag } from "#/lib/data/update-tag";
 import { mapActionError } from "#/lib/map-action-error";
@@ -130,6 +132,56 @@ export const unlinkTagFromIssueFn = createServerFn({ method: "POST" })
 				context.user,
 				data.workspaceCode,
 				data.issueNumber,
+				data.tagId,
+			);
+			return { success: true as const, data: unlinked };
+		} catch (error) {
+			return mapActionError(error, "Failed to remove tag");
+		}
+	});
+
+export const linkTagToDocumentFn = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.validator(
+		z.object({
+			workspaceCode: z.string(),
+			documentId: z.string().min(1),
+			tagId: z.string().min(1),
+		}),
+	)
+	.handler(async ({ data, context }) => {
+		try {
+			const linked = await linkTagToDocument(
+				context.user,
+				data.workspaceCode,
+				data.documentId,
+				data.tagId,
+			);
+			return { success: true as const, data: linked };
+		} catch (error) {
+			return mapActionError(
+				error,
+				"Failed to add tag",
+				"This tag is already on the document",
+			);
+		}
+	});
+
+export const unlinkTagFromDocumentFn = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.validator(
+		z.object({
+			workspaceCode: z.string(),
+			documentId: z.string().min(1),
+			tagId: z.string().min(1),
+		}),
+	)
+	.handler(async ({ data, context }) => {
+		try {
+			const unlinked = await unlinkTagFromDocument(
+				context.user,
+				data.workspaceCode,
+				data.documentId,
 				data.tagId,
 			);
 			return { success: true as const, data: unlinked };

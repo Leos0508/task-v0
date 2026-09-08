@@ -20,8 +20,10 @@ import { fetchIssueComments } from "#/lib/data/fetch-issue-comments";
 import { fetchIssues } from "#/lib/data/fetch-issues";
 import { fetchTags } from "#/lib/data/fetch-tags";
 import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
+import { linkTagToDocument } from "#/lib/data/link-tag-to-document";
 import { linkTagToIssue } from "#/lib/data/link-tag-to-issue";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { unlinkTagFromDocument } from "#/lib/data/unlink-tag-from-document";
 import { unlinkTagFromIssue } from "#/lib/data/unlink-tag-from-issue";
 import { updateDocument } from "#/lib/data/update-document";
 import { updateIssue } from "#/lib/data/update-issue";
@@ -352,6 +354,48 @@ function createTaskMcpServer(user: User) {
 	);
 
 	server.registerTool(
+		"link_document_tag",
+		{
+			description: "Attach a workspace tag to a document.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				documentId: z.string().min(1),
+				tagId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, documentId, tagId }) => {
+			try {
+				return jsonResult(
+					await linkTagToDocument(user, workspaceCode, documentId, tagId),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"unlink_document_tag",
+		{
+			description: "Remove a workspace tag from a document.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				documentId: z.string().min(1),
+				tagId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, documentId, tagId }) => {
+			try {
+				return jsonResult(
+					await unlinkTagFromDocument(user, workspaceCode, documentId, tagId),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
 		"list_comments",
 		{
 			description: "List comments on an issue, oldest first.",
@@ -395,7 +439,7 @@ function createTaskMcpServer(user: User) {
 	server.registerTool(
 		"list_documents",
 		{
-			description: "List documents in a workspace.",
+			description: "List documents in a workspace, including tags.",
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 			}),
@@ -413,7 +457,7 @@ function createTaskMcpServer(user: User) {
 		"get_document",
 		{
 			description:
-				"Get one document by workspace code and document id. Description is markdown.",
+				"Get one document by workspace code and document id. Description is markdown. Includes tags.",
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 				documentId: z.string().min(1),

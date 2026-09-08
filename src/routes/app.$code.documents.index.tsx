@@ -4,12 +4,14 @@ import PageLoading from "#/components/PageLoading";
 import { Separator } from "#/components/ui/separator";
 import DocumentList from "#/features/documents/components/DocumentList";
 import { documentsQueryOptions } from "#/features/documents/queries";
+import { tagsQueryOptions } from "#/features/issues/queries";
 
 export const Route = createFileRoute("/app/$code/documents/")({
 	loader: async ({ context, params }) => {
-		await context.queryClient.ensureQueryData(
-			documentsQueryOptions(params.code),
-		);
+		await Promise.all([
+			context.queryClient.ensureQueryData(documentsQueryOptions(params.code)),
+			context.queryClient.ensureQueryData(tagsQueryOptions(params.code)),
+		]);
 		return { code: context.access.workspace.code };
 	},
 	pendingComponent: PageLoading,

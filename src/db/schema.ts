@@ -355,6 +355,33 @@ export const issueTag = pgTable(
 	],
 );
 
+export const documentTag = pgTable(
+	"document_tag",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		tagId: text("tag_id")
+			.notNull()
+			.references(() => tag.id, { onDelete: "cascade" }),
+		documentId: text("document_id")
+			.notNull()
+			.references(() => document.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("document_tag_documentId_tagId_uidx").on(
+			table.documentId,
+			table.tagId,
+		),
+		index("document_tag_tagId_idx").on(table.tagId),
+	],
+);
+
 export const issueComment = pgTable(
 	"issue_comment",
 	{
@@ -493,6 +520,7 @@ export const documentRelations = relations(document, ({ one, many }) => ({
 		references: [workspace.id],
 	}),
 	issueDocuments: many(issueDocument),
+	documentTags: many(documentTag),
 }));
 
 export const issueDocumentRelations = relations(issueDocument, ({ one }) => ({
@@ -512,6 +540,7 @@ export const tagRelations = relations(tag, ({ one, many }) => ({
 		references: [workspace.id],
 	}),
 	issueTags: many(issueTag),
+	documentTags: many(documentTag),
 }));
 
 export const issueTagRelations = relations(issueTag, ({ one }) => ({
@@ -521,6 +550,17 @@ export const issueTagRelations = relations(issueTag, ({ one }) => ({
 	}),
 	tag: one(tag, {
 		fields: [issueTag.tagId],
+		references: [tag.id],
+	}),
+}));
+
+export const documentTagRelations = relations(documentTag, ({ one }) => ({
+	document: one(document, {
+		fields: [documentTag.documentId],
+		references: [document.id],
+	}),
+	tag: one(tag, {
+		fields: [documentTag.tagId],
 		references: [tag.id],
 	}),
 }));
