@@ -19,6 +19,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppCodeRouteImport } from './routes/app.$code'
 import { Route as AppAccountRouteImport } from './routes/app.account'
 import { Route as AppCreateWorkspaceRouteImport } from './routes/app.create-workspace'
+import { Route as FilesFileIdRouteImport } from './routes/files.$fileId'
 import { Route as InvitesTokenRouteImport } from './routes/invites.$token'
 import { Route as WorkspacesSplatRouteImport } from './routes/workspaces.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -80,6 +81,11 @@ const AppCreateWorkspaceRoute = AppCreateWorkspaceRouteImport.update({
   id: '/create-workspace',
   path: '/create-workspace',
   getParentRoute: () => AppRoute,
+} as any)
+const FilesFileIdRoute = FilesFileIdRouteImport.update({
+  id: '/files/$fileId',
+  path: '/files/$fileId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const InvitesTokenRoute = InvitesTokenRouteImport.update({
   id: '/invites/$token',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/app/$code': typeof AppCodeRouteWithChildren
   '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
+  '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/api/mcp': typeof ApiMcpRoute
   '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
+  '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app': typeof AppIndexRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/app/$code': typeof AppCodeRouteWithChildren
   '/app/account': typeof AppAccountRoute
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
+  '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/app/$code'
     | '/app/account'
     | '/app/create-workspace'
+    | '/files/$fileId'
     | '/invites/$token'
     | '/workspaces/$'
     | '/app/'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/api/mcp'
     | '/app/account'
     | '/app/create-workspace'
+    | '/files/$fileId'
     | '/invites/$token'
     | '/workspaces/$'
     | '/app'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/app/$code'
     | '/app/account'
     | '/app/create-workspace'
+    | '/files/$fileId'
     | '/invites/$token'
     | '/workspaces/$'
     | '/app/'
@@ -280,6 +292,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   WorkspacesRoute: typeof WorkspacesRouteWithChildren
   ApiMcpRoute: typeof ApiMcpRoute
+  FilesFileIdRoute: typeof FilesFileIdRoute
   InvitesTokenRoute: typeof InvitesTokenRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/create-workspace'
       preLoaderRoute: typeof AppCreateWorkspaceRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/files/$fileId': {
+      id: '/files/$fileId'
+      path: '/files/$fileId'
+      fullPath: '/files/$fileId'
+      preLoaderRoute: typeof FilesFileIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/invites/$token': {
       id: '/invites/$token'
@@ -515,6 +535,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   WorkspacesRoute: WorkspacesRouteWithChildren,
   ApiMcpRoute: ApiMcpRoute,
+  FilesFileIdRoute: FilesFileIdRoute,
   InvitesTokenRoute: InvitesTokenRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

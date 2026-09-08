@@ -91,6 +91,13 @@ function renderBlock(node: TipTapNode, orderedIndex?: number): string {
 				.join("\n");
 		case "listItem":
 			return `${orderedIndex === undefined ? "-" : `${orderedIndex}.`} ${inlineText(node.content?.[0]?.content ?? node.content)}`;
+		case "image": {
+			const src = String(node.attrs?.src ?? "");
+			const alt = String(node.attrs?.alt ?? "");
+			const title = String(node.attrs?.title ?? "");
+			if (!src) return "";
+			return title ? `![${alt}](${src} "${title}")` : `![${alt}](${src})`;
+		}
 		default:
 			return inlineText(node.content);
 	}
@@ -149,6 +156,21 @@ function paragraph(text: string): TipTapNode {
 		: { type: "paragraph" };
 }
 
+const imageLinePattern = /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)$/;
+
+function parseImageLine(line: string): TipTapNode | null {
+	const match = imageLinePattern.exec(line.trim());
+	if (!match) return null;
+	const attrs: Record<string, unknown> = {
+		src: match[2],
+		alt: match[1] ?? "",
+	};
+	if (match[3]) {
+		attrs.title = match[3];
+	}
+	return { type: "image", attrs };
+}
+
 export function markdownToTipTap(markdown: string): JsonValue {
 	const source = markdown.replace(/\r\n/g, "\n").trim();
 	if (!source) {
@@ -169,6 +191,13 @@ export function markdownToTipTap(markdown: string): JsonValue {
 
 		if (line.trim() === "---") {
 			content.push({ type: "horizontalRule" });
+			index += 1;
+			continue;
+		}
+
+		const imageNode = parseImageLine(line);
+		if (imageNode) {
+			content.push(imageNode);
 			index += 1;
 			continue;
 		}
@@ -250,7 +279,8 @@ export function markdownToTipTap(markdown: string): JsonValue {
 			!(lines[index] ?? "").startsWith("```") &&
 			!(lines[index] ?? "").startsWith("> ") &&
 			!/^[-*]\s+/.test(lines[index] ?? "") &&
-			!/^\d+\.\s+/.test(lines[index] ?? "")
+			!/^\d+\.\s+/.test(lines[index] ?? "") &&
+			!imageLinePattern.test((lines[index] ?? "").trim())
 		) {
 			paragraphLines.push(lines[index] ?? "");
 			index += 1;

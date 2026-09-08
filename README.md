@@ -40,7 +40,13 @@ npm run dev
 
 1. Create a [Neon](https://neon.tech) database and run `npm run db:migrate` against it.
 2. `npx wrangler login`
-3. Set Worker secrets (do not put these in `wrangler.jsonc`):
+3. Enable R2 in the [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/r2/overview), then create the bucket used for description images:
+
+```bash
+npx wrangler r2 bucket create task-v0-uploads
+```
+
+4. Set Worker secrets (do not put these in `wrangler.jsonc`):
 
 ```bash
 npx wrangler secret put DATABASE_URL
@@ -50,7 +56,7 @@ npx wrangler secret put BETTER_AUTH_URL
 
 `BETTER_AUTH_URL` must be the public origin, for example `https://task-v0.<account>.workers.dev`, with no trailing slash.
 
-4. `npm run deploy`
+5. `npm run deploy`
 
 Preview the production build locally with `npm run preview` after `npm run build`.
 

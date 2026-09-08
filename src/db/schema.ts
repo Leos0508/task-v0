@@ -380,6 +380,33 @@ export const issueComment = pgTable(
 	],
 );
 
+export const workspaceFile = pgTable(
+	"workspace_file",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		key: text("key").notNull(),
+		mimeType: text("mime_type").notNull(),
+		size: integer("size").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		workspaceId: text("workspace_id")
+			.notNull()
+			.references(() => workspace.id, { onDelete: "cascade" }),
+		uploadedById: text("uploaded_by_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		index("workspace_file_workspaceId_idx").on(table.workspaceId),
+		index("workspace_file_uploadedById_idx").on(table.uploadedById),
+	],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
@@ -388,6 +415,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	invitesSent: many(workspaceInvite),
 	issuesReported: many(issue),
 	issueComments: many(issueComment),
+	uploadedFiles: many(workspaceFile),
 }));
 
 export const apikeyRelations = relations(apikey, ({ one }) => ({
@@ -417,6 +445,7 @@ export const workspaceRelations = relations(workspace, ({ many }) => ({
 	invites: many(workspaceInvite),
 	documents: many(document),
 	tags: many(tag),
+	files: many(workspaceFile),
 }));
 
 export const workspaceUserRelations = relations(workspaceUser, ({ one }) => ({
@@ -503,6 +532,17 @@ export const issueCommentRelations = relations(issueComment, ({ one }) => ({
 	}),
 	author: one(user, {
 		fields: [issueComment.authorId],
+		references: [user.id],
+	}),
+}));
+
+export const workspaceFileRelations = relations(workspaceFile, ({ one }) => ({
+	workspace: one(workspace, {
+		fields: [workspaceFile.workspaceId],
+		references: [workspace.id],
+	}),
+	uploadedBy: one(user, {
+		fields: [workspaceFile.uploadedById],
 		references: [user.id],
 	}),
 }));
