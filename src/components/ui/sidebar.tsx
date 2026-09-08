@@ -134,6 +134,9 @@ function SidebarProvider({
 						{
 							"--sidebar-width": SIDEBAR_WIDTH,
 							"--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+							display: "flex",
+							minHeight: "100svh",
+							width: "100%",
 							...style,
 						} as React.CSSProperties
 					}
@@ -216,6 +219,7 @@ function Sidebar({
 			{/* This is what handles the sidebar gap on desktop */}
 			<div
 				data-slot="sidebar-gap"
+				style={{ width: "var(--sidebar-width)" }}
 				className={cn(
 					"relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
 					"group-data-[collapsible=offcanvas]:w-0",
@@ -303,7 +307,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
 	);
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({ className, style, ...props }: React.ComponentProps<"main">) {
 	return (
 		<main
 			data-slot="sidebar-inset"
@@ -312,6 +316,16 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
 				"md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
 				className,
 			)}
+			style={{
+				display: "flex",
+				flex: 1,
+				minWidth: 0,
+				minHeight: 0,
+				height: "100svh",
+				flexDirection: "column",
+				overflow: "hidden",
+				...style,
+			}}
 			{...props}
 		/>
 	);

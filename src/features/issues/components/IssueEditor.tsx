@@ -4,15 +4,14 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { ImageIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Button } from "#/components/ui/button";
 import {
 	assertDescriptionImage,
 	DESCRIPTION_IMAGE_ACCEPT,
 	DESCRIPTION_IMAGE_MIME_TYPES,
 } from "#/lib/description-image";
+import { SlashCommand } from "./slash-command";
 
 type IssueEditorProps = {
 	value: unknown;
@@ -65,7 +64,7 @@ async function insertUploadedImages({
 export default function IssueEditor({
 	value,
 	onChange,
-	placeholder = "Describe the issue…",
+	placeholder = "Describe the issue… Type / for commands",
 	mode = "edit",
 	onUploadImage,
 }: IssueEditorProps) {
@@ -75,7 +74,6 @@ export default function IssueEditor({
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const isEditable = mode === "edit";
 	const isEditableRef = useRef(isEditable);
-	const [uploading, setUploading] = useState(false);
 
 	useEffect(() => {
 		onChangeRef.current = onChange;
@@ -96,6 +94,12 @@ export default function IssueEditor({
 			StarterKit,
 			Placeholder.configure({ placeholder }),
 			Image.configure({ allowBase64: false }),
+			SlashCommand.configure({
+				getPickImage: () =>
+					onUploadImageRef.current
+						? () => fileInputRef.current?.click()
+						: undefined,
+			}),
 			FileHandler.configure({
 				allowedMimeTypes: [...DESCRIPTION_IMAGE_MIME_TYPES],
 				consumePasteEvent: true,
@@ -146,8 +150,8 @@ export default function IssueEditor({
 
 	if (!editor) {
 		return (
-			<div className="min-h-64 py-2 text-sm text-muted-foreground">
-				Loading editor…
+			<div className="tiptap-editor text-sm text-muted-foreground">
+				<span className="sr-only">Loading editor</span>
 			</div>
 		);
 	}
@@ -155,42 +159,27 @@ export default function IssueEditor({
 	const showPicker = isEditable && Boolean(onUploadImage);
 
 	return (
-		<div className="flex min-w-0 flex-col gap-2">
+		<div className="min-w-0">
 			{showPicker ? (
-				<div>
-					<input
-						ref={fileInputRef}
-						type="file"
-						accept={DESCRIPTION_IMAGE_ACCEPT}
-						multiple
-						aria-label="Upload image"
-						className="sr-only"
-						onChange={(event) => {
-							const files = Array.from(event.target.files ?? []);
-							event.target.value = "";
-							if (files.length === 0) return;
-							setUploading(true);
-							void insertUploadedImages({
-								editor,
-								files,
-								upload: onUploadImageRef.current,
-								editable: isEditableRef.current,
-							}).finally(() => {
-								setUploading(false);
-							});
-						}}
-					/>
-					<Button
-						type="button"
-						variant="ghost"
-						size="sm"
-						disabled={uploading}
-						onClick={() => fileInputRef.current?.click()}
-					>
-						<ImageIcon />
-						{uploading ? "Uploading…" : "Add image"}
-					</Button>
-				</div>
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept={DESCRIPTION_IMAGE_ACCEPT}
+					multiple
+					aria-label="Upload image"
+					className="sr-only"
+					onChange={(event) => {
+						const files = Array.from(event.target.files ?? []);
+						event.target.value = "";
+						if (files.length === 0) return;
+						void insertUploadedImages({
+							editor,
+							files,
+							upload: onUploadImageRef.current,
+							editable: isEditableRef.current,
+						});
+					}}
+				/>
 			) : null}
 			<EditorContent editor={editor} />
 		</div>

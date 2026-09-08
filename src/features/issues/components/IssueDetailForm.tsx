@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import {
 	type ComponentProps,
-	lazy,
 	type ReactNode,
 	Suspense,
 	useEffect,
@@ -63,6 +62,7 @@ import type { IssueLinkedDocument } from "#/lib/data/fetch-issue";
 import type { IssueTag } from "#/lib/data/fetch-tags";
 import { uploadDescriptionImage } from "#/lib/functions/files.functions";
 import { deleteIssueFn, updateIssueFn } from "#/lib/functions/issues.functions";
+import { lazyImport } from "#/lib/stale-dynamic-import";
 import { cn } from "#/lib/utils";
 import { issueCode as formatIssueCode, issuePath } from "#/lib/workspace-path";
 import { issueKeys } from "../queries";
@@ -77,11 +77,11 @@ import IssueComments from "./IssueComments";
 import IssueLinkedDocuments from "./IssueLinkedDocuments";
 import IssueTags from "./IssueTags";
 
-const IssueEditorLazy = lazy(() => import("./IssueEditor"));
+const IssueEditorLazy = lazyImport(() => import("./IssueEditor"));
 
 const editorFallback = (
-	<div className="min-h-64 py-2 text-sm text-muted-foreground">
-		Loading editor…
+	<div className="tiptap-editor text-sm text-muted-foreground">
+		<span className="sr-only">Loading editor</span>
 	</div>
 );
 
@@ -102,11 +102,13 @@ function ClientOnly({
 
 function IssueEditor(props: ComponentProps<typeof IssueEditorLazy>) {
 	return (
-		<ClientOnly fallback={editorFallback}>
-			<Suspense fallback={editorFallback}>
-				<IssueEditorLazy {...props} />
-			</Suspense>
-		</ClientOnly>
+		<div className="min-h-64 min-w-0 w-full" style={{ minHeight: "16rem" }}>
+			<ClientOnly fallback={editorFallback}>
+				<Suspense fallback={editorFallback}>
+					<IssueEditorLazy {...props} />
+				</Suspense>
+			</ClientOnly>
+		</div>
 	);
 }
 
@@ -277,11 +279,20 @@ export default function IssueDetailForm({
 			</header>
 
 			<div className="min-h-0 flex-1 overflow-y-auto">
-				<form
-					className="grid gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_15rem] mx-auto max-w-6xl w-full"
-					onSubmit={(event) => event.preventDefault()}
+				<div
+					className="detail-form-layout"
+					style={{
+						display: "grid",
+						gridTemplateColumns: "minmax(0, 1fr) 15rem",
+						alignItems: "start",
+						gap: "2rem",
+						width: "100%",
+						maxWidth: "72rem",
+						marginInline: "auto",
+						padding: "2rem 1.5rem",
+					}}
 				>
-					<div className="min-w-0 flex flex-col gap-4">
+					<div className="detail-form-main">
 						<form.Field name="title">
 							{(field) => {
 								const isInvalid =
@@ -304,7 +315,7 @@ export default function IssueDetailForm({
 											rows={1}
 											className={cn(
 												unstyledControl,
-												"min-h-0 resize-none px-0 py-0 text-3xl font-heading font-semibold leading-tight md:text-2xl",
+												"min-h-0 min-w-0 resize-none px-0 py-0 text-3xl font-heading font-semibold leading-tight md:text-2xl",
 											)}
 										/>
 										{isInvalid && (
@@ -335,7 +346,7 @@ export default function IssueDetailForm({
 						/>
 					</div>
 
-					<aside className="flex flex-col gap-8">
+					<aside className="detail-form-aside">
 						<form.Field name="status">
 							{(field) => (
 								<Field>
@@ -348,8 +359,10 @@ export default function IssueDetailForm({
 											field.handleChange(value as IssueStatus)
 										}
 									>
-										<SelectTrigger>
-											<SelectValue />
+										<SelectTrigger className="w-full">
+											<SelectValue>
+												<StatusBadge status={field.state.value} />
+											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
 											{STATUSES.map((status) => (
@@ -376,8 +389,10 @@ export default function IssueDetailForm({
 											)
 										}
 									>
-										<SelectTrigger>
-											<SelectValue placeholder="None" />
+										<SelectTrigger className="w-full">
+											<SelectValue>
+												<PriorityBadge priority={field.state.value} />
+											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
 											{PRIORITIES.map((priority) => (
@@ -445,7 +460,7 @@ export default function IssueDetailForm({
 							onLinkedDocumentsChange={setLinkedDocuments}
 						/>
 					</aside>
-				</form>
+				</div>
 			</div>
 
 			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
