@@ -6,5 +6,11 @@
 	"main": "@tanstack/react-start/server-entry",
 	"observability": {
 		"enabled": true
-	}
+	},
+	"r2_buckets": [
+		{
+			"binding": "UPLOADS",
+			"bucket_name": "task-v0-uploads"
+		}
+	]
 }

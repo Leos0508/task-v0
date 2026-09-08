@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 
-type ServerEnvName = keyof Cloudflare.Env;
+type ServerEnvName = {
+	[K in keyof Cloudflare.Env]: Cloudflare.Env[K] extends string ? K : never;
+}[keyof Cloudflare.Env];
 
 function readEnv(name: ServerEnvName): string | undefined {
 	try {
@@ -33,4 +35,17 @@ export function getAuthEnv() {
 		secret: requireEnv("BETTER_AUTH_SECRET"),
 		baseURL: readEnv("BETTER_AUTH_URL"),
 	};
+}
+
+export function getUploadsBucket() {
+	try {
+		const bucket = env.UPLOADS;
+		if (bucket) {
+			return bucket;
+		}
+	} catch {
+		// `cloudflare:workers` env is unavailable outside the Worker runtime.
+	}
+
+	throw new Error("UPLOADS is not set");
 }

@@ -61,6 +61,7 @@ import { Textarea } from "#/components/ui/textarea";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import type { IssueLinkedDocument } from "#/lib/data/fetch-issue";
 import type { IssueTag } from "#/lib/data/fetch-tags";
+import { uploadDescriptionImage } from "#/lib/functions/files.functions";
 import { deleteIssueFn, updateIssueFn } from "#/lib/functions/issues.functions";
 import { cn } from "#/lib/utils";
 import { issueCode as formatIssueCode, issuePath } from "#/lib/workspace-path";
@@ -319,6 +320,9 @@ export default function IssueDetailForm({
 									<IssueEditor
 										value={field.state.value}
 										onChange={field.handleChange}
+										onUploadImage={(file) =>
+											uploadDescriptionImage(workspaceCode, file)
+										}
 									/>
 								</Field>
 							)}

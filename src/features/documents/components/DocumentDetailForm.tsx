@@ -56,6 +56,7 @@ import {
 	deleteDocumentFn,
 	updateDocumentFn,
 } from "#/lib/functions/documents.functions";
+import { uploadDescriptionImage } from "#/lib/functions/files.functions";
 import { cn, formatDateTime } from "#/lib/utils";
 import { documentPath } from "#/lib/workspace-path";
 import { documentKeys } from "../queries";
@@ -324,6 +325,9 @@ export default function DocumentDetailForm({
 										onChange={field.handleChange}
 										placeholder="Start writing…"
 										mode={mode}
+										onUploadImage={(file) =>
+											uploadDescriptionImage(workspaceCode, file)
+										}
 									/>
 								</Field>
 							)}
