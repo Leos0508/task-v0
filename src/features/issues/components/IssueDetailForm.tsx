@@ -62,6 +62,10 @@ import type { IssueLinkedDocument } from "#/lib/data/fetch-issue";
 import type { IssueTag } from "#/lib/data/fetch-tags";
 import { uploadDescriptionImage } from "#/lib/functions/files.functions";
 import { deleteIssueFn, updateIssueFn } from "#/lib/functions/issues.functions";
+import {
+	fromDatetimeLocalValue,
+	toDatetimeLocalValue,
+} from "#/lib/issue-datetime";
 import { lazyImport } from "#/lib/stale-dynamic-import";
 import { cn } from "#/lib/utils";
 import { issueCode as formatIssueCode, issuePath } from "#/lib/workspace-path";
@@ -415,10 +419,14 @@ export default function IssueDetailForm({
 										Start
 									</FieldLabel>
 									<Input
-										type="date"
-										value={field.state.value ?? ""}
+										type="datetime-local"
+										step={60}
+										suppressHydrationWarning
+										value={toDatetimeLocalValue(field.state.value)}
 										onChange={(event) =>
-											field.handleChange(event.target.value || null)
+											field.handleChange(
+												fromDatetimeLocalValue(event.target.value),
+											)
 										}
 									/>
 								</Field>
@@ -433,10 +441,15 @@ export default function IssueDetailForm({
 											End
 										</FieldLabel>
 										<Input
-											type="date"
-											value={field.state.value ?? ""}
+											type="datetime-local"
+											step={60}
+											suppressHydrationWarning
+											aria-invalid={isInvalid}
+											value={toDatetimeLocalValue(field.state.value)}
 											onChange={(event) =>
-												field.handleChange(event.target.value || null)
+												field.handleChange(
+													fromDatetimeLocalValue(event.target.value),
+												)
 											}
 										/>
 										{isInvalid ? (

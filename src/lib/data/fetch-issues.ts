@@ -9,6 +9,7 @@ import {
 	tag,
 	user as userTable,
 } from "#/db/schema";
+import { toIssueDateTimeIso } from "#/lib/issue-datetime";
 import type { IssueTag } from "./fetch-tags";
 import { getWorkspaceAccess } from "./require-workspace-access";
 
@@ -80,8 +81,8 @@ export async function fetchIssues(
 		title: row.title,
 		status: row.status,
 		priority: row.priority,
-		startDate: row.startDate ?? null,
-		endDate: row.endDate ?? null,
+		startDate: toIssueDateTimeIso(row.startDate),
+		endDate: toIssueDateTimeIso(row.endDate),
 		rank: row.rank,
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),

@@ -5,6 +5,8 @@ import { updateDocumentSchema } from "#/features/documents/schema";
 import {
 	createCommentSchema,
 	createTagSchema,
+	issueEndDateTimeSchema,
+	issueStartDateTimeSchema,
 	tagColorSchema,
 	updateIssueSchema,
 	updateTagSchema,
@@ -33,10 +35,6 @@ import { markdownToTipTap, tipTapToMarkdown } from "#/mcp/markdown";
 
 const issueStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]);
 const issuePrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
-const dateOnlySchema = z
-	.string()
-	.regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date")
-	.nullable();
 
 function jsonResult(data: unknown) {
 	return {
@@ -150,15 +148,15 @@ function createTaskMcpServer(user: User) {
 		"create_issue",
 		{
 			description:
-				"Create an issue with a title and optional markdown description.",
+				"Create an issue with a title and optional markdown description. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day.",
 			inputSchema: z
 				.object({
 					workspaceCode: z.string().min(1),
 					title: z.string().min(1).max(200),
 					status: issueStatusSchema.optional(),
 					priority: issuePrioritySchema.nullable().optional(),
-					startDate: dateOnlySchema.optional(),
-					endDate: dateOnlySchema.optional(),
+					startDate: issueStartDateTimeSchema.optional(),
+					endDate: issueEndDateTimeSchema.optional(),
 					description: z.string().optional(),
 				})
 				.refine(
@@ -205,15 +203,15 @@ function createTaskMcpServer(user: User) {
 		"update_issue",
 		{
 			description:
-				"Update an issue. Pass only fields to change. Description is markdown.",
+				"Update an issue. Pass only fields to change. Description is markdown. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day.",
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 				issueNumber: z.number().int().positive(),
 				title: z.string().min(1).max(200).optional(),
 				status: issueStatusSchema.optional(),
 				priority: issuePrioritySchema.nullable().optional(),
-				startDate: dateOnlySchema.optional(),
-				endDate: dateOnlySchema.optional(),
+				startDate: issueStartDateTimeSchema.optional(),
+				endDate: issueEndDateTimeSchema.optional(),
 				description: z.string().optional(),
 			}),
 		},

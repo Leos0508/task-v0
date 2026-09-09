@@ -35,8 +35,8 @@ export async function updateIssue(
 		title?: string;
 		status?: UpdateIssueInput["status"];
 		priority?: UpdateIssueInput["priority"];
-		startDate?: string | null;
-		endDate?: string | null;
+		startDate?: Date | null;
+		endDate?: Date | null;
 		description?: unknown;
 		rank?: number;
 	} = {};
@@ -65,10 +65,10 @@ export async function updateIssue(
 		patch.priority = input.priority;
 	}
 	if (input.startDate !== undefined) {
-		patch.startDate = input.startDate;
+		patch.startDate = input.startDate ? new Date(input.startDate) : null;
 	}
 	if (input.endDate !== undefined) {
-		patch.endDate = input.endDate;
+		patch.endDate = input.endDate ? new Date(input.endDate) : null;
 	}
 	if (input.description !== undefined) {
 		patch.description = JSON.parse(JSON.stringify(input.description));
