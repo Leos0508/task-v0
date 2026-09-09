@@ -38,7 +38,7 @@ const statusDot: Record<IssueStatus, string> = {
 	CANCELLED: "bg-red-400/80",
 };
 
-const priorityLabel: Record<IssuePriority, string> = {
+export const PRIORITY_LABELS: Record<IssuePriority, string> = {
 	LOW: "Low",
 	MEDIUM: "Medium",
 	HIGH: "High",
@@ -72,7 +72,7 @@ export function PriorityBadge({
 		<span className="inline-flex items-center gap-2">
 			<Icon className="size-4" />
 			<span className="leading-[100%]">
-				{priority ? priorityLabel[priority] : "None"}
+				{priority ? PRIORITY_LABELS[priority] : "None"}
 			</span>
 		</span>
 	);

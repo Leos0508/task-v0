@@ -12,12 +12,15 @@ import {
 	issuesQueryOptions,
 	tagsQueryOptions,
 } from "#/features/issues/queries";
-import { issueViewSearchSchema } from "#/features/issues/view-search";
+import {
+	issueSearchDefaults,
+	issueViewSearchSchema,
+} from "#/features/issues/view-search";
 
 export const Route = createFileRoute("/app/$code/")({
 	validateSearch: issueViewSearchSchema,
 	search: {
-		middlewares: [stripSearchParams({ view: "list" })],
+		middlewares: [stripSearchParams(issueSearchDefaults)],
 	},
 	loader: async ({ context, params }) => {
 		await Promise.all([
@@ -33,7 +36,7 @@ export const Route = createFileRoute("/app/$code/")({
 
 function WorkspaceOverviewPage() {
 	const { access } = Route.useLoaderData();
-	const { view } = Route.useSearch();
+	const { view, status, priority, tag } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { workspace } = access;
 
@@ -63,7 +66,14 @@ function WorkspaceOverviewPage() {
 			</div>
 			<Separator />
 			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-				<IssueList workspaceCode={workspace.code} view={view} />
+				<IssueList
+					workspaceCode={workspace.code}
+					view={view}
+					filters={{ status, priority, tag }}
+					onFiltersChange={(filters) =>
+						navigate({ search: (prev) => ({ ...prev, ...filters }) })
+					}
+				/>
 			</div>
 		</div>
 	);
