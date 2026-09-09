@@ -5,21 +5,15 @@ import { useEffect, useMemo, useRef } from "react";
 import { PriorityBadge } from "#/features/issues/components/IssueBadges";
 import { patchIssue } from "#/features/issues/patch-issue";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
+import { fromGanttDateTime, toGanttDateTime } from "#/lib/issue-datetime";
 import "./issue-gantt.css";
-
-function formatDateOnly(value: Date) {
-	const year = value.getFullYear();
-	const month = String(value.getMonth() + 1).padStart(2, "0");
-	const day = String(value.getDate()).padStart(2, "0");
-	return `${year}-${month}-${day}`;
-}
 
 function toGanttTasks(issues: IssueListItem[]) {
 	return issues.map((issue) => ({
 		id: issue.id,
 		name: `#${issue.number} ${issue.title}`,
-		start: issue.startDate as string,
-		end: issue.endDate as string,
+		start: toGanttDateTime(issue.startDate as string),
+		end: toGanttDateTime(issue.endDate as string),
 		progress: 0,
 	}));
 }
@@ -83,9 +77,15 @@ export default function IssueGanttView({
 				skipClickRef.current = true;
 				const issue = issuesRef.current.find((row) => row.id === task.id);
 				if (!issue) return;
-				const startDate = formatDateOnly(start);
-				const endDate = formatDateOnly(end);
-				if (issue.startDate === startDate && issue.endDate === endDate) return;
+				const startDate = fromGanttDateTime(start);
+				const endDate = fromGanttDateTime(end);
+				if (
+					startDate == null ||
+					endDate == null ||
+					(issue.startDate === startDate && issue.endDate === endDate)
+				) {
+					return;
+				}
 				void patchIssue(queryClient, workspaceCode, issue, {
 					startDate,
 					endDate,
@@ -104,7 +104,7 @@ export default function IssueGanttView({
 				<section className="shrink-0 rounded-lg border p-3">
 					<h2 className="text-sm font-medium">Unscheduled</h2>
 					<p className="mb-2 text-xs text-muted-foreground">
-						Issues without a start and end date stay here
+						Issues without a start and end stay here
 					</p>
 					<ul className="flex max-h-36 flex-col gap-2 overflow-y-auto">
 						{unscheduled.map((issue) => (
@@ -132,7 +132,7 @@ export default function IssueGanttView({
 				<p className="flex min-h-0 flex-1 items-center rounded-lg border p-6 text-sm text-muted-foreground">
 					{hasFilters
 						? "No scheduled issues match these filters."
-						: "No scheduled issues. Set a start and end date on an issue to see it here."}
+						: "No scheduled issues. Set a start and end on an issue to see it here."}
 				</p>
 			) : (
 				<div ref={chartRef} className="issue-gantt min-h-0 min-w-0 flex-1" />

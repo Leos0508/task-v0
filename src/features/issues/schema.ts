@@ -1,14 +1,25 @@
 import { z } from "zod";
+import { parseIssueDateTime } from "#/lib/issue-datetime";
 import { TAG_COLOR_IDS } from "./tag-colors";
 
 const issueStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]);
 
 const issuePrioritySchema = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
-const dateOnlySchema = z
-	.string()
-	.regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date")
-	.nullable();
+function createIssueDateTimeSchema(bound: "start" | "end") {
+	return z.union([z.string(), z.null()]).transform((value, ctx) => {
+		if (value == null || value.trim() === "") return null;
+		const parsed = parseIssueDateTime(value, bound);
+		if (!parsed) {
+			ctx.addIssue({ code: "custom", message: "Invalid datetime" });
+			return z.NEVER;
+		}
+		return parsed;
+	});
+}
+
+export const issueStartDateTimeSchema = createIssueDateTimeSchema("start");
+export const issueEndDateTimeSchema = createIssueDateTimeSchema("end");
 
 function hasOrderedDates(value: {
 	startDate?: string | null;
@@ -22,8 +33,8 @@ const issueFormFields = z.object({
 	title: z.string().min(1, "Title is required").max(200),
 	status: issueStatusSchema,
 	priority: issuePrioritySchema.nullable(),
-	startDate: dateOnlySchema,
-	endDate: dateOnlySchema,
+	startDate: issueStartDateTimeSchema,
+	endDate: issueEndDateTimeSchema,
 	description: z.unknown(),
 });
 

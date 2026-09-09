@@ -2,7 +2,6 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import {
 	boolean,
-	date,
 	index,
 	integer,
 	jsonb,
@@ -230,8 +229,8 @@ export const issue = pgTable(
 		description: jsonb("description"),
 		status: issueStatus("status").notNull().default("TODO"),
 		priority: issuePriority("priority"),
-		startDate: date("start_date"),
-		endDate: date("end_date"),
+		startDate: timestamp("start_date", { withTimezone: true }),
+		endDate: timestamp("end_date", { withTimezone: true }),
 		rank: integer("rank").notNull().default(0),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")

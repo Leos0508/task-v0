@@ -9,6 +9,7 @@ import {
 	tag,
 	user as userTable,
 } from "#/db/schema";
+import { toIssueDateTimeIso } from "#/lib/issue-datetime";
 import type { JsonValue } from "#/types/json";
 import { AppError } from "#/types/result";
 import { getWorkspaceAccess } from "./require-workspace-access";
@@ -81,8 +82,8 @@ export async function fetchIssue(
 		description: (row.description ?? null) as JsonValue | null,
 		status: row.status,
 		priority: row.priority,
-		startDate: row.startDate ?? null,
-		endDate: row.endDate ?? null,
+		startDate: toIssueDateTimeIso(row.startDate),
+		endDate: toIssueDateTimeIso(row.endDate),
 		createdAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),
 		reporter: { name: row.reporterName },

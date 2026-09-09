@@ -64,8 +64,8 @@ export async function createIssue(
 					status,
 					rank: (first?.rank ?? RANK_GAP) - RANK_GAP,
 					priority: input?.priority ?? null,
-					startDate: input?.startDate,
-					endDate: input?.endDate,
+					startDate: input?.startDate ? new Date(input.startDate) : null,
+					endDate: input?.endDate ? new Date(input.endDate) : null,
 					description:
 						input?.description === undefined
 							? undefined

@@ -1,0 +1,2 @@
+ALTER TABLE "issue" ALTER COLUMN "start_date" SET DATA TYPE timestamp with time zone USING CASE WHEN "start_date" IS NULL THEN NULL ELSE ("start_date"::timestamp AT TIME ZONE 'UTC') END;--> statement-breakpoint
+ALTER TABLE "issue" ALTER COLUMN "end_date" SET DATA TYPE timestamp with time zone USING CASE WHEN "end_date" IS NULL THEN NULL ELSE (("end_date"::timestamp + interval '23 hours 59 minutes') AT TIME ZONE 'UTC') END;
