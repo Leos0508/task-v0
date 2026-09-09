@@ -72,6 +72,20 @@ function inlineText(nodes: TipTapNode[] | undefined): string {
 		.join("");
 }
 
+function renderListItem(item: TipTapNode, prefix: string): string {
+	const blocks = item.content ?? [];
+	const first = blocks[0];
+	const firstIsParagraph = first?.type === "paragraph";
+	const firstText = firstIsParagraph ? inlineText(first.content) : "";
+	const lines = [`${prefix} ${firstText}`.trimEnd()];
+	const rest = firstIsParagraph ? blocks.slice(1) : blocks;
+	for (const block of rest) {
+		const rendered = renderBlock(block);
+		if (rendered) lines.push(rendered);
+	}
+	return lines.join("\n");
+}
+
 function renderBlock(node: TipTapNode, orderedIndex?: number): string {
 	switch (node.type) {
 		case "heading": {
@@ -103,20 +117,20 @@ function renderBlock(node: TipTapNode, orderedIndex?: number): string {
 			return "---";
 		case "bulletList":
 			return (node.content ?? [])
-				.map(
-					(item) =>
-						`- ${inlineText(item.content?.[0]?.content ?? item.content)}`,
-				)
+				.map((item) => renderListItem(item, "-"))
 				.join("\n");
 		case "orderedList":
 			return (node.content ?? [])
 				.map((item, index) => {
 					const start = Number(node.attrs?.start ?? 1);
-					return `${start + index}. ${inlineText(item.content?.[0]?.content ?? item.content)}`;
+					return renderListItem(item, `${start + index}.`);
 				})
 				.join("\n");
 		case "listItem":
-			return `${orderedIndex === undefined ? "-" : `${orderedIndex}.`} ${inlineText(node.content?.[0]?.content ?? node.content)}`;
+			return renderListItem(
+				node,
+				orderedIndex === undefined ? "-" : `${orderedIndex}.`,
+			);
 		case "image": {
 			const src = String(node.attrs?.src ?? "");
 			const alt = String(node.attrs?.alt ?? "");
@@ -228,19 +242,47 @@ function paragraph(text: string): TipTapNode {
 		: { type: "paragraph" };
 }
 
+const imageIncludePattern = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/;
 const imageLinePattern = /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)$/;
+
+function imageNode(alt: string, src: string, title?: string): TipTapNode {
+	const attrs: Record<string, unknown> = { src, alt };
+	if (title) attrs.title = title;
+	return { type: "image", attrs };
+}
 
 function parseImageLine(line: string): TipTapNode | null {
 	const match = imageLinePattern.exec(line.trim());
 	if (!match) return null;
-	const attrs: Record<string, unknown> = {
-		src: match[2],
-		alt: match[1] ?? "",
-	};
-	if (match[3]) {
-		attrs.title = match[3];
+	return imageNode(match[1] ?? "", match[2] ?? "", match[3]);
+}
+
+function blocksFromTextWithImages(text: string): TipTapNode[] {
+	const nodes: TipTapNode[] = [];
+	const pattern = new RegExp(imageIncludePattern.source, "g");
+	let lastIndex = 0;
+	for (const match of text.matchAll(pattern)) {
+		const start = match.index ?? 0;
+		const before = text.slice(lastIndex, start);
+		if (before.trim()) nodes.push(paragraph(before));
+		nodes.push(imageNode(match[1] ?? "", match[2] ?? "", match[3]));
+		lastIndex = start + match[0].length;
 	}
-	return { type: "image", attrs };
+	const after = text.slice(lastIndex);
+	if (after.trim()) nodes.push(paragraph(after));
+	if (nodes.length === 0 && text.trim()) nodes.push(paragraph(text));
+	return nodes;
+}
+
+function listItemFromText(text: string): TipTapNode {
+	const blocks = blocksFromTextWithImages(text);
+	if (blocks.length === 0) {
+		return { type: "listItem", content: [{ type: "paragraph" }] };
+	}
+	if (blocks[0]?.type !== "paragraph") {
+		return { type: "listItem", content: [{ type: "paragraph" }, ...blocks] };
+	}
+	return { type: "listItem", content: blocks };
 }
 
 function splitTableCells(line: string) {
@@ -272,6 +314,7 @@ export function looksLikeMarkdownBlocks(text: string) {
 	if (/^>\s+\S/m.test(normalized) && lines.length > 1) return true;
 	if (lines.filter((line) => /^[-*]\s+\S/.test(line)).length >= 2) return true;
 	if (lines.filter((line) => /^\d+\.\s+\S/.test(line)).length >= 2) return true;
+	if (imageIncludePattern.test(normalized)) return true;
 	return false;
 }
 
@@ -415,10 +458,9 @@ export function markdownToTipTap(markdown: string): JsonValue {
 		if (/^[-*]\s+/.test(line)) {
 			const items: TipTapNode[] = [];
 			while (index < lines.length && /^[-*]\s+/.test(lines[index] ?? "")) {
-				items.push({
-					type: "listItem",
-					content: [paragraph((lines[index] ?? "").replace(/^[-*]\s+/, ""))],
-				});
+				items.push(
+					listItemFromText((lines[index] ?? "").replace(/^[-*]\s+/, "")),
+				);
 				index += 1;
 			}
 			content.push({ type: "bulletList", content: items });
@@ -428,10 +470,9 @@ export function markdownToTipTap(markdown: string): JsonValue {
 		if (/^\d+\.\s+/.test(line)) {
 			const items: TipTapNode[] = [];
 			while (index < lines.length && /^\d+\.\s+/.test(lines[index] ?? "")) {
-				items.push({
-					type: "listItem",
-					content: [paragraph((lines[index] ?? "").replace(/^\d+\.\s+/, ""))],
-				});
+				items.push(
+					listItemFromText((lines[index] ?? "").replace(/^\d+\.\s+/, "")),
+				);
 				index += 1;
 			}
 			content.push({ type: "orderedList", content: items });
@@ -454,7 +495,12 @@ export function markdownToTipTap(markdown: string): JsonValue {
 			paragraphLines.push(lines[index] ?? "");
 			index += 1;
 		}
-		content.push(paragraph(paragraphLines.join("\n")));
+		const blocks = blocksFromTextWithImages(paragraphLines.join("\n"));
+		if (blocks.length === 0) {
+			content.push({ type: "paragraph" });
+		} else {
+			content.push(...blocks);
+		}
 	}
 
 	return {
