@@ -1,0 +1,13 @@
+---
+description: Use the in-repo UI catalog as the source of truth for pages, primitives, and feature screens. Required before adding or restyling UI.
+alwaysApply: true
+---
+
+# UI catalog
+
+Before adding, restyling, or composing UI, read [docs/ui-catalog.md](docs/ui-catalog.md).
+
+- Reuse listed primitives (`#/components/ui/*`) and feature components. Do not invent a second Button, Dialog, or table.
+- Treat Figma / design-tool output as intent. Remap to catalog components; do not paste generated one-off widgets.
+- Destructive confirm → `AlertDialog`. Forms → `Field` + TanStack Form. Tables → `useAppTable` + `DataTable`.
+- If you add, rename, or delete a page or component, update `docs/ui-catalog.md` in the same change.
