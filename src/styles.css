@@ -129,6 +129,60 @@
   }
 }
 
+/* Mock editorial theme — scoped so production :root stays unchanged */
+.mock-editorial {
+  --background: oklch(0.97 0.008 90);
+  --foreground: oklch(0.2 0.01 60);
+  --card: oklch(0.995 0.004 90);
+  --card-foreground: oklch(0.2 0.01 60);
+  --popover: oklch(0.995 0.004 90);
+  --popover-foreground: oklch(0.2 0.01 60);
+  --primary: oklch(0.22 0.01 60);
+  --primary-foreground: oklch(0.97 0.008 90);
+  --secondary: oklch(0.94 0.01 90);
+  --secondary-foreground: oklch(0.22 0.01 60);
+  --muted: oklch(0.94 0.01 90);
+  --muted-foreground: oklch(0.5 0.015 60);
+  --accent: oklch(0.94 0.01 90);
+  --accent-foreground: oklch(0.22 0.01 60);
+  --destructive: oklch(0.55 0.18 25);
+  --border: oklch(0.88 0.012 85);
+  --input: oklch(0.88 0.012 85);
+  --ring: oklch(0.22 0.01 60);
+  --radius: 0.85rem;
+  --sidebar: oklch(0.955 0.01 90);
+  --sidebar-foreground: oklch(0.2 0.01 60);
+  --sidebar-primary: oklch(0.22 0.01 60);
+  --sidebar-primary-foreground: oklch(0.97 0.008 90);
+  --sidebar-accent: oklch(0.92 0.012 90);
+  --sidebar-accent-foreground: oklch(0.22 0.01 60);
+  --sidebar-border: oklch(0.88 0.012 85);
+  --sidebar-ring: oklch(0.22 0.01 60);
+  --font-heading: "Source Serif 4", ui-serif, Georgia, "Times New Roman", serif;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.mock-editorial .mock-tag-product {
+  background-color: #d8eee6;
+  color: #1f5c4a;
+}
+
+.mock-editorial .mock-tag-editor {
+  background-color: #e8e0f4;
+  color: #4a3a6b;
+}
+
+.mock-editorial .mock-tag-v0 {
+  background-color: #f6ecc8;
+  color: #6b5420;
+}
+
+.mock-editorial .mock-tag-writing {
+  background-color: #dceaf6;
+  color: #2a4a6b;
+}
+
 @layer utilities {
   .dashboard-page {
     @apply flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden;

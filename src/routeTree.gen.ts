@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as MockRouteImport } from './routes/mock'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
@@ -21,16 +22,33 @@ import { Route as AppAccountRouteImport } from './routes/app.account'
 import { Route as AppCreateWorkspaceRouteImport } from './routes/app.create-workspace'
 import { Route as FilesFileIdRouteImport } from './routes/files.$fileId'
 import { Route as InvitesTokenRouteImport } from './routes/invites.$token'
+import { Route as MockIndexRouteImport } from './routes/mock.index'
+import { Route as MockAppRouteImport } from './routes/mock.app'
+import { Route as MockSignInRouteImport } from './routes/mock.sign-in'
+import { Route as MockSignUpRouteImport } from './routes/mock.sign-up'
 import { Route as WorkspacesSplatRouteImport } from './routes/workspaces.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppCodeIndexRouteImport } from './routes/app.$code.index'
 import { Route as AppCodeDocumentsRouteImport } from './routes/app.$code.documents'
 import { Route as AppCodeIssuesRouteImport } from './routes/app.$code.issues'
 import { Route as AppCodeSettingsRouteImport } from './routes/app.$code.settings'
+import { Route as MockAppIndexRouteImport } from './routes/mock.app.index'
+import { Route as MockAppAccountRouteImport } from './routes/mock.app.account'
+import { Route as MockAppCreateWorkspaceRouteImport } from './routes/mock.app.create-workspace'
+import { Route as MockAppV0RouteImport } from './routes/mock.app.v0'
+import { Route as MockInvitesDemoRouteImport } from './routes/mock.invites.demo'
 import { Route as AppCodeDocumentsIndexRouteImport } from './routes/app.$code.documents.index'
 import { Route as AppCodeDocumentsDocumentIdRouteImport } from './routes/app.$code.documents.$documentId'
 import { Route as AppCodeIssuesIndexRouteImport } from './routes/app.$code.issues.index'
 import { Route as AppCodeIssuesIssueNumberRouteImport } from './routes/app.$code.issues.$issueNumber'
+import { Route as MockAppV0IndexRouteImport } from './routes/mock.app.v0.index'
+import { Route as MockAppV0DocumentsRouteImport } from './routes/mock.app.v0.documents'
+import { Route as MockAppV0IssuesRouteImport } from './routes/mock.app.v0.issues'
+import { Route as MockAppV0SettingsRouteImport } from './routes/mock.app.v0.settings'
+import { Route as MockAppV0DocumentsIndexRouteImport } from './routes/mock.app.v0.documents.index'
+import { Route as MockAppV0DocumentsDocumentIdRouteImport } from './routes/mock.app.v0.documents.$documentId'
+import { Route as MockAppV0IssuesIndexRouteImport } from './routes/mock.app.v0.issues.index'
+import { Route as MockAppV0IssuesIssueNumberRouteImport } from './routes/mock.app.v0.issues.$issueNumber'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +58,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MockRoute = MockRouteImport.update({
+  id: '/mock',
+  path: '/mock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -92,6 +115,26 @@ const InvitesTokenRoute = InvitesTokenRouteImport.update({
   path: '/invites/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MockIndexRoute = MockIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockRoute,
+} as any)
+const MockAppRoute = MockAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => MockRoute,
+} as any)
+const MockSignInRoute = MockSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => MockRoute,
+} as any)
+const MockSignUpRoute = MockSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => MockRoute,
+} as any)
 const WorkspacesSplatRoute = WorkspacesSplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -122,6 +165,31 @@ const AppCodeSettingsRoute = AppCodeSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppCodeRoute,
 } as any)
+const MockAppIndexRoute = MockAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockAppRoute,
+} as any)
+const MockAppAccountRoute = MockAppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => MockAppRoute,
+} as any)
+const MockAppCreateWorkspaceRoute = MockAppCreateWorkspaceRouteImport.update({
+  id: '/create-workspace',
+  path: '/create-workspace',
+  getParentRoute: () => MockAppRoute,
+} as any)
+const MockAppV0Route = MockAppV0RouteImport.update({
+  id: '/v0',
+  path: '/v0',
+  getParentRoute: () => MockAppRoute,
+} as any)
+const MockInvitesDemoRoute = MockInvitesDemoRouteImport.update({
+  id: '/invites/demo',
+  path: '/invites/demo',
+  getParentRoute: () => MockRoute,
+} as any)
 const AppCodeDocumentsIndexRoute = AppCodeDocumentsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -144,10 +212,53 @@ const AppCodeIssuesIssueNumberRoute =
     path: '/$issueNumber',
     getParentRoute: () => AppCodeIssuesRoute,
   } as any)
+const MockAppV0IndexRoute = MockAppV0IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockAppV0Route,
+} as any)
+const MockAppV0DocumentsRoute = MockAppV0DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => MockAppV0Route,
+} as any)
+const MockAppV0IssuesRoute = MockAppV0IssuesRouteImport.update({
+  id: '/issues',
+  path: '/issues',
+  getParentRoute: () => MockAppV0Route,
+} as any)
+const MockAppV0SettingsRoute = MockAppV0SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => MockAppV0Route,
+} as any)
+const MockAppV0DocumentsIndexRoute = MockAppV0DocumentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockAppV0DocumentsRoute,
+} as any)
+const MockAppV0DocumentsDocumentIdRoute =
+  MockAppV0DocumentsDocumentIdRouteImport.update({
+    id: '/$documentId',
+    path: '/$documentId',
+    getParentRoute: () => MockAppV0DocumentsRoute,
+  } as any)
+const MockAppV0IssuesIndexRoute = MockAppV0IssuesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockAppV0IssuesRoute,
+} as any)
+const MockAppV0IssuesIssueNumberRoute =
+  MockAppV0IssuesIssueNumberRouteImport.update({
+    id: '/$issueNumber',
+    path: '/$issueNumber',
+    getParentRoute: () => MockAppV0IssuesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/mock': typeof MockRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
@@ -157,17 +268,34 @@ export interface FileRoutesByFullPath {
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
+  '/mock/app': typeof MockAppRouteWithChildren
+  '/mock/sign-in': typeof MockSignInRoute
+  '/mock/sign-up': typeof MockSignUpRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app/': typeof AppIndexRoute
+  '/mock/': typeof MockIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app/$code/documents': typeof AppCodeDocumentsRouteWithChildren
   '/app/$code/issues': typeof AppCodeIssuesRouteWithChildren
   '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/mock/app/account': typeof MockAppAccountRoute
+  '/mock/app/create-workspace': typeof MockAppCreateWorkspaceRoute
+  '/mock/app/v0': typeof MockAppV0RouteWithChildren
+  '/mock/invites/demo': typeof MockInvitesDemoRoute
   '/app/$code/': typeof AppCodeIndexRoute
+  '/mock/app/': typeof MockAppIndexRoute
   '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
   '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/mock/app/v0/documents': typeof MockAppV0DocumentsRouteWithChildren
+  '/mock/app/v0/issues': typeof MockAppV0IssuesRouteWithChildren
+  '/mock/app/v0/settings': typeof MockAppV0SettingsRoute
   '/app/$code/documents/': typeof AppCodeDocumentsIndexRoute
   '/app/$code/issues/': typeof AppCodeIssuesIndexRoute
+  '/mock/app/v0/': typeof MockAppV0IndexRoute
+  '/mock/app/v0/documents/$documentId': typeof MockAppV0DocumentsDocumentIdRoute
+  '/mock/app/v0/issues/$issueNumber': typeof MockAppV0IssuesIssueNumberRoute
+  '/mock/app/v0/documents/': typeof MockAppV0DocumentsIndexRoute
+  '/mock/app/v0/issues/': typeof MockAppV0IssuesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -179,20 +307,34 @@ export interface FileRoutesByTo {
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
+  '/mock/sign-in': typeof MockSignInRoute
+  '/mock/sign-up': typeof MockSignUpRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app': typeof AppIndexRoute
+  '/mock': typeof MockIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/mock/app/account': typeof MockAppAccountRoute
+  '/mock/app/create-workspace': typeof MockAppCreateWorkspaceRoute
+  '/mock/invites/demo': typeof MockInvitesDemoRoute
   '/app/$code': typeof AppCodeIndexRoute
+  '/mock/app': typeof MockAppIndexRoute
   '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
   '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/mock/app/v0/settings': typeof MockAppV0SettingsRoute
   '/app/$code/documents': typeof AppCodeDocumentsIndexRoute
   '/app/$code/issues': typeof AppCodeIssuesIndexRoute
+  '/mock/app/v0': typeof MockAppV0IndexRoute
+  '/mock/app/v0/documents/$documentId': typeof MockAppV0DocumentsDocumentIdRoute
+  '/mock/app/v0/issues/$issueNumber': typeof MockAppV0IssuesIssueNumberRoute
+  '/mock/app/v0/documents': typeof MockAppV0DocumentsIndexRoute
+  '/mock/app/v0/issues': typeof MockAppV0IssuesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/mock': typeof MockRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
@@ -202,23 +344,41 @@ export interface FileRoutesById {
   '/app/create-workspace': typeof AppCreateWorkspaceRoute
   '/files/$fileId': typeof FilesFileIdRoute
   '/invites/$token': typeof InvitesTokenRoute
+  '/mock/app': typeof MockAppRouteWithChildren
+  '/mock/sign-in': typeof MockSignInRoute
+  '/mock/sign-up': typeof MockSignUpRoute
   '/workspaces/$': typeof WorkspacesSplatRoute
   '/app/': typeof AppIndexRoute
+  '/mock/': typeof MockIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app/$code/documents': typeof AppCodeDocumentsRouteWithChildren
   '/app/$code/issues': typeof AppCodeIssuesRouteWithChildren
   '/app/$code/settings': typeof AppCodeSettingsRoute
+  '/mock/app/account': typeof MockAppAccountRoute
+  '/mock/app/create-workspace': typeof MockAppCreateWorkspaceRoute
+  '/mock/app/v0': typeof MockAppV0RouteWithChildren
+  '/mock/invites/demo': typeof MockInvitesDemoRoute
   '/app/$code/': typeof AppCodeIndexRoute
+  '/mock/app/': typeof MockAppIndexRoute
   '/app/$code/documents/$documentId': typeof AppCodeDocumentsDocumentIdRoute
   '/app/$code/issues/$issueNumber': typeof AppCodeIssuesIssueNumberRoute
+  '/mock/app/v0/documents': typeof MockAppV0DocumentsRouteWithChildren
+  '/mock/app/v0/issues': typeof MockAppV0IssuesRouteWithChildren
+  '/mock/app/v0/settings': typeof MockAppV0SettingsRoute
   '/app/$code/documents/': typeof AppCodeDocumentsIndexRoute
   '/app/$code/issues/': typeof AppCodeIssuesIndexRoute
+  '/mock/app/v0/': typeof MockAppV0IndexRoute
+  '/mock/app/v0/documents/$documentId': typeof MockAppV0DocumentsDocumentIdRoute
+  '/mock/app/v0/issues/$issueNumber': typeof MockAppV0IssuesIssueNumberRoute
+  '/mock/app/v0/documents/': typeof MockAppV0DocumentsIndexRoute
+  '/mock/app/v0/issues/': typeof MockAppV0IssuesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/app'
+    | '/mock'
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
@@ -228,17 +388,34 @@ export interface FileRouteTypes {
     | '/app/create-workspace'
     | '/files/$fileId'
     | '/invites/$token'
+    | '/mock/app'
+    | '/mock/sign-in'
+    | '/mock/sign-up'
     | '/workspaces/$'
     | '/app/'
+    | '/mock/'
     | '/api/auth/$'
     | '/app/$code/documents'
     | '/app/$code/issues'
     | '/app/$code/settings'
+    | '/mock/app/account'
+    | '/mock/app/create-workspace'
+    | '/mock/app/v0'
+    | '/mock/invites/demo'
     | '/app/$code/'
+    | '/mock/app/'
     | '/app/$code/documents/$documentId'
     | '/app/$code/issues/$issueNumber'
+    | '/mock/app/v0/documents'
+    | '/mock/app/v0/issues'
+    | '/mock/app/v0/settings'
     | '/app/$code/documents/'
     | '/app/$code/issues/'
+    | '/mock/app/v0/'
+    | '/mock/app/v0/documents/$documentId'
+    | '/mock/app/v0/issues/$issueNumber'
+    | '/mock/app/v0/documents/'
+    | '/mock/app/v0/issues/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -250,19 +427,33 @@ export interface FileRouteTypes {
     | '/app/create-workspace'
     | '/files/$fileId'
     | '/invites/$token'
+    | '/mock/sign-in'
+    | '/mock/sign-up'
     | '/workspaces/$'
     | '/app'
+    | '/mock'
     | '/api/auth/$'
     | '/app/$code/settings'
+    | '/mock/app/account'
+    | '/mock/app/create-workspace'
+    | '/mock/invites/demo'
     | '/app/$code'
+    | '/mock/app'
     | '/app/$code/documents/$documentId'
     | '/app/$code/issues/$issueNumber'
+    | '/mock/app/v0/settings'
     | '/app/$code/documents'
     | '/app/$code/issues'
+    | '/mock/app/v0'
+    | '/mock/app/v0/documents/$documentId'
+    | '/mock/app/v0/issues/$issueNumber'
+    | '/mock/app/v0/documents'
+    | '/mock/app/v0/issues'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/mock'
     | '/sign-in'
     | '/sign-up'
     | '/workspaces'
@@ -272,22 +463,40 @@ export interface FileRouteTypes {
     | '/app/create-workspace'
     | '/files/$fileId'
     | '/invites/$token'
+    | '/mock/app'
+    | '/mock/sign-in'
+    | '/mock/sign-up'
     | '/workspaces/$'
     | '/app/'
+    | '/mock/'
     | '/api/auth/$'
     | '/app/$code/documents'
     | '/app/$code/issues'
     | '/app/$code/settings'
+    | '/mock/app/account'
+    | '/mock/app/create-workspace'
+    | '/mock/app/v0'
+    | '/mock/invites/demo'
     | '/app/$code/'
+    | '/mock/app/'
     | '/app/$code/documents/$documentId'
     | '/app/$code/issues/$issueNumber'
+    | '/mock/app/v0/documents'
+    | '/mock/app/v0/issues'
+    | '/mock/app/v0/settings'
     | '/app/$code/documents/'
     | '/app/$code/issues/'
+    | '/mock/app/v0/'
+    | '/mock/app/v0/documents/$documentId'
+    | '/mock/app/v0/issues/$issueNumber'
+    | '/mock/app/v0/documents/'
+    | '/mock/app/v0/issues/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  MockRoute: typeof MockRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   WorkspacesRoute: typeof WorkspacesRouteWithChildren
@@ -311,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mock': {
+      id: '/mock'
+      path: '/mock'
+      fullPath: '/mock'
+      preLoaderRoute: typeof MockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -383,6 +599,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitesTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mock/': {
+      id: '/mock/'
+      path: '/'
+      fullPath: '/mock/'
+      preLoaderRoute: typeof MockIndexRouteImport
+      parentRoute: typeof MockRoute
+    }
+    '/mock/app': {
+      id: '/mock/app'
+      path: '/app'
+      fullPath: '/mock/app'
+      preLoaderRoute: typeof MockAppRouteImport
+      parentRoute: typeof MockRoute
+    }
+    '/mock/sign-in': {
+      id: '/mock/sign-in'
+      path: '/sign-in'
+      fullPath: '/mock/sign-in'
+      preLoaderRoute: typeof MockSignInRouteImport
+      parentRoute: typeof MockRoute
+    }
+    '/mock/sign-up': {
+      id: '/mock/sign-up'
+      path: '/sign-up'
+      fullPath: '/mock/sign-up'
+      preLoaderRoute: typeof MockSignUpRouteImport
+      parentRoute: typeof MockRoute
+    }
     '/workspaces/$': {
       id: '/workspaces/$'
       path: '/$'
@@ -425,6 +669,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCodeSettingsRouteImport
       parentRoute: typeof AppCodeRoute
     }
+    '/mock/app/': {
+      id: '/mock/app/'
+      path: '/'
+      fullPath: '/mock/app/'
+      preLoaderRoute: typeof MockAppIndexRouteImport
+      parentRoute: typeof MockAppRoute
+    }
+    '/mock/app/account': {
+      id: '/mock/app/account'
+      path: '/account'
+      fullPath: '/mock/app/account'
+      preLoaderRoute: typeof MockAppAccountRouteImport
+      parentRoute: typeof MockAppRoute
+    }
+    '/mock/app/create-workspace': {
+      id: '/mock/app/create-workspace'
+      path: '/create-workspace'
+      fullPath: '/mock/app/create-workspace'
+      preLoaderRoute: typeof MockAppCreateWorkspaceRouteImport
+      parentRoute: typeof MockAppRoute
+    }
+    '/mock/app/v0': {
+      id: '/mock/app/v0'
+      path: '/v0'
+      fullPath: '/mock/app/v0'
+      preLoaderRoute: typeof MockAppV0RouteImport
+      parentRoute: typeof MockAppRoute
+    }
+    '/mock/invites/demo': {
+      id: '/mock/invites/demo'
+      path: '/invites/demo'
+      fullPath: '/mock/invites/demo'
+      preLoaderRoute: typeof MockInvitesDemoRouteImport
+      parentRoute: typeof MockRoute
+    }
     '/app/$code/documents/': {
       id: '/app/$code/documents/'
       path: '/'
@@ -452,6 +731,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/$code/issues/$issueNumber'
       preLoaderRoute: typeof AppCodeIssuesIssueNumberRouteImport
       parentRoute: typeof AppCodeIssuesRoute
+    }
+    '/mock/app/v0/': {
+      id: '/mock/app/v0/'
+      path: '/'
+      fullPath: '/mock/app/v0/'
+      preLoaderRoute: typeof MockAppV0IndexRouteImport
+      parentRoute: typeof MockAppV0Route
+    }
+    '/mock/app/v0/documents': {
+      id: '/mock/app/v0/documents'
+      path: '/documents'
+      fullPath: '/mock/app/v0/documents'
+      preLoaderRoute: typeof MockAppV0DocumentsRouteImport
+      parentRoute: typeof MockAppV0Route
+    }
+    '/mock/app/v0/issues': {
+      id: '/mock/app/v0/issues'
+      path: '/issues'
+      fullPath: '/mock/app/v0/issues'
+      preLoaderRoute: typeof MockAppV0IssuesRouteImport
+      parentRoute: typeof MockAppV0Route
+    }
+    '/mock/app/v0/settings': {
+      id: '/mock/app/v0/settings'
+      path: '/settings'
+      fullPath: '/mock/app/v0/settings'
+      preLoaderRoute: typeof MockAppV0SettingsRouteImport
+      parentRoute: typeof MockAppV0Route
+    }
+    '/mock/app/v0/documents/': {
+      id: '/mock/app/v0/documents/'
+      path: '/'
+      fullPath: '/mock/app/v0/documents/'
+      preLoaderRoute: typeof MockAppV0DocumentsIndexRouteImport
+      parentRoute: typeof MockAppV0DocumentsRoute
+    }
+    '/mock/app/v0/documents/$documentId': {
+      id: '/mock/app/v0/documents/$documentId'
+      path: '/$documentId'
+      fullPath: '/mock/app/v0/documents/$documentId'
+      preLoaderRoute: typeof MockAppV0DocumentsDocumentIdRouteImport
+      parentRoute: typeof MockAppV0DocumentsRoute
+    }
+    '/mock/app/v0/issues/': {
+      id: '/mock/app/v0/issues/'
+      path: '/'
+      fullPath: '/mock/app/v0/issues/'
+      preLoaderRoute: typeof MockAppV0IssuesIndexRouteImport
+      parentRoute: typeof MockAppV0IssuesRoute
+    }
+    '/mock/app/v0/issues/$issueNumber': {
+      id: '/mock/app/v0/issues/$issueNumber'
+      path: '/$issueNumber'
+      fullPath: '/mock/app/v0/issues/$issueNumber'
+      preLoaderRoute: typeof MockAppV0IssuesIssueNumberRouteImport
+      parentRoute: typeof MockAppV0IssuesRoute
     }
   }
 }
@@ -516,6 +851,86 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface MockAppV0DocumentsRouteChildren {
+  MockAppV0DocumentsDocumentIdRoute: typeof MockAppV0DocumentsDocumentIdRoute
+  MockAppV0DocumentsIndexRoute: typeof MockAppV0DocumentsIndexRoute
+}
+
+const MockAppV0DocumentsRouteChildren: MockAppV0DocumentsRouteChildren = {
+  MockAppV0DocumentsDocumentIdRoute: MockAppV0DocumentsDocumentIdRoute,
+  MockAppV0DocumentsIndexRoute: MockAppV0DocumentsIndexRoute,
+}
+
+const MockAppV0DocumentsRouteWithChildren =
+  MockAppV0DocumentsRoute._addFileChildren(MockAppV0DocumentsRouteChildren)
+
+interface MockAppV0IssuesRouteChildren {
+  MockAppV0IssuesIssueNumberRoute: typeof MockAppV0IssuesIssueNumberRoute
+  MockAppV0IssuesIndexRoute: typeof MockAppV0IssuesIndexRoute
+}
+
+const MockAppV0IssuesRouteChildren: MockAppV0IssuesRouteChildren = {
+  MockAppV0IssuesIssueNumberRoute: MockAppV0IssuesIssueNumberRoute,
+  MockAppV0IssuesIndexRoute: MockAppV0IssuesIndexRoute,
+}
+
+const MockAppV0IssuesRouteWithChildren = MockAppV0IssuesRoute._addFileChildren(
+  MockAppV0IssuesRouteChildren,
+)
+
+interface MockAppV0RouteChildren {
+  MockAppV0DocumentsRoute: typeof MockAppV0DocumentsRouteWithChildren
+  MockAppV0IssuesRoute: typeof MockAppV0IssuesRouteWithChildren
+  MockAppV0SettingsRoute: typeof MockAppV0SettingsRoute
+  MockAppV0IndexRoute: typeof MockAppV0IndexRoute
+}
+
+const MockAppV0RouteChildren: MockAppV0RouteChildren = {
+  MockAppV0DocumentsRoute: MockAppV0DocumentsRouteWithChildren,
+  MockAppV0IssuesRoute: MockAppV0IssuesRouteWithChildren,
+  MockAppV0SettingsRoute: MockAppV0SettingsRoute,
+  MockAppV0IndexRoute: MockAppV0IndexRoute,
+}
+
+const MockAppV0RouteWithChildren = MockAppV0Route._addFileChildren(
+  MockAppV0RouteChildren,
+)
+
+interface MockAppRouteChildren {
+  MockAppAccountRoute: typeof MockAppAccountRoute
+  MockAppCreateWorkspaceRoute: typeof MockAppCreateWorkspaceRoute
+  MockAppV0Route: typeof MockAppV0RouteWithChildren
+  MockAppIndexRoute: typeof MockAppIndexRoute
+}
+
+const MockAppRouteChildren: MockAppRouteChildren = {
+  MockAppAccountRoute: MockAppAccountRoute,
+  MockAppCreateWorkspaceRoute: MockAppCreateWorkspaceRoute,
+  MockAppV0Route: MockAppV0RouteWithChildren,
+  MockAppIndexRoute: MockAppIndexRoute,
+}
+
+const MockAppRouteWithChildren =
+  MockAppRoute._addFileChildren(MockAppRouteChildren)
+
+interface MockRouteChildren {
+  MockAppRoute: typeof MockAppRouteWithChildren
+  MockSignInRoute: typeof MockSignInRoute
+  MockSignUpRoute: typeof MockSignUpRoute
+  MockIndexRoute: typeof MockIndexRoute
+  MockInvitesDemoRoute: typeof MockInvitesDemoRoute
+}
+
+const MockRouteChildren: MockRouteChildren = {
+  MockAppRoute: MockAppRouteWithChildren,
+  MockSignInRoute: MockSignInRoute,
+  MockSignUpRoute: MockSignUpRoute,
+  MockIndexRoute: MockIndexRoute,
+  MockInvitesDemoRoute: MockInvitesDemoRoute,
+}
+
+const MockRouteWithChildren = MockRoute._addFileChildren(MockRouteChildren)
+
 interface WorkspacesRouteChildren {
   WorkspacesSplatRoute: typeof WorkspacesSplatRoute
 }
@@ -531,6 +946,7 @@ const WorkspacesRouteWithChildren = WorkspacesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  MockRoute: MockRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   WorkspacesRoute: WorkspacesRouteWithChildren,
@@ -542,12 +958,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

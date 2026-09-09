@@ -189,7 +189,7 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 | dropdown-menu | [`dropdown-menu.tsx`](../src/components/ui/dropdown-menu.tsx) | | UserMenu, detail overflow, columns | keep |
 | popover | [`popover.tsx`](../src/components/ui/popover.tsx) | | Sidebar switcher, filters, tags, links, columns | keep |
 | tooltip | [`tooltip.tsx`](../src/components/ui/tooltip.tsx) | | Editor table toolbar; Sidebar internals | keep |
-| dialog | [`dialog.tsx`](../src/components/ui/dialog.tsx) | Dialog, Content, Header, Footer, … | *none* (use AlertDialog for destructive) | unused |
+| dialog | [`dialog.tsx`](../src/components/ui/dialog.tsx) | Dialog, Content, Header, Footer, … | Mock new issue | wrap |
 | alert-dialog | [`alert-dialog.tsx`](../src/components/ui/alert-dialog.tsx) | **Destructive confirm only** | Issue/doc delete, comments, members, API keys, workspace delete | keep |
 | sheet | [`sheet.tsx`](../src/components/ui/sheet.tsx) | | Sidebar mobile only | keep |
 | breadcrumb | [`breadcrumb.tsx`](../src/components/ui/breadcrumb.tsx) | | Issue + document detail | keep |
@@ -246,3 +246,27 @@ Grouped by [features](#4-features). Treat as product surfaces: Query + server fu
 8. Do not invent REST `/api/*` for UI data. Use existing `createServerFn` + Query options.
 9. Tokens: `bg-background`, `text-muted-foreground`, `border-border`, `font-heading`, `font-mono`. Avoid new hex except workspace/tag colors already in data.
 10. Unused primitives (checkbox, slider, dialog, ui/sonner): use them if they fit before adding another package.
+
+---
+
+## 9. Mock (editorial click-through)
+
+Clickable visual redo under `/mock`. Theme class `mock-editorial` in [`src/styles.css`](../src/styles.css). Fixtures: [`src/mock/fixtures.ts`](../src/mock/fixtures.ts). No auth, Query loaders, or `createServerFn`. Production `/`, `/sign-in`, `/app` are unchanged.
+
+| Mock URL | Mirrors |
+|----------|---------|
+| `/mock` | Landing |
+| `/mock/sign-in` | Sign-in (Continue → `/mock/app`) |
+| `/mock/sign-up` | Sign-up |
+| `/mock/app` | Workspaces list |
+| `/mock/app/create-workspace` | Create workspace |
+| `/mock/app/account` | Account / API keys |
+| `/mock/app/v0` | Overview (search `view`, `status[]`, `priority[]`, `tag[]`) |
+| `/mock/app/v0/issues` | Issues list / board / gantt |
+| `/mock/app/v0/issues/1` | Issue detail (fixture numbers 1–6) |
+| `/mock/app/v0/documents` | Documents table |
+| `/mock/app/v0/documents/welcome` | Document detail (`welcome`, `tagging`, `editor-links`) |
+| `/mock/app/v0/settings` | Settings tabs |
+| `/mock/invites/demo` | Accept invite |
+
+Chrome: `MockLandingNavbar`, `MockAppSidebar`, `MockUserMenu` link only inside `/mock`. New issue uses `Dialog`. Mobile: `SidebarTrigger` + “Task” bar (`md:hidden`). Gantt is static bars. Editor is typography + a disabled toolbar.
