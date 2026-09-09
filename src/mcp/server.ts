@@ -27,6 +27,7 @@ import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
 import { linkTagToDocument } from "#/lib/data/link-tag-to-document";
 import { linkTagToIssue } from "#/lib/data/link-tag-to-issue";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { resolveDescriptionImages } from "#/lib/data/resolve-description-images";
 import { unlinkTagFromDocument } from "#/lib/data/unlink-tag-from-document";
 import { unlinkTagFromIssue } from "#/lib/data/unlink-tag-from-issue";
 import { updateDocument } from "#/lib/data/update-document";
@@ -49,6 +50,21 @@ function errorResult(error: unknown) {
 		content: [{ type: "text" as const, text: formatMcpError(error) }],
 		isError: true as const,
 	};
+}
+
+const descriptionImageHint =
+	" Include workspace images with ![alt](/files/{fileId}) or ![alt]({fileId}).";
+
+async function markdownDescription(
+	user: User,
+	workspaceCode: string,
+	markdown: string,
+) {
+	return resolveDescriptionImages(
+		user,
+		workspaceCode,
+		markdownToTipTap(markdown),
+	);
 }
 
 function createTaskMcpServer(user: User) {
@@ -150,7 +166,8 @@ function createTaskMcpServer(user: User) {
 		"create_issue",
 		{
 			description:
-				"Create an issue with a title and optional markdown description. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day.",
+				"Create an issue with a title and optional markdown description. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day." +
+				descriptionImageHint,
 			inputSchema: z
 				.object({
 					workspaceCode: z.string().min(1),
@@ -188,7 +205,7 @@ function createTaskMcpServer(user: User) {
 					description:
 						description === undefined
 							? undefined
-							: markdownToTipTap(description),
+							: await markdownDescription(user, workspaceCode, description),
 				});
 				const issue = await fetchIssue(user, workspaceCode, created.number);
 				return jsonResult({
@@ -205,7 +222,8 @@ function createTaskMcpServer(user: User) {
 		"update_issue",
 		{
 			description:
-				"Update an issue. Pass only fields to change. Description is markdown. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day.",
+				"Update an issue. Pass only fields to change. Description is markdown. Start and end accept ISO datetimes or YYYY-MM-DDTHH:mm (UTC); date-only YYYY-MM-DD is start or end of that UTC day." +
+				descriptionImageHint,
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 				issueNumber: z.number().int().positive(),
@@ -237,7 +255,7 @@ function createTaskMcpServer(user: User) {
 					description:
 						description === undefined
 							? undefined
-							: markdownToTipTap(description),
+							: await markdownDescription(user, workspaceCode, description),
 				});
 				await updateIssue(user, workspaceCode, issueNumber, input);
 				const issue = await fetchIssue(user, workspaceCode, issueNumber);
@@ -501,7 +519,8 @@ function createTaskMcpServer(user: User) {
 		"create_document",
 		{
 			description:
-				"Create a document with a title and optional markdown description.",
+				"Create a document with a title and optional markdown description." +
+				descriptionImageHint,
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 				title: z.string().min(1).max(200),
@@ -515,7 +534,7 @@ function createTaskMcpServer(user: User) {
 					description:
 						description === undefined
 							? undefined
-							: markdownToTipTap(description),
+							: await markdownDescription(user, workspaceCode, description),
 				});
 				const document = await fetchDocument(user, workspaceCode, created.id);
 				return jsonResult({
@@ -532,7 +551,8 @@ function createTaskMcpServer(user: User) {
 		"update_document",
 		{
 			description:
-				"Update a document. Pass only fields to change. Description is markdown.",
+				"Update a document. Pass only fields to change. Description is markdown." +
+				descriptionImageHint,
 			inputSchema: z.object({
 				workspaceCode: z.string().min(1),
 				documentId: z.string().min(1),
@@ -547,7 +567,7 @@ function createTaskMcpServer(user: User) {
 					description:
 						description === undefined
 							? undefined
-							: markdownToTipTap(description),
+							: await markdownDescription(user, workspaceCode, description),
 				});
 				await updateDocument(user, workspaceCode, documentId, input);
 				const document = await fetchDocument(user, workspaceCode, documentId);
