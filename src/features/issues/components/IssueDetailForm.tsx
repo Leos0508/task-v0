@@ -1,5 +1,5 @@
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
 	CopyIcon,
@@ -58,6 +58,8 @@ import {
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
+import ChangeHistory from "#/features/history/components/ChangeHistory";
+import { issueHistoryQueryOptions } from "#/features/history/queries";
 import type { IssueLinkedDocument } from "#/lib/data/fetch-issue";
 import type { IssueTag } from "#/lib/data/fetch-tags";
 import { uploadDescriptionImage } from "#/lib/functions/files.functions";
@@ -147,6 +149,9 @@ export default function IssueDetailForm({
 }: IssueDetailFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { data: history = [] } = useQuery(
+		issueHistoryQueryOptions(workspaceCode, issue.number),
+	);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [linkedDocuments, setLinkedDocuments] = useState(issue.linkedDocuments);
 	const [tags, setTags] = useState(issue.tags);
@@ -342,6 +347,7 @@ export default function IssueDetailForm({
 								</Field>
 							)}
 						</form.Field>
+						<ChangeHistory entries={history} />
 						<IssueComments
 							workspaceCode={workspaceCode}
 							issueNumber={issue.number}

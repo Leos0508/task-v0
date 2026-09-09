@@ -1,5 +1,5 @@
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
 	BookOpenIcon,
@@ -50,6 +50,8 @@ import {
 } from "#/components/ui/dropdown-menu";
 import { Field, FieldError } from "#/components/ui/field";
 import { Textarea } from "#/components/ui/textarea";
+import ChangeHistory from "#/features/history/components/ChangeHistory";
+import { documentHistoryQueryOptions } from "#/features/history/queries";
 import type { DocumentLinkedIssue } from "#/lib/data/fetch-document";
 import type { IssueTag } from "#/lib/data/fetch-tags";
 import {
@@ -137,6 +139,9 @@ export default function DocumentDetailForm({
 }: DocumentDetailFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { data: history = [] } = useQuery(
+		documentHistoryQueryOptions(workspaceCode, document.id),
+	);
 	const [mode, setMode] = useState<"edit" | "readonly">("edit");
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [linkedIssues, setLinkedIssues] = useState(document.linkedIssues);
@@ -349,6 +354,7 @@ export default function DocumentDetailForm({
 								</Field>
 							)}
 						</form.Field>
+						<ChangeHistory entries={history} />
 					</div>
 
 					<aside className="detail-form-aside">

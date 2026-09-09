@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import PageNotFound from "#/components/PageNotFound";
+import { issueHistoryQueryOptions } from "#/features/history/queries";
 import IssueDetailForm from "#/features/issues/components/IssueDetailForm";
 import {
 	issueCommentsQueryOptions,
@@ -26,6 +27,9 @@ export const Route = createFileRoute("/app/$code/issues/$issueNumber")({
 				context.queryClient.ensureQueryData(tagsQueryOptions(params.code)),
 				context.queryClient.ensureQueryData(
 					issueCommentsQueryOptions(params.code, issueNumber),
+				),
+				context.queryClient.ensureQueryData(
+					issueHistoryQueryOptions(params.code, issueNumber),
 				),
 			]);
 			return {

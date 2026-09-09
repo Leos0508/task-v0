@@ -16,9 +16,11 @@ import { createDocument } from "#/lib/data/create-document";
 import { createIssue } from "#/lib/data/create-issue";
 import { createTag } from "#/lib/data/create-tag";
 import { fetchDocument } from "#/lib/data/fetch-document";
+import { fetchDocumentHistory } from "#/lib/data/fetch-document-history";
 import { fetchDocuments } from "#/lib/data/fetch-documents";
 import { fetchIssue } from "#/lib/data/fetch-issue";
 import { fetchIssueComments } from "#/lib/data/fetch-issue-comments";
+import { fetchIssueHistory } from "#/lib/data/fetch-issue-history";
 import { fetchIssues } from "#/lib/data/fetch-issues";
 import { fetchTags } from "#/lib/data/fetch-tags";
 import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
@@ -414,6 +416,27 @@ function createTaskMcpServer(user: User) {
 	);
 
 	server.registerTool(
+		"list_issue_history",
+		{
+			description:
+				"List field-change history for an issue, newest first. Description changes are recorded without body diffs.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				issueNumber: z.number().int().positive(),
+			}),
+		},
+		async ({ workspaceCode, issueNumber }) => {
+			try {
+				return jsonResult(
+					await fetchIssueHistory(user, workspaceCode, issueNumber),
+				);
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
 		"create_comment",
 		{
 			description: "Add a plain-text comment to an issue.",
@@ -532,6 +555,27 @@ function createTaskMcpServer(user: User) {
 					...document,
 					description: tipTapToMarkdown(document.description),
 				});
+			} catch (error) {
+				return errorResult(error);
+			}
+		},
+	);
+
+	server.registerTool(
+		"list_document_history",
+		{
+			description:
+				"List field-change history for a document, newest first. Content changes are recorded without body diffs.",
+			inputSchema: z.object({
+				workspaceCode: z.string().min(1),
+				documentId: z.string().min(1),
+			}),
+		},
+		async ({ workspaceCode, documentId }) => {
+			try {
+				return jsonResult(
+					await fetchDocumentHistory(user, workspaceCode, documentId),
+				);
 			} catch (error) {
 				return errorResult(error);
 			}

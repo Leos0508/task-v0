@@ -2,12 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "#/db";
-import { document, issue, issueDocument } from "#/db/schema";
+import { document } from "#/db/schema";
 import { updateDocumentSchema } from "#/features/documents/schema";
 import { createDocument } from "#/lib/data/create-document";
 import { fetchDocument } from "#/lib/data/fetch-document";
 import { fetchDocuments } from "#/lib/data/fetch-documents";
+import { linkIssueToDocument } from "#/lib/data/link-issue-to-document";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { unlinkIssueFromDocument } from "#/lib/data/unlink-issue-from-document";
 import { updateDocument } from "#/lib/data/update-document";
 import { mapActionError } from "#/lib/map-action-error";
 import { authMiddleware } from "#/middlewares/auth-middleware";
@@ -112,51 +114,12 @@ export const linkIssueToDocumentFn = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data, context }) => {
 		try {
-			const { workspace } = await getWorkspaceAccess(
+			const linkedIssue = await linkIssueToDocument(
 				context.user,
 				data.workspaceCode,
+				data.documentId,
+				data.issueNumber,
 			);
-
-			const [[doc], [linkedIssue]] = await Promise.all([
-				db
-					.select({ id: document.id })
-					.from(document)
-					.where(
-						and(
-							eq(document.id, data.documentId),
-							eq(document.workspaceId, workspace.id),
-						),
-					)
-					.limit(1),
-				db
-					.select({
-						id: issue.id,
-						number: issue.number,
-						title: issue.title,
-						status: issue.status,
-					})
-					.from(issue)
-					.where(
-						and(
-							eq(issue.workspaceId, workspace.id),
-							eq(issue.number, data.issueNumber),
-						),
-					)
-					.limit(1),
-			]);
-
-			if (!doc) {
-				throw new AppError("NOT_FOUND", "Document not found");
-			}
-			if (!linkedIssue) {
-				throw new AppError("NOT_FOUND", "Issue not found");
-			}
-
-			await db.insert(issueDocument).values({
-				documentId: doc.id,
-				issueId: linkedIssue.id,
-			});
-
 			return { success: true as const, data: linkedIssue };
 		} catch (error) {
 			return mapActionError(
@@ -178,59 +141,13 @@ export const unlinkIssueFromDocumentFn = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data, context }) => {
 		try {
-			const { workspace } = await getWorkspaceAccess(
+			const unlinked = await unlinkIssueFromDocument(
 				context.user,
 				data.workspaceCode,
+				data.documentId,
+				data.issueNumber,
 			);
-
-			const [[doc], [linkedIssue]] = await Promise.all([
-				db
-					.select({ id: document.id })
-					.from(document)
-					.where(
-						and(
-							eq(document.id, data.documentId),
-							eq(document.workspaceId, workspace.id),
-						),
-					)
-					.limit(1),
-				db
-					.select({ id: issue.id, number: issue.number })
-					.from(issue)
-					.where(
-						and(
-							eq(issue.workspaceId, workspace.id),
-							eq(issue.number, data.issueNumber),
-						),
-					)
-					.limit(1),
-			]);
-
-			if (!doc) {
-				throw new AppError("NOT_FOUND", "Document not found");
-			}
-			if (!linkedIssue) {
-				throw new AppError("NOT_FOUND", "Issue not found");
-			}
-
-			const [existing] = await db
-				.select({ id: issueDocument.id })
-				.from(issueDocument)
-				.where(
-					and(
-						eq(issueDocument.issueId, linkedIssue.id),
-						eq(issueDocument.documentId, doc.id),
-					),
-				)
-				.limit(1);
-
-			if (!existing) {
-				throw new AppError("NOT_FOUND", "Link not found");
-			}
-
-			await db.delete(issueDocument).where(eq(issueDocument.id, existing.id));
-
-			return { success: true as const, data: { issueId: linkedIssue.id } };
+			return { success: true as const, data: unlinked };
 		} catch (error) {
 			return mapActionError(error, "Failed to unlink issue");
 		}
