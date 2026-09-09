@@ -406,6 +406,52 @@ export const issueComment = pgTable(
 	],
 );
 
+export const issueHistory = pgTable(
+	"issue_history",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		field: text("field").notNull(),
+		oldValue: text("old_value"),
+		newValue: text("new_value"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		issueId: text("issue_id")
+			.notNull()
+			.references(() => issue.id, { onDelete: "cascade" }),
+		actorId: text("actor_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		index("issue_history_issueId_idx").on(table.issueId),
+		index("issue_history_actorId_idx").on(table.actorId),
+	],
+);
+
+export const documentHistory = pgTable(
+	"document_history",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		field: text("field").notNull(),
+		oldValue: text("old_value"),
+		newValue: text("new_value"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		documentId: text("document_id")
+			.notNull()
+			.references(() => document.id, { onDelete: "cascade" }),
+		actorId: text("actor_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		index("document_history_documentId_idx").on(table.documentId),
+		index("document_history_actorId_idx").on(table.actorId),
+	],
+);
+
 export const workspaceFile = pgTable(
 	"workspace_file",
 	{
@@ -441,6 +487,8 @@ export const userRelations = relations(user, ({ many }) => ({
 	invitesSent: many(workspaceInvite),
 	issuesReported: many(issue),
 	issueComments: many(issueComment),
+	issueHistory: many(issueHistory),
+	documentHistory: many(documentHistory),
 	uploadedFiles: many(workspaceFile),
 }));
 
@@ -511,6 +559,7 @@ export const issueRelations = relations(issue, ({ one, many }) => ({
 	issueDocuments: many(issueDocument),
 	issueTags: many(issueTag),
 	issueComments: many(issueComment),
+	issueHistory: many(issueHistory),
 }));
 
 export const documentRelations = relations(document, ({ one, many }) => ({
@@ -520,6 +569,7 @@ export const documentRelations = relations(document, ({ one, many }) => ({
 	}),
 	issueDocuments: many(issueDocument),
 	documentTags: many(documentTag),
+	documentHistory: many(documentHistory),
 }));
 
 export const issueDocumentRelations = relations(issueDocument, ({ one }) => ({
@@ -574,6 +624,31 @@ export const issueCommentRelations = relations(issueComment, ({ one }) => ({
 		references: [user.id],
 	}),
 }));
+
+export const issueHistoryRelations = relations(issueHistory, ({ one }) => ({
+	issue: one(issue, {
+		fields: [issueHistory.issueId],
+		references: [issue.id],
+	}),
+	actor: one(user, {
+		fields: [issueHistory.actorId],
+		references: [user.id],
+	}),
+}));
+
+export const documentHistoryRelations = relations(
+	documentHistory,
+	({ one }) => ({
+		document: one(document, {
+			fields: [documentHistory.documentId],
+			references: [document.id],
+		}),
+		actor: one(user, {
+			fields: [documentHistory.actorId],
+			references: [user.id],
+		}),
+	}),
+);
 
 export const workspaceFileRelations = relations(workspaceFile, ({ one }) => ({
 	workspace: one(workspace, {

@@ -3,6 +3,14 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
 import { issue } from "#/db/schema";
 import type { UpdateIssueInput } from "#/features/issues/schema";
+import {
+	type HistoryChange,
+	insertIssueHistory,
+	instantValue,
+	sameInstant,
+	sameJson,
+	tipTapText,
+} from "#/lib/data/change-history";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
 import { RANK_GAP } from "#/lib/issue-rank";
 import { AppError } from "#/types/result";
@@ -19,7 +27,12 @@ export async function updateIssue(
 		.select({
 			id: issue.id,
 			number: issue.number,
+			title: issue.title,
+			description: issue.description,
 			status: issue.status,
+			priority: issue.priority,
+			startDate: issue.startDate,
+			endDate: issue.endDate,
 		})
 		.from(issue)
 		.where(
@@ -40,41 +53,87 @@ export async function updateIssue(
 		description?: unknown;
 		rank?: number;
 	} = {};
+	const changes: HistoryChange[] = [];
 
 	if (input.title !== undefined) {
-		patch.title = input.title.trim();
-	}
-	if (input.status !== undefined) {
-		patch.status = input.status;
-		if (input.status !== existing.status) {
-			const [last] = await db
-				.select({ rank: issue.rank })
-				.from(issue)
-				.where(
-					and(
-						eq(issue.workspaceId, workspace.id),
-						eq(issue.status, input.status),
-					),
-				)
-				.orderBy(desc(issue.rank))
-				.limit(1);
-			patch.rank = (last?.rank ?? 0) + RANK_GAP;
+		const title = input.title.trim();
+		if (title !== existing.title) {
+			patch.title = title;
+			changes.push({
+				field: "title",
+				oldValue: existing.title,
+				newValue: title,
+			});
 		}
 	}
-	if (input.priority !== undefined) {
+	if (input.status !== undefined && input.status !== existing.status) {
+		const [last] = await db
+			.select({ rank: issue.rank })
+			.from(issue)
+			.where(
+				and(
+					eq(issue.workspaceId, workspace.id),
+					eq(issue.status, input.status),
+				),
+			)
+			.orderBy(desc(issue.rank))
+			.limit(1);
+		patch.status = input.status;
+		patch.rank = (last?.rank ?? 0) + RANK_GAP;
+		changes.push({
+			field: "status",
+			oldValue: existing.status,
+			newValue: input.status,
+		});
+	}
+	if (input.priority !== undefined && input.priority !== existing.priority) {
 		patch.priority = input.priority;
+		changes.push({
+			field: "priority",
+			oldValue: existing.priority,
+			newValue: input.priority,
+		});
 	}
 	if (input.startDate !== undefined) {
-		patch.startDate = input.startDate ? new Date(input.startDate) : null;
+		const startDate = input.startDate ? new Date(input.startDate) : null;
+		if (!sameInstant(existing.startDate, startDate)) {
+			patch.startDate = startDate;
+			changes.push({
+				field: "startDate",
+				oldValue: instantValue(existing.startDate),
+				newValue: instantValue(startDate),
+			});
+		}
 	}
 	if (input.endDate !== undefined) {
-		patch.endDate = input.endDate ? new Date(input.endDate) : null;
+		const endDate = input.endDate ? new Date(input.endDate) : null;
+		if (!sameInstant(existing.endDate, endDate)) {
+			patch.endDate = endDate;
+			changes.push({
+				field: "endDate",
+				oldValue: instantValue(existing.endDate),
+				newValue: instantValue(endDate),
+			});
+		}
 	}
-	if (input.description !== undefined) {
+	if (
+		input.description !== undefined &&
+		!sameJson(existing.description, input.description)
+	) {
 		patch.description = JSON.parse(JSON.stringify(input.description));
+		if (tipTapText(existing.description) !== tipTapText(input.description)) {
+			changes.push({
+				field: "description",
+				oldValue: null,
+				newValue: null,
+			});
+		}
 	}
 
-	await db.update(issue).set(patch).where(eq(issue.id, existing.id));
+	if (Object.keys(patch).length > 0) {
+		await db.update(issue).set(patch).where(eq(issue.id, existing.id));
+	}
+	await insertIssueHistory(existing.id, sessionUser.id, changes);
 
 	return { number: existing.number };
 }

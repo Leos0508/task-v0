@@ -2,6 +2,7 @@ import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
 import { db } from "#/db";
 import { issue, issueTag, tag } from "#/db/schema";
+import { insertIssueHistory } from "#/lib/data/change-history";
 import { AppError } from "#/types/result";
 import { getWorkspaceAccess } from "./require-workspace-access";
 
@@ -15,7 +16,7 @@ export async function unlinkTagFromIssue(
 
 	const [[existingTag], [existingIssue]] = await Promise.all([
 		db
-			.select({ id: tag.id })
+			.select({ id: tag.id, name: tag.name })
 			.from(tag)
 			.where(and(eq(tag.id, tagId), eq(tag.workspaceId, workspace.id)))
 			.limit(1),
@@ -51,6 +52,10 @@ export async function unlinkTagFromIssue(
 	}
 
 	await db.delete(issueTag).where(eq(issueTag.id, existing.id));
+
+	await insertIssueHistory(existingIssue.id, sessionUser.id, [
+		{ field: "tag", oldValue: existingTag.name, newValue: null },
+	]);
 
 	return { tagId: existingTag.id };
 }

@@ -3,6 +3,7 @@ import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import PageNotFound from "#/components/PageNotFound";
 import DocumentDetailForm from "#/features/documents/components/DocumentDetailForm";
+import { documentHistoryQueryOptions } from "#/features/history/queries";
 import { tagsQueryOptions } from "#/features/issues/queries";
 import { canManageMembers } from "#/lib/authz/roles";
 import { getDocumentFn } from "#/lib/functions/documents.functions";
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/app/$code/documents/$documentId")({
 					data: { code: params.code, id: params.documentId },
 				}),
 				context.queryClient.ensureQueryData(tagsQueryOptions(params.code)),
+				context.queryClient.ensureQueryData(
+					documentHistoryQueryOptions(params.code, params.documentId),
+				),
 			]);
 			return {
 				document,

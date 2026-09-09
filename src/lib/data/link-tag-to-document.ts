@@ -2,6 +2,7 @@ import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
 import { db } from "#/db";
 import { document, documentTag, tag } from "#/db/schema";
+import { insertDocumentHistory } from "#/lib/data/change-history";
 import { AppError } from "#/types/result";
 import { getWorkspaceAccess } from "./require-workspace-access";
 
@@ -46,6 +47,10 @@ export async function linkTagToDocument(
 		tagId: existingTag.id,
 		documentId: existingDocument.id,
 	});
+
+	await insertDocumentHistory(existingDocument.id, sessionUser.id, [
+		{ field: "tag", oldValue: null, newValue: existingTag.name },
+	]);
 
 	return existingTag;
 }
