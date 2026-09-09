@@ -11,9 +11,11 @@ function getIssueRowId(row: IssueListItem) {
 export default function IssueTableView({
 	workspaceCode,
 	issues,
+	emptyMessage = "No issues yet. Create one to get started.",
 }: {
 	workspaceCode: string;
 	issues: IssueListItem[];
+	emptyMessage?: string;
 }) {
 	const columns = useMemo(
 		() => createIssueColumns(workspaceCode),
@@ -26,10 +28,5 @@ export default function IssueTableView({
 		getRowId: getIssueRowId,
 	});
 
-	return (
-		<DataTable
-			table={table}
-			emptyMessage="No issues yet. Create one to get started."
-		/>
-	);
+	return <DataTable table={table} emptyMessage={emptyMessage} />;
 }

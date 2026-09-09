@@ -27,9 +27,11 @@ function toGanttTasks(issues: IssueListItem[]) {
 export default function IssueGanttView({
 	workspaceCode,
 	issues,
+	hasFilters = false,
 }: {
 	workspaceCode: string;
 	issues: IssueListItem[];
+	hasFilters?: boolean;
 }) {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
@@ -128,8 +130,9 @@ export default function IssueGanttView({
 			) : null}
 			{scheduled.length === 0 ? (
 				<p className="flex min-h-0 flex-1 items-center rounded-lg border p-6 text-sm text-muted-foreground">
-					No scheduled issues. Set a start and end date on an issue to see it
-					here.
+					{hasFilters
+						? "No scheduled issues match these filters."
+						: "No scheduled issues. Set a start and end date on an issue to see it here."}
 				</p>
 			) : (
 				<div ref={chartRef} className="issue-gantt min-h-0 min-w-0 flex-1" />
