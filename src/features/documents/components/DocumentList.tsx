@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, PlusIcon } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import ListSortPopover from "#/components/ListSortPopover";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
 import { DataTable } from "#/components/ui/data-table";
@@ -13,46 +14,68 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
+import { createDocumentColumns } from "#/features/documents/components/document-column";
+import {
+	DOCUMENT_SORT_FIELDS,
+	type DocumentSortField,
+	documentSearchDefaults,
+} from "#/features/documents/schema";
+import { sortDocuments } from "#/features/documents/sort-documents";
 import { tagsQueryOptions } from "#/features/issues/queries";
 import type { DocumentListItem } from "#/lib/data/fetch-documents";
 import { useAppTable } from "#/lib/data-table";
 import { createDocumentFn } from "#/lib/functions/documents.functions";
+import { nextListSort } from "#/lib/list-sort";
 import { documentKeys, documentsQueryOptions } from "../queries";
-import { createDocumentColumns } from "./document-column";
 
 const EMPTY_DOCUMENT: DocumentListItem[] = [];
 
-type DocumentSort = "updatedAt" | "createdAt" | "title";
+const SORT_LABELS: Record<DocumentSortField, string> = {
+	updatedAt: "Last edited",
+	createdAt: "Date created",
+	title: "Title",
+};
+
+const SORT_FIELDS = DOCUMENT_SORT_FIELDS.map((field) => ({
+	value: field,
+	label: SORT_LABELS[field],
+}));
 
 function getDocumentRowId(row: DocumentListItem) {
 	return row.id;
 }
 
-function sortDocuments(documents: DocumentListItem[], sort: DocumentSort) {
-	return [...documents].sort((a, b) => {
-		if (sort === "title") {
-			return a.title.localeCompare(b.title);
-		}
-		return new Date(b[sort]).getTime() - new Date(a[sort]).getTime();
-	});
-}
-
 export default function DocumentList({
 	workspaceCode,
+	sort,
+	dir,
+	onSortChange,
 }: {
 	workspaceCode: string;
+	sort: DocumentSortField;
+	dir: "asc" | "desc";
+	onSortChange: (next: {
+		sort: DocumentSortField;
+		dir: "asc" | "desc";
+	}) => void;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: documents } = useQuery(documentsQueryOptions(workspaceCode));
 	const { data: tags = [] } = useQuery(tagsQueryOptions(workspaceCode));
-	const [sort, setSort] = useState<DocumentSort>("updatedAt");
 	const [tagFilter, setTagFilter] = useState<string>("ALL");
 	const [isCreating, startCreate] = useTransition();
 
+	const handleSortField = useCallback(
+		(field: DocumentSortField) => {
+			onSortChange(nextListSort({ sort, dir }, field));
+		},
+		[dir, onSortChange, sort],
+	);
+
 	const columns = useMemo(
-		() => createDocumentColumns(workspaceCode),
-		[workspaceCode],
+		() => createDocumentColumns(workspaceCode, sort, dir, handleSortField),
+		[dir, handleSortField, sort, workspaceCode],
 	);
 
 	const sortedDocuments = useMemo(() => {
@@ -60,8 +83,8 @@ export default function DocumentList({
 			if (tagFilter === "ALL") return true;
 			return document.tags.some((tag) => tag.id === tagFilter);
 		});
-		return sortDocuments(filtered, sort);
-	}, [documents, sort, tagFilter]);
+		return sortDocuments(filtered, sort, dir);
+	}, [dir, documents, sort, tagFilter]);
 
 	const table = useAppTable({
 		columns,
@@ -98,19 +121,14 @@ export default function DocumentList({
 		<div className="w-full space-y-2">
 			<div className="flex w-full items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-2">
-					<Select
-						value={sort}
-						onValueChange={(value) => setSort(value as DocumentSort)}
-					>
-						<SelectTrigger className="w-44">
-							<SelectValue placeholder="Sort by" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="updatedAt">Last edited</SelectItem>
-							<SelectItem value="createdAt">Date created</SelectItem>
-							<SelectItem value="title">Title</SelectItem>
-						</SelectContent>
-					</Select>
+					<ListSortPopover
+						fields={SORT_FIELDS}
+						sort={sort}
+						dir={dir}
+						defaultSort={documentSearchDefaults.sort}
+						defaultDir={documentSearchDefaults.dir}
+						onChange={onSortChange}
+					/>
 					<Select value={tagFilter} onValueChange={setTagFilter}>
 						<SelectTrigger className="w-44">
 							<SelectValue placeholder="Tag" />

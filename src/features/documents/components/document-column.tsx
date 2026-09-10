@@ -1,14 +1,37 @@
 import { Link } from "@tanstack/react-router";
+import ListSortHeader from "#/components/ListSortHeader";
+import type { DocumentSortField } from "#/features/documents/schema";
 import IssueTagBadge from "#/features/issues/components/IssueTagBadge";
 import type { DocumentListItem } from "#/lib/data/fetch-documents";
 import { createAppColumnHelper } from "#/lib/data-table";
 
 const columnHelper = createAppColumnHelper<DocumentListItem>();
 
-export function createDocumentColumns(workspaceCode: string) {
+function sortHeader(
+	label: string,
+	field: DocumentSortField,
+	sort: DocumentSortField,
+	dir: "asc" | "desc",
+	onSort: (field: DocumentSortField) => void,
+) {
+	return (
+		<ListSortHeader
+			label={label}
+			direction={sort === field ? dir : false}
+			onClick={() => onSort(field)}
+		/>
+	);
+}
+
+export function createDocumentColumns(
+	workspaceCode: string,
+	sort: DocumentSortField,
+	dir: "asc" | "desc",
+	onSort: (field: DocumentSortField) => void,
+) {
 	return columnHelper.columns([
 		columnHelper.accessor("title", {
-			header: "Title",
+			header: () => sortHeader("Title", "title", sort, dir, onSort),
 			cell: ({ row, getValue }) => (
 				<Link
 					to="/app/$code/documents/$documentId"
@@ -38,7 +61,7 @@ export function createDocumentColumns(workspaceCode: string) {
 			meta: { className: "min-w-40" },
 		}),
 		columnHelper.accessor("updatedAt", {
-			header: "Last edited",
+			header: () => sortHeader("Last edited", "updatedAt", sort, dir, onSort),
 			cell: ({ getValue }) => formatLastEdited(getValue()),
 			meta: { className: "w-[1%] whitespace-nowrap text-muted-foreground" },
 		}),

@@ -1,4 +1,5 @@
 import type { ReactTable, RowData } from "@tanstack/react-table";
+import ListSortHeader from "#/components/ListSortHeader";
 import {
 	Table,
 	TableBody,
@@ -30,16 +31,40 @@ export function DataTable<TData extends RowData>({
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => (
-								<TableHead
-									key={header.id}
-									className={header.column.columnDef.meta?.className}
-								>
-									{header.isPlaceholder ? null : (
-										<table.FlexRender header={header} />
-									)}
-								</TableHead>
-							))}
+							{headerGroup.headers.map((header) => {
+								const canSort = header.column.getCanSort();
+								const sorted = canSort ? header.column.getIsSorted() : false;
+								return (
+									<TableHead
+										key={header.id}
+										aria-sort={
+											sorted === "asc"
+												? "ascending"
+												: sorted === "desc"
+													? "descending"
+													: undefined
+										}
+										className={header.column.columnDef.meta?.className}
+									>
+										{header.isPlaceholder ? null : canSort ? (
+											<ListSortHeader
+												label={<table.FlexRender header={header} />}
+												accessibleName={
+													typeof header.column.columnDef.header === "string"
+														? header.column.columnDef.header
+														: header.column.id
+												}
+												direction={sorted}
+												onClick={(event) =>
+													header.column.getToggleSortingHandler()?.(event)
+												}
+											/>
+										) : (
+											<table.FlexRender header={header} />
+										)}
+									</TableHead>
+								);
+							})}
 						</TableRow>
 					))}
 				</TableHeader>

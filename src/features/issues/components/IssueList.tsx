@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, PlusIcon } from "lucide-react";
-import { Suspense, useMemo, useTransition } from "react";
+import { Suspense, useCallback, useMemo, useTransition } from "react";
 import { toast } from "sonner";
+import ListSortPopover from "#/components/ListSortPopover";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
 import { Label } from "#/components/ui/label";
@@ -32,8 +33,10 @@ import { sortIssues } from "#/features/issues/sort-issues";
 import {
 	countIssueFilters,
 	type IssueViewSearch,
+	issueSearchDefaults,
 } from "#/features/issues/view-search";
 import { createIssueFn } from "#/lib/functions/issues.functions";
+import { nextListSort } from "#/lib/list-sort";
 import { lazyImport } from "#/lib/stale-dynamic-import";
 import { cn } from "#/lib/utils";
 
@@ -55,6 +58,11 @@ const SORT_LABELS: Record<IssueSortField, string> = {
 	startDate: "Start",
 	endDate: "End",
 };
+
+const SORT_FIELDS = ISSUE_SORT_FIELDS.map((field) => ({
+	value: field,
+	label: SORT_LABELS[field],
+}));
 
 const GROUP_BY_LABELS: Record<IssueGraphGroupBy, string> = {
 	status: "Status",
@@ -107,6 +115,14 @@ export default function IssueList({
 		if (search.view === "board") return filteredIssues;
 		return sortIssues(filteredIssues, search.sort, search.dir);
 	}, [filteredIssues, search.dir, search.sort, search.view]);
+
+	const handleSortField = useCallback(
+		(field: IssueSortField) => {
+			const next = nextListSort({ sort: search.sort, dir: search.dir }, field);
+			onSearchChange({ ...search, sort: next.sort, dir: next.dir });
+		},
+		[onSearchChange, search],
+	);
 
 	function handleNewIssue() {
 		if (isCreating) return;
@@ -191,43 +207,22 @@ export default function IssueList({
 						filters={filters}
 						onFiltersChange={(next) => onSearchChange({ ...search, ...next })}
 					/>
-					<Select
-						value={search.sort}
-						onValueChange={(value) =>
-							onSearchChange({
-								...search,
-								sort: value as IssueSortField,
-							})
-						}
-					>
-						<SelectTrigger aria-label="Sort by" className="min-w-36">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{ISSUE_SORT_FIELDS.map((field) => (
-								<SelectItem key={field} value={field}>
-									{SORT_LABELS[field]}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select
-						value={search.dir}
-						onValueChange={(value) =>
-							onSearchChange({
-								...search,
-								dir: value as "asc" | "desc",
-							})
-						}
-					>
-						<SelectTrigger aria-label="Sort direction" className="w-28">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="asc">Ascending</SelectItem>
-							<SelectItem value="desc">Descending</SelectItem>
-						</SelectContent>
-					</Select>
+					{search.view === "board" ? null : (
+						<ListSortPopover
+							fields={SORT_FIELDS}
+							sort={search.sort}
+							dir={search.dir}
+							defaultSort={issueSearchDefaults.sort}
+							defaultDir={issueSearchDefaults.dir}
+							onChange={(next) =>
+								onSearchChange({
+									...search,
+									sort: next.sort,
+									dir: next.dir,
+								})
+							}
+						/>
+					)}
 					<div className="flex items-center gap-2">
 						<Switch
 							id="issue-graph"
@@ -283,6 +278,9 @@ export default function IssueList({
 					<IssueTableView
 						workspaceCode={workspaceCode}
 						issues={displayIssues}
+						sort={search.sort}
+						dir={search.dir}
+						onSort={handleSortField}
 						emptyMessage={emptyMessage}
 					/>
 				) : null}
