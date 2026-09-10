@@ -5,6 +5,15 @@ import { Suspense, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
+import { Label } from "#/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
+import { Switch } from "#/components/ui/switch";
 import IssueBoardView from "#/features/issues/components/IssueBoardView";
 import IssueFiltersPopover from "#/features/issues/components/IssueFiltersPopover";
 import IssueTableView from "#/features/issues/components/IssueTableView";
@@ -14,9 +23,15 @@ import {
 	tagsQueryOptions,
 } from "#/features/issues/queries";
 import {
+	ISSUE_GRAPH_GROUP_BY,
+	ISSUE_SORT_FIELDS,
+	type IssueGraphGroupBy,
+	type IssueSortField,
+} from "#/features/issues/schema";
+import { sortIssues } from "#/features/issues/sort-issues";
+import {
 	countIssueFilters,
-	type IssueFilters,
-	type IssueView,
+	type IssueViewSearch,
 } from "#/features/issues/view-search";
 import { createIssueFn } from "#/lib/functions/issues.functions";
 import { lazyImport } from "#/lib/stale-dynamic-import";
@@ -26,22 +41,46 @@ const IssueGanttView = lazyImport(
 	() => import("#/features/issues/components/IssueGanttView"),
 );
 
+const IssueChartPanel = lazyImport(
+	() => import("#/features/issues/components/IssueChartPanel"),
+);
+
+const SORT_LABELS: Record<IssueSortField, string> = {
+	number: "Number",
+	title: "Title",
+	status: "Status",
+	priority: "Priority",
+	createdAt: "Created",
+	updatedAt: "Updated",
+	startDate: "Start",
+	endDate: "End",
+};
+
+const GROUP_BY_LABELS: Record<IssueGraphGroupBy, string> = {
+	status: "Status",
+	priority: "Priority",
+	tag: "Tag",
+};
+
 export default function IssueList({
 	workspaceCode,
-	view,
-	filters,
-	onFiltersChange,
+	search,
+	onSearchChange,
 }: {
 	workspaceCode: string;
-	view: IssueView;
-	filters: IssueFilters;
-	onFiltersChange: (filters: IssueFilters) => void;
+	search: IssueViewSearch;
+	onSearchChange: (search: IssueViewSearch) => void;
 }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: issues } = useQuery(issuesQueryOptions(workspaceCode));
 	const { data: tags = [] } = useQuery(tagsQueryOptions(workspaceCode));
 	const [isCreating, startCreate] = useTransition();
+	const filters = {
+		status: search.status,
+		priority: search.priority,
+		tag: search.tag,
+	};
 	const hasFilters = countIssueFilters(filters) > 0;
 
 	const filteredIssues = useMemo(() => {
@@ -63,6 +102,11 @@ export default function IssueList({
 			return true;
 		});
 	}, [filters.priority, filters.status, filters.tag, issues]);
+
+	const displayIssues = useMemo(() => {
+		if (search.view === "board") return filteredIssues;
+		return sortIssues(filteredIssues, search.sort, search.dir);
+	}, [filteredIssues, search.dir, search.sort, search.view]);
 
 	function handleNewIssue() {
 		if (isCreating) return;
@@ -105,30 +149,121 @@ export default function IssueList({
 
 	return (
 		<div className="flex h-full min-h-0 min-w-0 flex-col gap-4 p-4">
-			<div className="grid gap-3 sm:grid-cols-4">
-				<div className="rounded-lg border p-3">
-					<p className="text-xs text-muted-foreground">Total</p>
-					<p className="text-lg font-semibold">{counts.total}</p>
+			{search.graph ? (
+				<Suspense
+					fallback={
+						<div className="flex h-44 items-center justify-center rounded-lg border">
+							<PageLoading />
+						</div>
+					}
+				>
+					<IssueChartPanel
+						issues={filteredIssues}
+						tags={tags}
+						groupBy={search.groupBy}
+						emptyMessage={emptyMessage}
+					/>
+				</Suspense>
+			) : (
+				<div className="grid gap-3 sm:grid-cols-4">
+					<div className="rounded-lg border p-3">
+						<p className="text-xs text-muted-foreground">Total</p>
+						<p className="text-lg font-semibold">{counts.total}</p>
+					</div>
+					<div className="rounded-lg border p-3">
+						<p className="text-xs text-muted-foreground">Todo</p>
+						<p className="text-lg font-semibold">{counts.todo}</p>
+					</div>
+					<div className="rounded-lg border p-3">
+						<p className="text-xs text-muted-foreground">In progress</p>
+						<p className="text-lg font-semibold">{counts.inProgress}</p>
+					</div>
+					<div className="rounded-lg border p-3">
+						<p className="text-xs text-muted-foreground">Done</p>
+						<p className="text-lg font-semibold">{counts.done}</p>
+					</div>
 				</div>
-				<div className="rounded-lg border p-3">
-					<p className="text-xs text-muted-foreground">Todo</p>
-					<p className="text-lg font-semibold">{counts.todo}</p>
-				</div>
-				<div className="rounded-lg border p-3">
-					<p className="text-xs text-muted-foreground">In progress</p>
-					<p className="text-lg font-semibold">{counts.inProgress}</p>
-				</div>
-				<div className="rounded-lg border p-3">
-					<p className="text-xs text-muted-foreground">Done</p>
-					<p className="text-lg font-semibold">{counts.done}</p>
-				</div>
-			</div>
+			)}
 			<div className="flex flex-wrap items-center justify-between gap-4">
-				<IssueFiltersPopover
-					tags={tags}
-					filters={filters}
-					onFiltersChange={onFiltersChange}
-				/>
+				<div className="flex flex-wrap items-center gap-2">
+					<IssueFiltersPopover
+						tags={tags}
+						filters={filters}
+						onFiltersChange={(next) => onSearchChange({ ...search, ...next })}
+					/>
+					<Select
+						value={search.sort}
+						onValueChange={(value) =>
+							onSearchChange({
+								...search,
+								sort: value as IssueSortField,
+							})
+						}
+					>
+						<SelectTrigger aria-label="Sort by" className="min-w-36">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{ISSUE_SORT_FIELDS.map((field) => (
+								<SelectItem key={field} value={field}>
+									{SORT_LABELS[field]}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+					<Select
+						value={search.dir}
+						onValueChange={(value) =>
+							onSearchChange({
+								...search,
+								dir: value as "asc" | "desc",
+							})
+						}
+					>
+						<SelectTrigger aria-label="Sort direction" className="w-28">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="asc">Ascending</SelectItem>
+							<SelectItem value="desc">Descending</SelectItem>
+						</SelectContent>
+					</Select>
+					<div className="flex items-center gap-2">
+						<Switch
+							id="issue-graph"
+							size="sm"
+							checked={search.graph}
+							onCheckedChange={(checked) =>
+								onSearchChange({ ...search, graph: checked })
+							}
+						/>
+						<Label htmlFor="issue-graph" className="font-normal">
+							Graph
+						</Label>
+					</div>
+					{search.graph ? (
+						<Select
+							value={search.groupBy}
+							onValueChange={(value) =>
+								onSearchChange({
+									...search,
+									groupBy: value as IssueGraphGroupBy,
+								})
+							}
+						>
+							<SelectTrigger aria-label="Group graph by" className="min-w-32">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{ISSUE_GRAPH_GROUP_BY.map((groupBy) => (
+									<SelectItem key={groupBy} value={groupBy}>
+										{GROUP_BY_LABELS[groupBy]}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					) : null}
+				</div>
 				<Button onClick={handleNewIssue} disabled={isCreating}>
 					{isCreating ? (
 						<Loader2Icon className="size-4 animate-spin" />
@@ -141,27 +276,27 @@ export default function IssueList({
 			<div
 				className={cn(
 					"min-h-0 min-w-0 flex-1",
-					view === "gantt" ? "overflow-hidden" : "overflow-auto",
+					search.view === "gantt" ? "overflow-hidden" : "overflow-auto",
 				)}
 			>
-				{view === "list" ? (
+				{search.view === "list" ? (
 					<IssueTableView
 						workspaceCode={workspaceCode}
-						issues={filteredIssues}
+						issues={displayIssues}
 						emptyMessage={emptyMessage}
 					/>
 				) : null}
-				{view === "board" ? (
+				{search.view === "board" ? (
 					<IssueBoardView
 						workspaceCode={workspaceCode}
-						issues={filteredIssues}
+						issues={displayIssues}
 					/>
 				) : null}
-				{view === "gantt" ? (
+				{search.view === "gantt" ? (
 					<Suspense fallback={<PageLoading />}>
 						<IssueGanttView
 							workspaceCode={workspaceCode}
-							issues={filteredIssues}
+							issues={displayIssues}
 							hasFilters={hasFilters}
 						/>
 					</Suspense>

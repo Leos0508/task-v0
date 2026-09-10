@@ -1,13 +1,15 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
+import { authSessionQueryOptions } from "#/features/auth/queries";
 import AcceptInviteCard from "#/features/settings/components/AcceptInviteCard";
-import { getAuthSession } from "#/lib/auth.functions";
 import { getInviteByTokenFn } from "#/lib/functions/members.functions";
 
 export const Route = createFileRoute("/invites/$token")({
-	beforeLoad: async ({ location }) => {
-		const session = await getAuthSession();
+	beforeLoad: async ({ context, location }) => {
+		const session = await context.queryClient.ensureQueryData(
+			authSessionQueryOptions,
+		);
 		if (!session) {
 			throw redirect({
 				to: "/sign-in",

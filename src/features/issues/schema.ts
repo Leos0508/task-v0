@@ -105,6 +105,69 @@ export const updateCommentSchema = z.object({
 	body: commentBodySchema,
 });
 
+export const ISSUE_SORT_FIELDS = [
+	"number",
+	"title",
+	"status",
+	"priority",
+	"createdAt",
+	"updatedAt",
+	"startDate",
+	"endDate",
+] as const;
+
+export const ISSUE_GRAPH_GROUP_BY = ["status", "priority", "tag"] as const;
+
+export const issueViewConfigSchema = z.object({
+	layout: z.enum(["list", "board", "gantt"]),
+	filters: z.object({
+		status: z.array(issueStatusSchema),
+		priority: z.array(issuePrioritySchema),
+		tag: z.array(z.string().min(1)),
+	}),
+	sort: z.object({
+		field: z.enum(ISSUE_SORT_FIELDS),
+		direction: z.enum(["asc", "desc"]),
+	}),
+	graph: z.object({
+		visible: z.boolean(),
+		groupBy: z.enum(ISSUE_GRAPH_GROUP_BY),
+	}),
+});
+
+export const defaultIssueViewConfig = {
+	layout: "list" as const,
+	filters: { status: [], priority: [], tag: [] },
+	sort: { field: "number" as const, direction: "desc" as const },
+	graph: { visible: false, groupBy: "status" as const },
+};
+
+export const issueViewNameSchema = z
+	.string()
+	.trim()
+	.min(1, "Name is required")
+	.max(80);
+
+export const createIssueViewSchema = z.object({
+	name: issueViewNameSchema,
+	config: issueViewConfigSchema,
+});
+
+export const updateIssueViewSchema = z
+	.object({
+		name: issueViewNameSchema.optional(),
+		config: issueViewConfigSchema.optional(),
+	})
+	.refine((value) => value.name !== undefined || value.config !== undefined, {
+		message: "No changes provided",
+	});
+
+export type IssueViewConfig = z.infer<typeof issueViewConfigSchema>;
+export type IssueSortField = (typeof ISSUE_SORT_FIELDS)[number];
+export type IssueGraphGroupBy = (typeof ISSUE_GRAPH_GROUP_BY)[number];
+export type CreateIssueViewInput = z.infer<typeof createIssueViewSchema>;
+export type UpdateIssueViewInput = z.infer<typeof updateIssueViewSchema>;
+
 export type CreateTagInput = z.infer<typeof createTagSchema>;
 export type UpdateTagInput = z.infer<typeof updateTagSchema>;
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;

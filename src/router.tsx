@@ -15,6 +15,7 @@ export function getRouter() {
 		scrollRestoration: true,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
+		defaultStaleTime: 60_000,
 		defaultPendingComponent: PageLoading,
 		defaultErrorComponent: PageError,
 		defaultNotFoundComponent: () => <PageNotFound />,

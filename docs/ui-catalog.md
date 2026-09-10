@@ -51,7 +51,7 @@ Shared layout classes (critical CSS in root): `.dashboard-page`, `.detail-form-l
 
 Path-only layouts (outlet only): [`app.$code.issues.tsx`](../src/routes/app.$code.issues.tsx), [`app.$code.documents.tsx`](../src/routes/app.$code.documents.tsx).
 
-Search on overview + issues: `view` (`list` \| `board` \| `gantt`), `status[]`, `priority[]`, `tag[]` — [`src/features/issues/view-search.ts`](../src/features/issues/view-search.ts).
+Search on overview + issues: `view` (`list` \| `board` \| `gantt`), `viewId`, `status[]`, `priority[]`, `tag[]`, `sort`, `dir`, `graph`, `groupBy` — [`src/features/issues/view-search.ts`](../src/features/issues/view-search.ts).
 
 ---
 
@@ -88,13 +88,15 @@ Multi-tenant spaces (`code`, `name`, `color`). List/create/switch.
 
 ### Issues
 
-Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Priority: `LOW`–`URGENT` or none. Views: list table, board, Gantt. Filters in URL.
+Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Priority: `LOW`–`URGENT` or none. Layouts: list table, board, Gantt. Named workspace views persist default filters, sort, layout, and graph. Session edits stay in the URL until **Update view**.
 
 | Piece | File |
 |-------|------|
 | List + create | [`IssueList.tsx`](../src/features/issues/components/IssueList.tsx) |
+| Saved views | [`IssueViewControls.tsx`](../src/features/issues/components/IssueViewControls.tsx), [`IssueSaveViewDialog.tsx`](../src/features/issues/components/IssueSaveViewDialog.tsx) |
 | View tabs | [`IssueViewTabs.tsx`](../src/features/issues/components/IssueViewTabs.tsx) |
 | Filters | [`IssueFiltersPopover.tsx`](../src/features/issues/components/IssueFiltersPopover.tsx) |
+| Chart panel | [`IssueChartPanel.tsx`](../src/features/issues/components/IssueChartPanel.tsx) (lazy; Recharts via [`chart.tsx`](../src/components/ui/chart.tsx)) |
 | Table | [`IssueTableView.tsx`](../src/features/issues/components/IssueTableView.tsx), [`issue-columns.tsx`](../src/features/issues/components/issue-columns.tsx) |
 | Board | [`IssueBoardView.tsx`](../src/features/issues/components/IssueBoardView.tsx), [`reorder-issue.ts`](../src/features/issues/reorder-issue.ts) |
 | Gantt | [`IssueGanttView.tsx`](../src/features/issues/components/IssueGanttView.tsx) (lazy) |
@@ -105,7 +107,7 @@ Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Prio
 | Comments | [`IssueComments.tsx`](../src/features/issues/components/IssueComments.tsx) |
 | Linked docs | [`IssueLinkedDocuments.tsx`](../src/features/issues/components/IssueLinkedDocuments.tsx) |
 | Patch helpers | [`patch-issue.ts`](../src/features/issues/patch-issue.ts) |
-| Server | [`issues.functions.ts`](../src/lib/functions/issues.functions.ts), [`comments.functions.ts`](../src/lib/functions/comments.functions.ts), [`tags.functions.ts`](../src/lib/functions/tags.functions.ts), [`files.functions.ts`](../src/lib/functions/files.functions.ts) |
+| Server | [`issues.functions.ts`](../src/lib/functions/issues.functions.ts), [`issue-views.functions.ts`](../src/lib/functions/issue-views.functions.ts), [`comments.functions.ts`](../src/lib/functions/comments.functions.ts), [`tags.functions.ts`](../src/lib/functions/tags.functions.ts), [`files.functions.ts`](../src/lib/functions/files.functions.ts) |
 
 **Screens:** overview, issues list, issue detail. **Redo:** wrap views and editor; do not Figma-regenerate TipTap/Gantt/board.
 
@@ -185,11 +187,12 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 | card | [`card.tsx`](../src/components/ui/card.tsx) | Card, Header, Title, Description, Content, Footer, Action | Auth, create workspace, invite, API keys | keep |
 | tabs | [`tabs.tsx`](../src/components/ui/tabs.tsx) | TabsList `variant`: default, line | Issue views, settings | keep |
 | table | [`table.tsx`](../src/components/ui/table.tsx) | Table, Header, Body, Row, Head, Cell, Caption | Via DataTable | keep |
+| chart | [`chart.tsx`](../src/components/ui/chart.tsx) | ChartContainer, Tooltip, Legend, Style | Issue chart panel | keep |
 | data-table | [`data-table.tsx`](../src/components/ui/data-table.tsx) | `table`, `emptyMessage` | Workspaces, issues list, documents, members | keep |
 | dropdown-menu | [`dropdown-menu.tsx`](../src/components/ui/dropdown-menu.tsx) | | UserMenu, detail overflow, columns | keep |
 | popover | [`popover.tsx`](../src/components/ui/popover.tsx) | | Sidebar switcher, filters, tags, links, columns | keep |
 | tooltip | [`tooltip.tsx`](../src/components/ui/tooltip.tsx) | | Editor table toolbar; Sidebar internals | keep |
-| dialog | [`dialog.tsx`](../src/components/ui/dialog.tsx) | Dialog, Content, Header, Footer, … | *none yet* | unused |
+| dialog | [`dialog.tsx`](../src/components/ui/dialog.tsx) | Dialog, Content, Header, Footer, … | Save / rename issue views | keep |
 | alert-dialog | [`alert-dialog.tsx`](../src/components/ui/alert-dialog.tsx) | **Destructive confirm only** | Issue/doc delete, comments, members, API keys, workspace delete | keep |
 | sheet | [`sheet.tsx`](../src/components/ui/sheet.tsx) | | Sidebar mobile only | keep |
 | breadcrumb | [`breadcrumb.tsx`](../src/components/ui/breadcrumb.tsx) | | Issue + document detail | keep |
@@ -206,7 +209,7 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 |----|------|------|---------|--------|
 | logo | [`Logo.tsx`](../src/components/Logo.tsx) | Wordmark | Landing, sign-in, sign-up | wrap |
 | landing-navbar | [`LandingNavbar.tsx`](../src/components/LandingNavbar.tsx) | Public header | `/` | wrap |
-| app-sidebar | [`AppSidebar.tsx`](../src/components/AppSidebar.tsx) | Nav: overview, issues, documents, settings; workspace switch | `/app/$code/*` | wrap |
+| app-sidebar | [`AppSidebar.tsx`](../src/components/AppSidebar.tsx) | Nav: overview, issues, saved views, documents, settings; workspace switch | `/app/$code/*` | wrap |
 | user-menu | [`UserMenu.tsx`](../src/components/UserMenu.tsx) | Account, API keys, sign out | `/app`, `/app/account`, sidebar footer | wrap |
 | sign-in-form | [`SignInForm.tsx`](../src/components/SignInForm.tsx) | Email/password | `/sign-in` | wrap |
 | sign-up-form | [`SignUpForm.tsx`](../src/components/SignUpForm.tsx) | Registration | `/sign-up` | wrap |
@@ -220,7 +223,7 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 
 Grouped by [features](#4-features). Treat as product surfaces: Query + server functions stay; visual chrome can change.
 
-**Issues:** IssueList, IssueViewTabs, IssueFiltersPopover, IssueTableView, IssueBoardView, IssueGanttView, IssueDetailForm, IssueEditor, TableToolbar, SlashCommandList, MermaidNodeView, IssueBadges, IssueTags, IssueTagBadge, IssueListTags, IssueComments, IssueLinkedDocuments.
+**Issues:** IssueList, IssueViewControls, IssueSaveViewDialog, IssueViewTabs, IssueFiltersPopover, IssueChartPanel, IssueTableView, IssueBoardView, IssueGanttView, IssueDetailForm, IssueEditor, TableToolbar, SlashCommandList, MermaidNodeView, IssueBadges, IssueTags, IssueTagBadge, IssueListTags, IssueComments, IssueLinkedDocuments.
 
 **Documents:** DocumentList, DocumentDetailForm, DocumentTags, DocumentLinkedIssues.
 
@@ -245,4 +248,4 @@ Grouped by [features](#4-features). Treat as product surfaces: Query + server fu
 7. TipTap, Mermaid, Gantt: client-only / lazy (`lazyImport`); do not SSR-mount.
 8. Do not invent REST `/api/*` for UI data. Use existing `createServerFn` + Query options.
 9. Tokens: `bg-background`, `text-muted-foreground`, `border-border`, `font-heading`, `font-mono`. Avoid new hex except workspace/tag colors already in data.
-10. Unused primitives (checkbox, slider, dialog, ui/sonner): use them if they fit before adding another package.
+10. Unused primitives (checkbox, slider, ui/sonner): use them if they fit before adding another package.

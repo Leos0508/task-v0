@@ -1,11 +1,17 @@
 import { queryOptions } from "@tanstack/react-query";
 import { listIssueCommentsFn } from "#/lib/functions/comments.functions";
+import { listIssueViewsFn } from "#/lib/functions/issue-views.functions";
 import { listIssuesFn } from "#/lib/functions/issues.functions";
 import { listTagsFn } from "#/lib/functions/tags.functions";
 
 export const issueKeys = {
 	all: (workspaceCode: string) =>
 		["workspaces", workspaceCode, "issues"] as const,
+};
+
+export const issueViewKeys = {
+	all: (workspaceCode: string) =>
+		["workspaces", workspaceCode, "issue-views"] as const,
 };
 
 export const tagKeys = {
@@ -22,6 +28,7 @@ export function issuesQueryOptions(workspaceCode: string) {
 	return queryOptions({
 		queryKey: issueKeys.all(workspaceCode),
 		queryFn: () => listIssuesFn({ data: { code: workspaceCode } }),
+		staleTime: 30_000,
 	});
 }
 
@@ -29,6 +36,15 @@ export function tagsQueryOptions(workspaceCode: string) {
 	return queryOptions({
 		queryKey: tagKeys.all(workspaceCode),
 		queryFn: () => listTagsFn({ data: { code: workspaceCode } }),
+		staleTime: 30_000,
+	});
+}
+
+export function issueViewsQueryOptions(workspaceCode: string) {
+	return queryOptions({
+		queryKey: issueViewKeys.all(workspaceCode),
+		queryFn: () => listIssueViewsFn({ data: { code: workspaceCode } }),
+		staleTime: 30_000,
 	});
 }
 

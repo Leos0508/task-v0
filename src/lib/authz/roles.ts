@@ -18,6 +18,14 @@ export function canDeleteWorkspace(role: WorkspaceRole) {
 	return role === "OWNER";
 }
 
+export function canManageIssueView(
+	role: WorkspaceRole,
+	createdById: string,
+	userId: string,
+) {
+	return createdById === userId || hasAtLeast(role, "ADMIN");
+}
+
 export function canInviteRole(actor: WorkspaceRole, target: WorkspaceRole) {
 	if (target === "OWNER") return false;
 	if (actor === "OWNER") return target === "ADMIN" || target === "MEMBER";
