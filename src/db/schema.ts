@@ -48,7 +48,6 @@ export const account = pgTable(
 	"account",
 	{
 		id: text("id").primaryKey(),
-		issuer: text("issuer").notNull(),
 		accountId: text("account_id").notNull(),
 		providerId: text("provider_id").notNull(),
 		userId: text("user_id")
@@ -67,8 +66,8 @@ export const account = pgTable(
 			.notNull(),
 	},
 	(table) => [
-		uniqueIndex("account_issuer_accountId_uidx").on(
-			table.issuer,
+		uniqueIndex("account_providerId_accountId_uidx").on(
+			table.providerId,
 			table.accountId,
 		),
 		index("account_userId_idx").on(table.userId),
@@ -452,6 +451,36 @@ export const documentHistory = pgTable(
 	],
 );
 
+export const issueView = pgTable(
+	"issue_view",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		name: text("name").notNull(),
+		config: jsonb("config").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+		workspaceId: text("workspace_id")
+			.notNull()
+			.references(() => workspace.id, { onDelete: "cascade" }),
+		createdById: text("created_by_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+	},
+	(table) => [
+		uniqueIndex("issue_view_workspaceId_name_uidx").on(
+			table.workspaceId,
+			table.name,
+		),
+		index("issue_view_workspaceId_idx").on(table.workspaceId),
+		index("issue_view_createdById_idx").on(table.createdById),
+	],
+);
+
 export const workspaceFile = pgTable(
 	"workspace_file",
 	{
@@ -490,6 +519,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	issueHistory: many(issueHistory),
 	documentHistory: many(documentHistory),
 	uploadedFiles: many(workspaceFile),
+	issueViewsCreated: many(issueView),
 }));
 
 export const apikeyRelations = relations(apikey, ({ one }) => ({
@@ -520,6 +550,7 @@ export const workspaceRelations = relations(workspace, ({ many }) => ({
 	documents: many(document),
 	tags: many(tag),
 	files: many(workspaceFile),
+	issueViews: many(issueView),
 }));
 
 export const workspaceUserRelations = relations(workspaceUser, ({ one }) => ({
@@ -632,6 +663,17 @@ export const issueHistoryRelations = relations(issueHistory, ({ one }) => ({
 	}),
 	actor: one(user, {
 		fields: [issueHistory.actorId],
+		references: [user.id],
+	}),
+}));
+
+export const issueViewRelations = relations(issueView, ({ one }) => ({
+	workspace: one(workspace, {
+		fields: [issueView.workspaceId],
+		references: [workspace.id],
+	}),
+	createdBy: one(user, {
+		fields: [issueView.createdById],
 		references: [user.id],
 	}),
 }));

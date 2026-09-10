@@ -2,11 +2,15 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import PageNotFound from "#/components/PageNotFound";
-import { getAuthSession } from "#/lib/auth.functions";
+import { authSessionQueryOptions } from "#/features/auth/queries";
 
 export const Route = createFileRoute("/app")({
-	beforeLoad: async ({ location }) => {
-		const session = await getAuthSession();
+	staleTime: 60_000,
+	shouldReload: false,
+	beforeLoad: async ({ context, location }) => {
+		const session = await context.queryClient.ensureQueryData(
+			authSessionQueryOptions,
+		);
 
 		if (!session) {
 			throw redirect({

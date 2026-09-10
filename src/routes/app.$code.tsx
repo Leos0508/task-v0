@@ -13,15 +13,20 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "#/components/ui/sidebar";
-import { workspacesQueryOptions } from "#/features/workspaces/queries";
-import { getWorkspaceAccessFn } from "#/lib/functions/workspaces.functions";
+import { issueViewsQueryOptions } from "#/features/issues/queries";
+import {
+	workspaceAccessQueryOptions,
+	workspacesQueryOptions,
+} from "#/features/workspaces/queries";
 
 export const Route = createFileRoute("/app/$code")({
-	beforeLoad: async ({ params, location }) => {
+	staleTime: 60_000,
+	shouldReload: false,
+	beforeLoad: async ({ context, params, location }) => {
 		try {
-			const access = await getWorkspaceAccessFn({
-				data: { code: params.code },
-			});
+			const access = await context.queryClient.ensureQueryData(
+				workspaceAccessQueryOptions(params.code),
+			);
 			return { access };
 		} catch (error) {
 			if (error instanceof Error && error.message === "Unauthorized") {
@@ -34,7 +39,12 @@ export const Route = createFileRoute("/app/$code")({
 		}
 	},
 	loader: async ({ context }) => {
-		await context.queryClient.ensureQueryData(workspacesQueryOptions);
+		await Promise.all([
+			context.queryClient.ensureQueryData(workspacesQueryOptions),
+			context.queryClient.ensureQueryData(
+				issueViewsQueryOptions(context.access.workspace.code),
+			),
+		]);
 		return { access: context.access };
 	},
 	pendingComponent: PageLoading,

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react";
 import { useState } from "react";
@@ -13,6 +14,8 @@ import {
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "#/components/ui/sidebar";
+import { authKeys } from "#/features/auth/queries";
+import { workspaceKeys } from "#/features/workspaces/queries";
 import { authClient } from "#/lib/auth-client";
 
 export type UserMenuUser = {
@@ -64,6 +67,7 @@ export default function UserMenu({
 }: UserMenuProps) {
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
 	async function handleSignOut() {
 		setIsSigningOut(true);
@@ -72,6 +76,8 @@ export default function UserMenu({
 				{},
 				{
 					onSuccess: () => {
+						queryClient.removeQueries({ queryKey: authKeys.session });
+						queryClient.removeQueries({ queryKey: workspaceKeys.all });
 						toast.success("Sign out success");
 						navigate({ to: "/sign-in" });
 					},
