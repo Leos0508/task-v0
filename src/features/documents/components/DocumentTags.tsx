@@ -16,6 +16,7 @@ import {
 	tagKeys,
 	tagsQueryOptions,
 } from "#/features/issues/queries";
+import { TAG_NAME_MAX } from "#/features/issues/schema";
 import {
 	getRandomTagColorId,
 	TAG_COLORS,
@@ -65,6 +66,7 @@ export default function DocumentTags({
 
 	const canCreate =
 		needle.length > 0 &&
+		needle.length <= TAG_NAME_MAX &&
 		!catalog.some((tag) => tag.name.toLowerCase() === needle.toLowerCase());
 
 	async function invalidate() {
@@ -172,6 +174,7 @@ export default function DocumentTags({
 							value={query}
 							onChange={(event) => setQuery(event.target.value)}
 							placeholder="Search or create tag…"
+							maxLength={TAG_NAME_MAX}
 						/>
 						<div className="mt-2 max-h-56 overflow-y-auto">
 							{available.length === 0 && !canCreate ? (

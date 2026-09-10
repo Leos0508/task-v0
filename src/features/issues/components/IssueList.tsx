@@ -15,6 +15,7 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { Switch } from "#/components/ui/switch";
+import IssueBoardCardPopover from "#/features/issues/components/IssueBoardCardPopover";
 import IssueBoardView from "#/features/issues/components/IssueBoardView";
 import IssueFiltersPopover from "#/features/issues/components/IssueFiltersPopover";
 import IssueTableView from "#/features/issues/components/IssueTableView";
@@ -207,7 +208,12 @@ export default function IssueList({
 						filters={filters}
 						onFiltersChange={(next) => onSearchChange({ ...search, ...next })}
 					/>
-					{search.view === "board" ? null : (
+					{search.view === "board" ? (
+						<IssueBoardCardPopover
+							card={search.card}
+							onChange={(card) => onSearchChange({ ...search, card })}
+						/>
+					) : (
 						<ListSortPopover
 							fields={SORT_FIELDS}
 							sort={search.sort}
@@ -271,7 +277,7 @@ export default function IssueList({
 			<div
 				className={cn(
 					"min-h-0 min-w-0 flex-1",
-					search.view === "gantt" ? "overflow-hidden" : "overflow-auto",
+					search.view === "list" ? "overflow-auto" : "overflow-hidden",
 				)}
 			>
 				{search.view === "list" ? (
@@ -288,6 +294,7 @@ export default function IssueList({
 					<IssueBoardView
 						workspaceCode={workspaceCode}
 						issues={displayIssues}
+						cardFields={search.card}
 					/>
 				) : null}
 				{search.view === "gantt" ? (

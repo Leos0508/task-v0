@@ -1,18 +1,24 @@
 import type { User } from "better-auth";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
-import { issue } from "#/db/schema";
+import { type IssueStatus, issue } from "#/db/schema";
 import type { ReorderIssueInput } from "#/features/issues/schema";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
 import { insertIndex, RANK_GAP, rankBetween } from "#/lib/issue-rank";
 import { AppError } from "#/types/result";
+
+export type IssuePlacement = {
+	id: string;
+	rank: number;
+	status: IssueStatus;
+};
 
 export async function reorderIssue(
 	sessionUser: User,
 	workspaceCode: string,
 	issueNumber: number,
 	input: ReorderIssueInput,
-) {
+): Promise<{ number: number; placements: IssuePlacement[] }> {
 	const { workspace } = await getWorkspaceAccess(sessionUser, workspaceCode);
 
 	const [moving] = await db
@@ -55,7 +61,7 @@ export async function reorderIssue(
 	}
 
 	if (currentIdx !== -1 && insertAt === currentIdx) {
-		return { number: moving.number };
+		return { number: moving.number, placements: [] };
 	}
 
 	const before = others[insertAt - 1]?.rank ?? null;
@@ -67,7 +73,10 @@ export async function reorderIssue(
 			.update(issue)
 			.set({ rank: nextRank, status: input.status })
 			.where(eq(issue.id, moving.id));
-		return { number: moving.number };
+		return {
+			number: moving.number,
+			placements: [{ id: moving.id, rank: nextRank, status: input.status }],
+		};
 	}
 
 	const next = [...others];
@@ -77,15 +86,18 @@ export async function reorderIssue(
 		number: moving.number,
 	});
 
+	const placements: IssuePlacement[] = [];
 	for (let i = 0; i < next.length; i += 1) {
+		const rank = (i + 1) * RANK_GAP;
 		await db
 			.update(issue)
 			.set({
-				rank: (i + 1) * RANK_GAP,
+				rank,
 				status: input.status,
 			})
 			.where(eq(issue.id, next[i].id));
+		placements.push({ id: next[i].id, rank, status: input.status });
 	}
 
-	return { number: moving.number };
+	return { number: moving.number, placements };
 }
