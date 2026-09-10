@@ -1,5 +1,7 @@
 # Mock UI plan — editorial aesthetic, current layout
 
+> The `/mock` route tree was removed after this look shipped on production. This document is the original plan (kept as written).
+
 ## Goal
 
 Build a **clickable mock** of the existing app so we can judge a visual redo. Take the **look** from `docs/design-reference/` (warm paper, serif titles, pastel tags, black pill actions). Keep the **information architecture and page layout** from [`docs/ui-catalog.md`](./ui-catalog.md). No API, no auth, no `createServerFn`. Static fixtures only.

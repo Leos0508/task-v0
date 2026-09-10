@@ -8,7 +8,11 @@ import AppSidebar from "#/components/AppSidebar";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import PageNotFound from "#/components/PageNotFound";
-import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from "#/components/ui/sidebar";
 import { workspacesQueryOptions } from "#/features/workspaces/queries";
 import { getWorkspaceAccessFn } from "#/lib/functions/workspaces.functions";
 
@@ -57,6 +61,10 @@ function WorkspaceLayout() {
 		<SidebarProvider>
 			<AppSidebar workspace={access.workspace} user={access.user} />
 			<SidebarInset>
+				<div className="flex h-12 shrink-0 items-center gap-2 border-b px-3 md:hidden">
+					<SidebarTrigger />
+					<span className="font-heading text-lg font-semibold">Task</span>
+				</div>
 				<Outlet />
 			</SidebarInset>
 		</SidebarProvider>
