@@ -1,12 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	stripSearchParams,
+	useNavigate,
+} from "@tanstack/react-router";
 import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import { Separator } from "#/components/ui/separator";
 import DocumentList from "#/features/documents/components/DocumentList";
 import { documentsQueryOptions } from "#/features/documents/queries";
+import {
+	documentSearchDefaults,
+	documentSearchSchema,
+} from "#/features/documents/schema";
 import { tagsQueryOptions } from "#/features/issues/queries";
 
 export const Route = createFileRoute("/app/$code/documents/")({
+	validateSearch: documentSearchSchema,
+	search: {
+		middlewares: [stripSearchParams(documentSearchDefaults)],
+	},
 	loader: async ({ context, params }) => {
 		await Promise.all([
 			context.queryClient.ensureQueryData(documentsQueryOptions(params.code)),
@@ -21,6 +33,8 @@ export const Route = createFileRoute("/app/$code/documents/")({
 
 function DocumentsPage() {
 	const { code } = Route.useLoaderData();
+	const search = Route.useSearch();
+	const navigate = useNavigate({ from: Route.fullPath });
 
 	return (
 		<div className="dashboard-page">
@@ -32,7 +46,17 @@ function DocumentsPage() {
 			</div>
 			<Separator />
 			<div className="flex w-full flex-col overflow-y-auto p-4">
-				<DocumentList workspaceCode={code} />
+				<DocumentList
+					workspaceCode={code}
+					sort={search.sort}
+					dir={search.dir}
+					onSortChange={(next) =>
+						navigate({
+							search: (prev) => ({ ...prev, ...next }),
+							replace: true,
+						})
+					}
+				/>
 			</div>
 		</div>
 	);

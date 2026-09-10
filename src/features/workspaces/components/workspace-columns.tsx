@@ -24,6 +24,7 @@ export const workspaceColumns = columnHelper.columns([
 	columnHelper.accessor("name", {
 		header: "Name",
 		enableSorting: true,
+		sortDescFirst: false,
 		sortFn: "text",
 		cell: ({ row, getValue }) => (
 			<Link

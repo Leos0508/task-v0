@@ -1,47 +1,49 @@
 import {
-  columnFilteringFeature,
-  createFilteredRowModel,
-  createSortedRowModel,
-  createTableHook,
-  filterFn_equalsString,
-  filterFn_includesString,
-  globalFilteringFeature,
-  metaHelper,
-  rowSortingFeature,
-  sortFn_text,
-  tableFeatures,
-  tableOptions,
+	columnFilteringFeature,
+	createFilteredRowModel,
+	createSortedRowModel,
+	createTableHook,
+	filterFn_equalsString,
+	filterFn_includesString,
+	globalFilteringFeature,
+	metaHelper,
+	rowSortingFeature,
+	sortFn_text,
+	tableFeatures,
+	tableOptions,
 } from "@tanstack/react-table";
 
 type DataTableColumnMeta = {
-  className?: string;
+	className?: string;
 };
 
 const dataTableFeatures = tableFeatures({
-  columnFilteringFeature,
-  globalFilteringFeature,
-  rowSortingFeature,
-  filteredRowModel: createFilteredRowModel(),
-  sortedRowModel: createSortedRowModel(),
-  filterFns: {
-    equalsString: filterFn_equalsString,
-    includesString: filterFn_includesString,
-  },
-  sortFns: {
-    text: sortFn_text,
-  },
-  columnMeta: metaHelper<DataTableColumnMeta>(),
+	columnFilteringFeature,
+	globalFilteringFeature,
+	rowSortingFeature,
+	filteredRowModel: createFilteredRowModel(),
+	sortedRowModel: createSortedRowModel(),
+	filterFns: {
+		equalsString: filterFn_equalsString,
+		includesString: filterFn_includesString,
+	},
+	sortFns: {
+		text: sortFn_text,
+	},
+	columnMeta: metaHelper<DataTableColumnMeta>(),
 });
 
 export const { useAppTable, createAppColumnHelper } = createTableHook(
-  tableOptions({
-    features: dataTableFeatures,
-    defaultColumn: {
-      enableSorting: false,
-      enableColumnFilter: false,
-    },
-    globalFilterFn: filterFn_includesString,
-  }),
+	tableOptions({
+		features: dataTableFeatures,
+		defaultColumn: {
+			enableSorting: false,
+			enableColumnFilter: false,
+		},
+		enableSortingRemoval: false,
+		enableMultiSort: false,
+		globalFilterFn: filterFn_includesString,
+	}),
 );
 
 export type DataTableFeatures = typeof dataTableFeatures;

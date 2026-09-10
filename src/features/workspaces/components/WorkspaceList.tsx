@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { PlusIcon, SearchIcon } from "lucide-react";
+import ListSortPopover from "#/components/ListSortPopover";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
 import { DataTable } from "#/components/ui/data-table";
@@ -9,15 +10,6 @@ import {
 	InputGroupAddon,
 	InputGroupInput,
 } from "#/components/ui/input-group";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
 import { workspaceColumns } from "#/features/workspaces/components/workspace-columns";
 import { useAppTable } from "#/lib/data-table";
 import type { WorkspaceListItem } from "#/types/workspace";
@@ -56,23 +48,17 @@ export default function WorkspaceList() {
 		<div className="flex flex-col bg-background min-h-40 text-foreground w-full max-w-5xl">
 			<div className="w-full flex items-center justify-between gap-8">
 				<div className="flex-1 flex items-center gap-2">
-					<Select
-						value={sort}
-						onValueChange={(value) =>
-							table.setSorting([{ id: "name", desc: value === "desc" }])
+					<ListSortPopover
+						fields={[{ value: "name", label: "Name" }]}
+						sort="name"
+						dir={sort}
+						defaultSort="name"
+						defaultDir="asc"
+						dirLabels={{ asc: "A-Z", desc: "Z-A" }}
+						onChange={(next) =>
+							table.setSorting([{ id: "name", desc: next.dir === "desc" }])
 						}
-					>
-						<SelectTrigger>
-							<SelectValue placeholder="Sort By" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Sort By</SelectLabel>
-								<SelectItem value="asc">A-Z</SelectItem>
-								<SelectItem value="desc">Z-A</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					/>
 				</div>
 				<div className="flex items-center gap-2">
 					<Button asChild>

@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
+import ListSortHeader from "#/components/ListSortHeader";
 import {
 	Popover,
 	PopoverContent,
@@ -14,23 +15,45 @@ import {
 } from "#/features/issues/components/IssueBadges";
 import IssueListTags from "#/features/issues/components/IssueListTags";
 import { patchIssue } from "#/features/issues/patch-issue";
+import type { IssueSortField } from "#/features/issues/schema";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
 import { createAppColumnHelper } from "#/lib/data-table";
 import { cn } from "#/lib/utils";
 
 const columnHelper = createAppColumnHelper<IssueListItem>();
 
-export function createIssueColumns(workspaceCode: string) {
+function sortHeader(
+	label: string,
+	field: IssueSortField,
+	sort: IssueSortField,
+	dir: "asc" | "desc",
+	onSort: (field: IssueSortField) => void,
+) {
+	return (
+		<ListSortHeader
+			label={label}
+			direction={sort === field ? dir : false}
+			onClick={() => onSort(field)}
+		/>
+	);
+}
+
+export function createIssueColumns(
+	workspaceCode: string,
+	sort: IssueSortField,
+	dir: "asc" | "desc",
+	onSort: (field: IssueSortField) => void,
+) {
 	return columnHelper.columns([
 		columnHelper.accessor("number", {
-			header: "ID",
+			header: () => sortHeader("ID", "number", sort, dir, onSort),
 			cell: ({ getValue }) => `#${getValue()}`,
 			meta: {
 				className: "w-[1%] whitespace-nowrap font-mono text-muted-foreground",
 			},
 		}),
 		columnHelper.accessor("title", {
-			header: "Title",
+			header: () => sortHeader("Title", "title", sort, dir, onSort),
 			cell: ({ row, getValue }) => (
 				<Link
 					to="/app/$code/issues/$issueNumber"
@@ -46,7 +69,7 @@ export function createIssueColumns(workspaceCode: string) {
 			meta: { className: "w-full whitespace-nowrap" },
 		}),
 		columnHelper.accessor("status", {
-			header: "Status",
+			header: () => sortHeader("Status", "status", sort, dir, onSort),
 			enableColumnFilter: true,
 			filterFn: "equalsString",
 			cell: ({ row }) => (
@@ -55,7 +78,7 @@ export function createIssueColumns(workspaceCode: string) {
 			meta: { className: "w-[1%] whitespace-nowrap" },
 		}),
 		columnHelper.accessor("priority", {
-			header: "Priority",
+			header: () => sortHeader("Priority", "priority", sort, dir, onSort),
 			cell: ({ row }) => (
 				<IssuePriorityCell workspaceCode={workspaceCode} issue={row.original} />
 			),
@@ -71,7 +94,7 @@ export function createIssueColumns(workspaceCode: string) {
 			meta: { className: "w-[1%] whitespace-nowrap" },
 		}),
 		columnHelper.accessor("updatedAt", {
-			header: "Last edited",
+			header: () => sortHeader("Last edited", "updatedAt", sort, dir, onSort),
 			cell: ({ getValue }) => formatLastEdited(getValue()),
 			meta: { className: "w-[1%] whitespace-nowrap text-muted-foreground" },
 		}),
