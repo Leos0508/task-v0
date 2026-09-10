@@ -77,14 +77,21 @@ export type ReorderIssueInput = z.infer<typeof reorderIssueSchema>;
 
 export const tagColorSchema = z.enum(TAG_COLOR_IDS);
 
+export const TAG_NAME_MAX = 50;
+
 export const createTagSchema = z.object({
-	name: z.string().trim().min(1, "Name is required").max(40),
+	name: z.string().trim().min(1, "Name is required").max(TAG_NAME_MAX),
 	color: tagColorSchema.optional(),
 });
 
 export const updateTagSchema = z
 	.object({
-		name: z.string().trim().min(1, "Name is required").max(40).optional(),
+		name: z
+			.string()
+			.trim()
+			.min(1, "Name is required")
+			.max(TAG_NAME_MAX)
+			.optional(),
 		color: tagColorSchema.optional(),
 	})
 	.refine((value) => value.name !== undefined || value.color !== undefined, {
@@ -118,6 +125,15 @@ export const ISSUE_SORT_FIELDS = [
 
 export const ISSUE_GRAPH_GROUP_BY = ["status", "priority", "tag"] as const;
 
+export const ISSUE_BOARD_CARD_FIELDS = ["priority", "dates", "tags"] as const;
+
+export const defaultBoardCardFields = ["priority", "tags"] as const;
+
+export function normalizeBoardCardFields(fields: readonly string[]) {
+	const selected = new Set(fields);
+	return ISSUE_BOARD_CARD_FIELDS.filter((field) => selected.has(field));
+}
+
 export const issueViewConfigSchema = z.object({
 	layout: z.enum(["list", "board", "gantt"]),
 	filters: z.object({
@@ -133,6 +149,13 @@ export const issueViewConfigSchema = z.object({
 		visible: z.boolean(),
 		groupBy: z.enum(ISSUE_GRAPH_GROUP_BY),
 	}),
+	board: z
+		.object({
+			card: z
+				.array(z.enum(["priority", "status", "dates", "tags"]))
+				.transform(normalizeBoardCardFields),
+		})
+		.default({ card: [...defaultBoardCardFields] }),
 });
 
 export const defaultIssueViewConfig = {
@@ -140,6 +163,7 @@ export const defaultIssueViewConfig = {
 	filters: { status: [], priority: [], tag: [] },
 	sort: { field: "number" as const, direction: "desc" as const },
 	graph: { visible: false, groupBy: "status" as const },
+	board: { card: [...defaultBoardCardFields] },
 };
 
 export const issueViewNameSchema = z
@@ -165,6 +189,7 @@ export const updateIssueViewSchema = z
 export type IssueViewConfig = z.infer<typeof issueViewConfigSchema>;
 export type IssueSortField = (typeof ISSUE_SORT_FIELDS)[number];
 export type IssueGraphGroupBy = (typeof ISSUE_GRAPH_GROUP_BY)[number];
+export type IssueBoardCardField = (typeof ISSUE_BOARD_CARD_FIELDS)[number];
 export type CreateIssueViewInput = z.infer<typeof createIssueViewSchema>;
 export type UpdateIssueViewInput = z.infer<typeof updateIssueViewSchema>;
 

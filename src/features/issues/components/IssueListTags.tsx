@@ -25,9 +25,11 @@ export default function IssueListTags({
 
 	if (tags.length <= VISIBLE_TAG_LIMIT) {
 		return (
-			<div className="flex flex-wrap gap-1">
+			<div className="flex min-w-0 max-w-full flex-wrap gap-1">
 				{tags.map((tag) => (
-					<span key={tag.id}>{renderTag(tag)}</span>
+					<span key={tag.id} className="min-w-0 max-w-full">
+						{renderTag(tag)}
+					</span>
 				))}
 			</div>
 		);
@@ -45,13 +47,10 @@ export default function IssueListTags({
 					<Badge variant="secondary">+{tags.length}</Badge>
 				</button>
 			</PopoverTrigger>
-			<PopoverContent
-				align="start"
-				className="w-auto max-w-64 p-2"
-			>
-				<ul className="flex flex-wrap gap-1">
+			<PopoverContent align="start" className="w-auto max-w-64 p-2">
+				<ul className="flex max-w-full min-w-0 flex-wrap gap-1">
 					{tags.map((tag) => (
-						<li key={tag.id} className="list-none">
+						<li key={tag.id} className="min-w-0 max-w-full list-none">
 							{renderTag(tag)}
 						</li>
 					))}

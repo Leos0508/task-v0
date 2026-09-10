@@ -26,14 +26,14 @@ export default function IssueTagBadge({
 					: { backgroundColor: color.bg, color: color.fg }
 			}
 			className={cn(
-				"rounded-full border-transparent font-normal",
+				"max-w-full min-w-0 shrink rounded-full border-transparent font-normal",
 				tone === "accent" &&
 					"border-transparent bg-accent text-accent-foreground",
 				onRemove && "pr-0.5",
 				className,
 			)}
 		>
-			{tag.name}
+			<span className="truncate">{tag.name}</span>
 			{onRemove ? (
 				<button
 					type="button"

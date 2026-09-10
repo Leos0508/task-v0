@@ -31,11 +31,18 @@ export const STATUS_LABELS: Record<IssueStatus, string> = {
 	CANCELLED: "Cancelled",
 };
 
-const statusDot: Record<IssueStatus, string> = {
+export const STATUS_DOT: Record<IssueStatus, string> = {
 	TODO: "bg-amber-400/80",
 	IN_PROGRESS: "bg-blue-400/80",
 	DONE: "bg-green-400/80",
 	CANCELLED: "bg-red-400/80",
+};
+
+export const STATUS_COLUMN_TINT: Record<IssueStatus, string> = {
+	TODO: "bg-amber-400/10",
+	IN_PROGRESS: "bg-blue-400/10",
+	DONE: "bg-green-400/10",
+	CANCELLED: "bg-red-400/10",
 };
 
 export const PRIORITY_LABELS: Record<IssuePriority, string> = {
@@ -55,7 +62,7 @@ const priorityIcon: Record<IssuePriority, LucideIcon> = {
 export function StatusBadge({ status }: { status: IssueStatus }) {
 	return (
 		<span className="inline-flex items-center gap-2">
-			<span className={cn("size-3 rounded-full", statusDot[status])} />
+			<span className={cn("size-3 rounded-full", STATUS_DOT[status])} />
 			{STATUS_LABELS[status]}
 		</span>
 	);
@@ -63,14 +70,22 @@ export function StatusBadge({ status }: { status: IssueStatus }) {
 
 export function PriorityBadge({
 	priority,
+	size = "default",
 }: {
 	priority: IssuePriority | null;
+	size?: "default" | "sm";
 }) {
 	const Icon = priority ? priorityIcon[priority] : MinusIcon;
+	const compact = size === "sm";
 
 	return (
-		<span className="inline-flex items-center gap-2">
-			<Icon className="size-4" />
+		<span
+			className={cn(
+				"inline-flex items-center my-0.5",
+				compact ? "gap-1 text-[11px]" : "gap-2",
+			)}
+		>
+			<Icon className={compact ? "size-3" : "size-4"} />
 			<span className="leading-[100%]">
 				{priority ? PRIORITY_LABELS[priority] : "None"}
 			</span>

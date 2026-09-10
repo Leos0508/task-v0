@@ -1,12 +1,15 @@
 import { z } from "zod";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import {
+	defaultBoardCardFields,
 	defaultIssueViewConfig,
 	ISSUE_GRAPH_GROUP_BY,
 	ISSUE_SORT_FIELDS,
+	type IssueBoardCardField,
 	type IssueGraphGroupBy,
 	type IssueSortField,
 	type IssueViewConfig,
+	normalizeBoardCardFields,
 } from "#/features/issues/schema";
 
 export const ISSUE_VIEWS = ["list", "board", "gantt"] as const;
@@ -41,6 +44,11 @@ export const issueViewSearchSchema = z.object({
 		.default(false)
 		.catch(false),
 	groupBy: z.enum(ISSUE_GRAPH_GROUP_BY).default("status").catch("status"),
+	card: z
+		.array(z.enum(["priority", "status", "dates", "tags"]))
+		.default([...defaultBoardCardFields])
+		.catch([...defaultBoardCardFields])
+		.transform(normalizeBoardCardFields),
 });
 
 export type IssueFilters = {
@@ -59,6 +67,7 @@ export type IssueViewSearch = {
 	dir: "asc" | "desc";
 	graph: boolean;
 	groupBy: IssueGraphGroupBy;
+	card: IssueBoardCardField[];
 };
 
 export const emptyIssueFilters: IssueFilters = {
@@ -74,6 +83,7 @@ export const issueSearchDefaults: IssueViewSearch = {
 	dir: "desc",
 	graph: false,
 	groupBy: "status",
+	card: [...defaultBoardCardFields],
 };
 
 export function countIssueFilters(filters: IssueFilters) {
@@ -107,6 +117,9 @@ export function viewConfigFromSearch(search: IssueViewSearch): IssueViewConfig {
 			visible: search.graph,
 			groupBy: search.groupBy,
 		},
+		board: {
+			card: normalizeBoardCardFields(search.card),
+		},
 	};
 }
 
@@ -124,6 +137,7 @@ export function searchFromViewConfig(
 		dir: config.sort.direction,
 		graph: config.graph.visible,
 		groupBy: config.graph.groupBy,
+		card: normalizeBoardCardFields(config.board.card),
 	};
 }
 
@@ -145,6 +159,10 @@ export function isViewSearchDirty(
 		search.groupBy !== config.graph.groupBy ||
 		!sameStringList(search.status, config.filters.status) ||
 		!sameStringList(search.priority, config.filters.priority) ||
-		!sameStringList(search.tag, config.filters.tag)
+		!sameStringList(search.tag, config.filters.tag) ||
+		!sameStringList(
+			normalizeBoardCardFields(search.card),
+			normalizeBoardCardFields(config.board.card),
+		)
 	);
 }

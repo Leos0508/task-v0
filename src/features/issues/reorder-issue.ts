@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { placementInputFromList } from "#/features/issues/board-drop";
 import { issueKeys } from "#/features/issues/queries";
 import type { ReorderIssueInput } from "#/features/issues/schema";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
@@ -10,6 +11,18 @@ import {
 	RANK_GAP,
 	rankBetween,
 } from "#/lib/issue-rank";
+
+type PersistSession = {
+	epoch: number;
+	inflight: boolean;
+	baseline: IssueListItem[] | undefined;
+};
+
+const persistSessions = new Map<string, PersistSession>();
+
+function sessionKey(workspaceCode: string, issueId: string) {
+	return `${workspaceCode}:${issueId}`;
+}
 
 export async function reorderIssueOnBoard(
 	queryClient: QueryClient,
@@ -38,6 +51,14 @@ export async function reorderIssueOnBoard(
 	const after = others[insertAt]?.rank ?? null;
 	const nextRank = rankBetween(before, after) ?? (insertAt + 1) * RANK_GAP;
 
+	const persistKey = sessionKey(workspaceCode, issue.id);
+	let session = persistSessions.get(persistKey);
+	if (!session?.inflight) {
+		session = { epoch: 0, inflight: false, baseline: previous };
+		persistSessions.set(persistKey, session);
+	}
+	session.epoch += 1;
+
 	queryClient.setQueryData<IssueListItem[]>(key, (rows) =>
 		rows?.map((row) =>
 			row.id === issue.id
@@ -45,24 +66,73 @@ export async function reorderIssueOnBoard(
 						...row,
 						status: input.status,
 						rank: nextRank,
-						updatedAt: new Date().toISOString(),
 					}
 				: row,
 		),
 	);
 
-	const result = await reorderIssueFn({
-		data: {
-			workspaceCode,
-			issueNumber: issue.number,
-			input,
-		},
-	});
-	if (!result.success) {
-		queryClient.setQueryData(key, previous);
-		toast.error(result.error.message);
-		return;
-	}
+	void persistBoardReorder(queryClient, workspaceCode, issue.id, issue.number);
+}
 
-	await queryClient.invalidateQueries({ queryKey: key });
+async function persistBoardReorder(
+	queryClient: QueryClient,
+	workspaceCode: string,
+	issueId: string,
+	issueNumber: number,
+) {
+	const persistKey = sessionKey(workspaceCode, issueId);
+	const session = persistSessions.get(persistKey);
+	if (!session || session.inflight) return;
+
+	session.inflight = true;
+	const key = issueKeys.all(workspaceCode);
+
+	try {
+		while (true) {
+			const epoch = session.epoch;
+			const rows = queryClient.getQueryData<IssueListItem[]>(key);
+			const input = rows ? placementInputFromList(rows, issueId) : null;
+			if (!input) {
+				persistSessions.delete(persistKey);
+				return;
+			}
+
+			const result = await reorderIssueFn({
+				data: {
+					workspaceCode,
+					issueNumber,
+					input,
+				},
+			});
+
+			if (session.epoch !== epoch) continue;
+
+			if (!result.success) {
+				queryClient.setQueryData(key, session.baseline);
+				toast.error(result.error.message);
+				persistSessions.delete(persistKey);
+				return;
+			}
+
+			const placements = result.data?.placements ?? [];
+			if (placements.length > 0) {
+				queryClient.setQueryData<IssueListItem[]>(key, (current) => {
+					if (!current) return current;
+					const next = new Map(placements.map((row) => [row.id, row]));
+					return current.map((row) => {
+						const placement = next.get(row.id);
+						return placement
+							? { ...row, rank: placement.rank, status: placement.status }
+							: row;
+					});
+				});
+			}
+
+			persistSessions.delete(persistKey);
+			return;
+		}
+	} finally {
+		const current = persistSessions.get(persistKey);
+		if (current) current.inflight = false;
+	}
 }
