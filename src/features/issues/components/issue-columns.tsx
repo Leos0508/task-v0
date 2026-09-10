@@ -12,7 +12,7 @@ import {
 	STATUSES,
 	StatusBadge,
 } from "#/features/issues/components/IssueBadges";
-import IssueTagBadge from "#/features/issues/components/IssueTagBadge";
+import IssueListTags from "#/features/issues/components/IssueListTags";
 import { patchIssue } from "#/features/issues/patch-issue";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
 import { createAppColumnHelper } from "#/lib/data-table";
@@ -63,19 +63,7 @@ export function createIssueColumns(workspaceCode: string) {
 		}),
 		columnHelper.accessor("tags", {
 			header: "Tags",
-			cell: ({ getValue }) => {
-				const tags = getValue();
-				if (tags.length === 0) {
-					return <span className="text-muted-foreground">—</span>;
-				}
-				return (
-					<div className="flex flex-wrap gap-1">
-						{tags.map((tag) => (
-							<IssueTagBadge key={tag.id} tag={tag} />
-						))}
-					</div>
-				);
-			},
+			cell: ({ getValue }) => <IssueListTags tags={getValue()} />,
 			meta: { className: "min-w-40" },
 		}),
 		columnHelper.accessor("reporterName", {

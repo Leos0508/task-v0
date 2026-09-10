@@ -19,19 +19,20 @@ export default function IssueTagBadge({
 
 	return (
 		<Badge
-			variant={tone === "accent" ? "outline" : "secondary"}
+			variant="outline"
+			style={
+				tone === "accent"
+					? undefined
+					: { backgroundColor: color.bg, color: color.fg }
+			}
 			className={cn(
+				"rounded-full border-transparent font-normal",
 				tone === "accent" &&
 					"border-transparent bg-accent text-accent-foreground",
 				onRemove && "pr-0.5",
 				className,
 			)}
 		>
-			<span
-				aria-hidden
-				className="size-2 shrink-0 rounded-full"
-				style={{ backgroundColor: color.hex }}
-			/>
 			{tag.name}
 			{onRemove ? (
 				<button

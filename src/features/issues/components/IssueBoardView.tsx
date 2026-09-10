@@ -19,7 +19,7 @@ import {
 	STATUS_LABELS,
 	STATUSES,
 } from "#/features/issues/components/IssueBadges";
-import IssueTagBadge from "#/features/issues/components/IssueTagBadge";
+import IssueListTags from "#/features/issues/components/IssueListTags";
 import { reorderIssueOnBoard } from "#/features/issues/reorder-issue";
 import type { IssueListItem } from "#/lib/data/fetch-issues";
 import { compareIssueRank } from "#/lib/issue-rank";
@@ -269,12 +269,7 @@ function BoardCard({
 				</Link>
 				<div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
 					<PriorityBadge priority={issue.priority} />
-					{issue.tags.slice(0, 3).map((tag) => (
-						<IssueTagBadge key={tag.id} tag={tag} />
-					))}
-					{issue.tags.length > 3 ? (
-						<span className="text-[11px]">+{issue.tags.length - 3}</span>
-					) : null}
+					<IssueListTags tags={issue.tags} empty={null} />
 				</div>
 			</div>
 		</div>
