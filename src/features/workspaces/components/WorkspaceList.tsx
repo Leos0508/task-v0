@@ -13,7 +13,7 @@ import {
 import { workspaceColumns } from "#/features/workspaces/components/workspace-columns";
 import { useAppTable } from "#/lib/data-table";
 import type { WorkspaceListItem } from "#/types/workspace";
-import { workspacesQueryOptions } from "../queries";
+import { userQuotaQueryOptions, workspacesQueryOptions } from "../queries";
 
 const EMPTY_WORKSPACES: WorkspaceListItem[] = [];
 const WORKSPACE_TABLE_INITIAL_STATE = {
@@ -30,6 +30,11 @@ function canFilterWorkspaceColumn(column: { id: string }) {
 
 export default function WorkspaceList() {
 	const { data: workspaces } = useQuery(workspacesQueryOptions);
+	const { data: quota } = useQuery(userQuotaQueryOptions);
+	const atWorkspaceLimit =
+		quota != null &&
+		!quota.exempt &&
+		quota.workspaceCount >= quota.workspaceLimit;
 
 	const table = useAppTable({
 		columns: workspaceColumns,
@@ -61,12 +66,23 @@ export default function WorkspaceList() {
 					/>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button asChild>
-						<Link to="/app/create-workspace">
+					{atWorkspaceLimit ? (
+						<Button
+							type="button"
+							disabled
+							title="You can belong to at most 5 workspaces"
+						>
 							New
 							<PlusIcon />
-						</Link>
-					</Button>
+						</Button>
+					) : (
+						<Button asChild>
+							<Link to="/app/create-workspace">
+								New
+								<PlusIcon />
+							</Link>
+						</Button>
+					)}
 					<InputGroup className="w-full max-w-48">
 						<InputGroupInput
 							placeholder="Search"

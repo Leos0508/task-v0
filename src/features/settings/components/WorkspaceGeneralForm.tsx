@@ -1,5 +1,5 @@
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -11,9 +11,11 @@ import {
 	FieldLabel,
 } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
+import { workspaceQuotaQueryOptions } from "#/features/settings/queries";
 import { workspaceKeys } from "#/features/workspaces/queries";
 import { updateWorkspaceSchema } from "#/features/workspaces/schema";
 import { updateWorkspaceFn } from "#/lib/functions/workspaces.functions";
+import { formatStorageBytes } from "#/lib/quota";
 import { getRandomPastelHexColor } from "#/lib/utils";
 
 type WorkspaceGeneralFormProps = {
@@ -31,6 +33,7 @@ export default function WorkspaceGeneralForm({
 }: WorkspaceGeneralFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { data: quota } = useQuery(workspaceQuotaQueryOptions(workspace.code));
 	const form = useForm({
 		defaultValues: {
 			name: workspace.name,
@@ -68,6 +71,12 @@ export default function WorkspaceGeneralForm({
 				form.handleSubmit();
 			}}
 		>
+			{quota ? (
+				<p className="mb-4 text-sm text-muted-foreground">
+					Upload storage {formatStorageBytes(quota.storageBytes)} of{" "}
+					{formatStorageBytes(quota.storageLimit)}
+				</p>
+			) : null}
 			{readOnly && (
 				<p className="text-sm text-muted-foreground mb-4">
 					Only an owner can change workspace name, code, and color.

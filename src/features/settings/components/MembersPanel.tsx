@@ -1,5 +1,5 @@
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -34,7 +34,13 @@ import {
 	revokeInviteFn,
 	updateMemberRoleFn,
 } from "#/lib/functions/members.functions";
-import { inviteKeys, memberKeys } from "../queries";
+import { canAddWorkspaceMember, MEMBER_LIMIT_MESSAGE } from "#/lib/quota";
+import {
+	inviteKeys,
+	memberKeys,
+	quotaKeys,
+	workspaceQuotaQueryOptions,
+} from "../queries";
 import { type InviteMemberInput, inviteMemberSchema } from "../schema";
 
 function getMemberRowId(row: { id: string }) {
@@ -59,6 +65,8 @@ export default function MembersPanel({
 	canManage,
 }: MembersPanelProps) {
 	const queryClient = useQueryClient();
+	const { data: quota } = useQuery(workspaceQuotaQueryOptions(workspaceCode));
+	const canInvite = quota == null || canAddWorkspaceMember(quota);
 
 	const invalidateMembers = useCallback(async () => {
 		await Promise.all([
@@ -67,6 +75,9 @@ export default function MembersPanel({
 			}),
 			queryClient.invalidateQueries({
 				queryKey: inviteKeys.all(workspaceCode),
+			}),
+			queryClient.invalidateQueries({
+				queryKey: quotaKeys.workspace(workspaceCode),
 			}),
 		]);
 	}, [queryClient, workspaceCode]);
@@ -185,10 +196,16 @@ export default function MembersPanel({
 					className="max-w-xl"
 					onSubmit={(e) => {
 						e.preventDefault();
+						if (!canInvite) return;
 						form.handleSubmit();
 					}}
 				>
 					<h3 className="font-medium mb-3">Invite a member</h3>
+					{canInvite ? null : (
+						<p className="mb-3 text-sm text-muted-foreground">
+							{MEMBER_LIMIT_MESSAGE}
+						</p>
+					)}
 					<FieldGroup className="flex-row items-end max-sm:flex-col">
 						<form.Field name="email">
 							{(field) => {
@@ -204,6 +221,7 @@ export default function MembersPanel({
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											placeholder="teammate@email.com"
+											disabled={!canInvite}
 										/>
 										{isInvalid && (
 											<FieldError errors={field.state.meta.errors} />
@@ -221,6 +239,7 @@ export default function MembersPanel({
 										onValueChange={(value) =>
 											field.handleChange(value as "MEMBER" | "ADMIN")
 										}
+										disabled={!canInvite}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -237,7 +256,7 @@ export default function MembersPanel({
 								</Field>
 							)}
 						</form.Field>
-						<Button type="submit" disabled={isSubmitting}>
+						<Button type="submit" disabled={isSubmitting || !canInvite}>
 							{isSubmitting ? (
 								<Loader2Icon className="size-4 animate-spin" />
 							) : (
@@ -249,7 +268,14 @@ export default function MembersPanel({
 			)}
 
 			<div>
-				<h3 className="font-medium mb-3">Members</h3>
+				<h3 className="font-medium mb-3">
+					Members
+					{quota ? (
+						<span className="ml-2 text-sm font-normal text-muted-foreground">
+							{quota.memberCount}/{quota.memberLimit}
+						</span>
+					) : null}
+				</h3>
 				<DataTable table={membersTable} emptyMessage="No members yet." />
 			</div>
 

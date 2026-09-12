@@ -3,6 +3,7 @@ import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import { authSessionQueryOptions } from "#/features/auth/queries";
 import AcceptInviteCard from "#/features/settings/components/AcceptInviteCard";
+import { userQuotaQueryOptions } from "#/features/workspaces/queries";
 import { getInviteByTokenFn } from "#/lib/functions/members.functions";
 
 export const Route = createFileRoute("/invites/$token")({
@@ -17,8 +18,11 @@ export const Route = createFileRoute("/invites/$token")({
 			});
 		}
 	},
-	loader: async ({ params }) => {
-		const invite = await getInviteByTokenFn({ data: { token: params.token } });
+	loader: async ({ context, params }) => {
+		const [invite] = await Promise.all([
+			getInviteByTokenFn({ data: { token: params.token } }),
+			context.queryClient.ensureQueryData(userQuotaQueryOptions),
+		]);
 		return { invite, token: params.token };
 	},
 	pendingComponent: PageLoading,
@@ -41,7 +45,12 @@ function InvitePage() {
 
 	return (
 		<div className="flex h-full w-full items-center justify-center p-6">
-			<AcceptInviteCard token={token} workspaceName={invite.workspaceName} />
+			<AcceptInviteCard
+				token={token}
+				workspaceName={invite.workspaceName}
+				memberCount={invite.memberCount}
+				memberLimit={invite.memberLimit}
+			/>
 		</div>
 	);
 }
