@@ -1,5 +1,5 @@
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { useRef } from "react";
@@ -24,14 +24,17 @@ import {
 	createWorkspaceFn,
 	isWorkspaceCodeAvailableFn,
 } from "#/lib/functions/workspaces.functions";
+import { canJoinMoreWorkspaces, WORKSPACE_LIMIT_MESSAGE } from "#/lib/quota";
 import { getRandomPastelHexColor } from "#/lib/utils";
 import { slugifyWorkspaceCode } from "#/lib/workspace-code";
-import { workspaceKeys } from "../queries";
+import { userQuotaQueryOptions, workspaceKeys } from "../queries";
 import { createWorkspaceSchema } from "../schema";
 
 export default function CreateWorkspaceForm() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const { data: quota } = useQuery(userQuotaQueryOptions);
+	const canCreate = quota == null || canJoinMoreWorkspaces(quota);
 	const codeDirty = useRef(false);
 	const form = useForm({
 		defaultValues: {
@@ -51,6 +54,7 @@ export default function CreateWorkspaceForm() {
 			}
 
 			await queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
+			await queryClient.invalidateQueries({ queryKey: workspaceKeys.quota });
 			toast.success("Workspace created");
 			navigate({
 				to: "/app/$code",
@@ -74,7 +78,9 @@ export default function CreateWorkspaceForm() {
 				<CardHeader>
 					<CardTitle>Create workspace</CardTitle>
 					<CardDescription>
-						Name it, pick a color, and confirm a unique code
+						{canCreate
+							? "Name it, pick a color, and confirm a unique code"
+							: WORKSPACE_LIMIT_MESSAGE}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -213,7 +219,7 @@ export default function CreateWorkspaceForm() {
 						className="w-full"
 						size="lg"
 						type="submit"
-						disabled={isSubmitting}
+						disabled={isSubmitting || !canCreate}
 					>
 						{isSubmitting ? (
 							<Loader2Icon className="size-4 animate-spin" />

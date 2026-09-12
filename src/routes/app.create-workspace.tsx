@@ -4,8 +4,12 @@ import PageError from "#/components/PageError";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
 import CreateWorkspaceForm from "#/features/workspaces/components/CreateWorkspaceForm";
+import { userQuotaQueryOptions } from "#/features/workspaces/queries";
 
 export const Route = createFileRoute("/app/create-workspace")({
+	loader: async ({ context }) => {
+		await context.queryClient.ensureQueryData(userQuotaQueryOptions);
+	},
 	pendingComponent: PageLoading,
 	errorComponent: PageError,
 	component: CreateWorkspacePage,

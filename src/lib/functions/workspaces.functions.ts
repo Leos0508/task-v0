@@ -10,6 +10,7 @@ import {
 import { bootstrapUser } from "#/lib/data/bootstrap-user";
 import { fetchWorkspaces } from "#/lib/data/fetch-workspaces";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import { assertCanJoinWorkspace } from "#/lib/limits";
 import { mapActionError } from "#/lib/map-action-error";
 import { normalizeWorkspaceCode } from "#/lib/workspace-code";
 import { isWorkspaceCodeAvailable } from "#/lib/workspace-code.server";
@@ -65,6 +66,7 @@ export const createWorkspaceFn = createServerFn({ method: "POST" })
 	.validator(createWorkspaceSchema)
 	.handler(async ({ data, context }) => {
 		try {
+			await assertCanJoinWorkspace(context.user.id);
 			const code = normalizeWorkspaceCode(data.code);
 
 			const [created] = await db

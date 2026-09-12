@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import DeleteWorkspaceCard from "#/features/settings/components/DeleteWorkspaceCard";
 import MembersPanel from "#/features/settings/components/MembersPanel";
 import WorkspaceGeneralForm from "#/features/settings/components/WorkspaceGeneralForm";
+import { workspaceQuotaQueryOptions } from "#/features/settings/queries";
 import { canDeleteWorkspace, canManageMembers } from "#/lib/authz/roles";
 import {
 	listInvitesFn,
@@ -19,6 +20,9 @@ export const Route = createFileRoute("/app/$code/settings")({
 		const invites = canManageMembers(access.role)
 			? await listInvitesFn({ data: { code: params.code } })
 			: [];
+		await context.queryClient.ensureQueryData(
+			workspaceQuotaQueryOptions(params.code),
+		);
 
 		return { access, members, invites };
 	},

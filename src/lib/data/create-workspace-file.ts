@@ -10,6 +10,7 @@ import {
 	isDescriptionImageMimeType,
 } from "#/lib/description-image";
 import { getUploadsBucket } from "#/lib/env.server";
+import { assertCanUploadBytes } from "#/lib/limits";
 import { AppError } from "#/types/result";
 
 export async function createWorkspaceFile(
@@ -42,6 +43,8 @@ export async function createWorkspaceFile(
 	if (bytes.byteLength > DESCRIPTION_IMAGE_MAX_BYTES) {
 		throw new AppError("VALIDATE", "Images must be 5 MB or smaller");
 	}
+
+	await assertCanUploadBytes(workspace.id, user.id, bytes.byteLength);
 
 	const bucket = getUploadsBucket();
 	await bucket.put(key, bytes, {

@@ -23,6 +23,10 @@ import { fetchInviteByToken } from "#/lib/data/fetch-invite";
 import { fetchWorkspaceInvites } from "#/lib/data/fetch-workspace-invites";
 import { fetchWorkspaceMembers } from "#/lib/data/fetch-workspace-members";
 import { getWorkspaceAccess } from "#/lib/data/require-workspace-access";
+import {
+	assertCanAddWorkspaceMember,
+	assertCanJoinWorkspace,
+} from "#/lib/limits";
 import { mapActionError } from "#/lib/map-action-error";
 import { authMiddleware } from "#/middlewares/auth-middleware";
 import { AppError } from "#/types/result";
@@ -119,6 +123,8 @@ export const inviteMemberFn = createServerFn({ method: "POST" })
 					},
 				};
 			}
+
+			await assertCanAddWorkspaceMember(current.id, user.id);
 
 			const token = randomBytes(24).toString("hex");
 			const [invite] = await db
@@ -331,6 +337,22 @@ export const acceptInviteFn = createServerFn({ method: "POST" })
 						message: `Sign in as ${invite.email} to accept this invite`,
 					},
 				};
+			}
+
+			const [existingMembership] = await db
+				.select({ id: workspaceUser.id })
+				.from(workspaceUser)
+				.where(
+					and(
+						eq(workspaceUser.userId, user.id),
+						eq(workspaceUser.workspaceId, invite.workspaceId),
+					),
+				)
+				.limit(1);
+
+			if (!existingMembership) {
+				await assertCanJoinWorkspace(user.id);
+				await assertCanAddWorkspaceMember(invite.workspaceId, user.id);
 			}
 
 			await db

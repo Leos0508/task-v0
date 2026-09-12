@@ -37,6 +37,14 @@ export function getAuthEnv() {
 	};
 }
 
+export function getQuotaExemptUserIds() {
+	const raw = readEnv("QUOTA_EXEMPT_USER_IDS") ?? "";
+	return raw
+		.split(",")
+		.map((id) => id.trim())
+		.filter((id) => id.length > 0);
+}
+
 export function getUploadsBucket() {
 	try {
 		const bucket = env.UPLOADS;

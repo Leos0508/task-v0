@@ -16,6 +16,7 @@ Fill in `.env.local`:
 | `DATABASE_URL` | Neon/Postgres connection string |
 | `BETTER_AUTH_SECRET` | Auth signing secret (`npx -y @better-auth/cli secret`) |
 | `BETTER_AUTH_URL` | Public origin, e.g. `http://localhost:3000` |
+| `QUOTA_EXEMPT_USER_IDS` | Optional comma-separated user IDs that skip workspace, member, and upload limits |
 
 Apply schema, then start the app:
 

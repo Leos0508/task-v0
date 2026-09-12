@@ -4,11 +4,17 @@ import PageLoading from "#/components/PageLoading";
 import UserMenu from "#/components/UserMenu";
 import { Separator } from "#/components/ui/separator";
 import WorkspaceList from "#/features/workspaces/components/WorkspaceList";
-import { workspacesQueryOptions } from "#/features/workspaces/queries";
+import {
+	userQuotaQueryOptions,
+	workspacesQueryOptions,
+} from "#/features/workspaces/queries";
 
 export const Route = createFileRoute("/app/")({
 	loader: async ({ context }) => {
-		await context.queryClient.ensureQueryData(workspacesQueryOptions);
+		await Promise.all([
+			context.queryClient.ensureQueryData(workspacesQueryOptions),
+			context.queryClient.ensureQueryData(userQuotaQueryOptions),
+		]);
 		return { user: context.session.user };
 	},
 	pendingComponent: PageLoading,

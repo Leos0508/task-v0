@@ -72,7 +72,7 @@ MCP tools (no UI): `list_workspaces`, `get_workspace`, `list_issues`, `get_issue
 
 ### Workspaces
 
-Multi-tenant spaces (`code`, `name`, `color`). List/create/switch.
+Multi-tenant spaces (`code`, `name`, `color`). List/create/switch. Server quotas: 5 workspaces per user, 20 members per workspace, 2 GB uploads per workspace — [`src/lib/limits.ts`](../src/lib/limits.ts). Exempt user IDs: `QUOTA_EXEMPT_USER_IDS`. New workspace is disabled at the membership cap.
 
 | Piece | File |
 |-------|------|
@@ -128,7 +128,7 @@ Detail reuses [`IssueEditor`](../src/features/issues/components/IssueEditor.tsx)
 
 ### Settings
 
-Roles: `MEMBER` < `ADMIN` < `OWNER` — [`src/lib/authz/roles.ts`](../src/lib/authz/roles.ts). Members/invites: ADMIN+. Delete workspace: OWNER. Hide workspace existence from non-members (`NOT_FOUND`).
+Roles: `MEMBER` < `ADMIN` < `OWNER` — [`src/lib/authz/roles.ts`](../src/lib/authz/roles.ts). Members/invites: ADMIN+. Delete workspace: OWNER. Hide workspace existence from non-members (`NOT_FOUND`). Members tab shows `count/20` and blocks invites at cap. General shows upload storage used of 2 GB. Invite accept explains workspace or member caps.
 
 | Piece | File |
 |-------|------|
@@ -136,7 +136,7 @@ Roles: `MEMBER` < `ADMIN` < `OWNER` — [`src/lib/authz/roles.ts`](../src/lib/au
 | Members | [`MembersPanel.tsx`](../src/features/settings/components/MembersPanel.tsx), [`member-columns.tsx`](../src/features/settings/components/member-columns.tsx) |
 | Danger | [`DeleteWorkspaceCard.tsx`](../src/features/settings/components/DeleteWorkspaceCard.tsx) |
 | Invite accept | [`AcceptInviteCard.tsx`](../src/features/settings/components/AcceptInviteCard.tsx) |
-| Server | [`members.functions.ts`](../src/lib/functions/members.functions.ts) |
+| Server | [`members.functions.ts`](../src/lib/functions/members.functions.ts), [`quota.functions.ts`](../src/lib/functions/quota.functions.ts) |
 
 **Screens:** settings, invite.
 
