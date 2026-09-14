@@ -3,8 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "#/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,36 +11,22 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "#/components/ui/card";
 import {
 	Field,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from "#/components/ui/field";
+import { Input } from "#/components/ui/input";
 import {
 	InputGroup,
 	InputGroupAddon,
 	InputGroupButton,
 	InputGroupInput,
-} from "@/components/ui/input-group";
-import { authClient } from "@/lib/auth-client";
-
-const signUpSchema = z
-	.object({
-		name: z.string().min(1, "Name is required"),
-		email: z.email(),
-		password: z
-			.string()
-			.min(8, "Password must be at least 8 characters")
-			.regex(/[A-Z]/, "Password must include an uppercase letter"),
-		confirmPassword: z.string().min(1, "Confirm password is required"),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-		path: ["confirmPassword"],
-	});
+} from "#/components/ui/input-group";
+import { signUpSchema } from "#/features/auth/schema";
+import { authClient } from "#/lib/auth-client";
 
 export default function SignUpForm() {
 	const [showPassword, setShowPassword] = useState(false);
@@ -66,9 +51,8 @@ export default function SignUpForm() {
 				},
 				{
 					onSuccess: async () => {
-						toast.success("Sign up success");
-						// TODO: redirect based on search
-						navigate({ to: "/sign-in" });
+						toast.success("Check your email to verify your account");
+						navigate({ to: "/verify-email", search: { sent: true } });
 					},
 					onError: (ctx) => {
 						toast.error(`Failed to sign up: ${ctx.error.message}`);

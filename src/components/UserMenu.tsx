@@ -135,7 +135,7 @@ export default function UserMenu({
 					}}
 				>
 					<KeyRoundIcon />
-					API keys
+					Account
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					disabled={isSigningOut}

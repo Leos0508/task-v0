@@ -6,6 +6,8 @@ import UserMenu from "#/components/UserMenu";
 import { Button } from "#/components/ui/button";
 import { Separator } from "#/components/ui/separator";
 import ApiKeysPanel from "#/features/account/components/ApiKeysPanel";
+import ChangePasswordForm from "#/features/account/components/ChangePasswordForm";
+import EmailStatusCard from "#/features/account/components/EmailStatusCard";
 
 export const Route = createFileRoute("/app/account")({
 	loader: async ({ context }) => {
@@ -35,6 +37,21 @@ function AccountPage() {
 			</div>
 			<Separator />
 			<div className="h-full overflow-y-auto px-6 py-8">
+				<div className="mb-10 max-w-xl">
+					<h2 className="font-heading text-xl font-semibold">Email</h2>
+					<p className="mb-4 text-sm text-muted-foreground">
+						Verification status for this account.
+					</p>
+					<EmailStatusCard email={user.email} verified={user.emailVerified} />
+				</div>
+				<div className="mb-10">
+					<h2 className="mb-1 font-heading text-xl font-semibold">Password</h2>
+					<p className="mb-4 text-sm text-muted-foreground">
+						Must be at least 8 characters and include an uppercase letter.
+						Updating it signs out other sessions.
+					</p>
+					<ChangePasswordForm />
+				</div>
 				<div className="mb-6">
 					<h2 className="font-heading text-xl font-semibold">API keys</h2>
 					<p className="text-sm text-muted-foreground">
