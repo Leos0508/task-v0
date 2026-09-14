@@ -45,7 +45,7 @@ function DocumentsPage() {
 				</p>
 			</div>
 			<Separator />
-			<div className="flex w-full flex-col overflow-y-auto p-4">
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4">
 				<DocumentList
 					workspaceCode={code}
 					sort={search.sort}
