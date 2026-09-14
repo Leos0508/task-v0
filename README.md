@@ -55,9 +55,13 @@ npx wrangler r2 bucket create task-v0-uploads
 npx wrangler secret put DATABASE_URL
 npx wrangler secret put BETTER_AUTH_SECRET
 npx wrangler secret put BETTER_AUTH_URL
+npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put EMAIL_FROM
 ```
 
 `BETTER_AUTH_URL` must be the public origin, for example `https://task-v0.<account>.workers.dev`, with no trailing slash.
+
+`EMAIL_FROM` should be a verified Resend sender, for example `Task <noreply@yourdomain.com>`. For Resend sandbox only, use `Task <onboarding@resend.dev>` (delivers to the Resend account email).
 
 5. `npm run deploy`
 

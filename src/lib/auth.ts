@@ -15,7 +15,7 @@ export const auth = betterAuth({
 	...(authEnv.baseURL
 		? {
 				baseURL: authEnv.baseURL,
-				trustedOrigins: [authEnv.baseURL],
+				trustedOrigins: authEnv.trustedOrigins,
 			}
 		: {}),
 	database: drizzleAdapter(db, {
