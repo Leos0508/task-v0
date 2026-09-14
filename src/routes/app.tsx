@@ -32,11 +32,11 @@ function AppLayout() {
 	const { session } = Route.useRouteContext();
 
 	return (
-		<div className="grid h-svh min-h-0 grid-rows-[auto_minmax(0,1fr)]">
+		<div className="flex h-svh min-h-0 flex-col">
 			{session.user.emailVerified ? null : (
 				<EmailUnverifiedBanner email={session.user.email} />
 			)}
-			<div className="h-full min-h-0 overflow-hidden">
+			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 				<Outlet />
 			</div>
 		</div>
