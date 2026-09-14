@@ -1,6 +1,7 @@
 {
   "name": "task-v0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "imports": {
     "#/*": "./src/*"
