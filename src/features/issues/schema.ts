@@ -123,8 +123,6 @@ export const ISSUE_SORT_FIELDS = [
 	"endDate",
 ] as const;
 
-export const ISSUE_GRAPH_GROUP_BY = ["status", "priority", "tag"] as const;
-
 export const ISSUE_BOARD_CARD_FIELDS = ["priority", "dates", "tags"] as const;
 
 export const defaultBoardCardFields = ["priority", "tags"] as const;
@@ -145,10 +143,6 @@ export const issueViewConfigSchema = z.object({
 		field: z.enum(ISSUE_SORT_FIELDS),
 		direction: z.enum(["asc", "desc"]),
 	}),
-	graph: z.object({
-		visible: z.boolean(),
-		groupBy: z.enum(ISSUE_GRAPH_GROUP_BY),
-	}),
 	board: z
 		.object({
 			card: z
@@ -162,7 +156,6 @@ export const defaultIssueViewConfig = {
 	layout: "list" as const,
 	filters: { status: [], priority: [], tag: [] },
 	sort: { field: "number" as const, direction: "desc" as const },
-	graph: { visible: false, groupBy: "status" as const },
 	board: { card: [...defaultBoardCardFields] },
 };
 
@@ -188,7 +181,6 @@ export const updateIssueViewSchema = z
 
 export type IssueViewConfig = z.infer<typeof issueViewConfigSchema>;
 export type IssueSortField = (typeof ISSUE_SORT_FIELDS)[number];
-export type IssueGraphGroupBy = (typeof ISSUE_GRAPH_GROUP_BY)[number];
 export type IssueBoardCardField = (typeof ISSUE_BOARD_CARD_FIELDS)[number];
 export type CreateIssueViewInput = z.infer<typeof createIssueViewSchema>;
 export type UpdateIssueViewInput = z.infer<typeof updateIssueViewSchema>;
