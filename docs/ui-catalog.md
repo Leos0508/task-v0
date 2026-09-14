@@ -36,11 +36,14 @@ Shared layout classes (critical CSS in root): `.dashboard-page`, `.detail-form-l
 | Page | URL | Route file | Primary UI | Features |
 |------|-----|------------|------------|----------|
 | Landing | `/` | [`src/routes/index.tsx`](../src/routes/index.tsx) | [`LandingNavbar`](../src/components/LandingNavbar.tsx) | Marketing copy; session-aware CTA |
-| Sign in | `/sign-in` | [`src/routes/sign-in.tsx`](../src/routes/sign-in.tsx) | [`Logo`](../src/components/Logo.tsx), [`SignInForm`](../src/components/SignInForm.tsx) | [`src/features/auth/schema.ts`](../src/features/auth/schema.ts); search `redirect` |
-| Sign up | `/sign-up` | [`src/routes/sign-up.tsx`](../src/routes/sign-up.tsx) | [`Logo`](../src/components/Logo.tsx), [`SignUpForm`](../src/components/SignUpForm.tsx) | Same auth schema |
+| Sign in | `/sign-in` | [`src/routes/sign-in.tsx`](../src/routes/sign-in.tsx) | [`AuthSplitLayout`](../src/components/AuthSplitLayout.tsx), [`SignInForm`](../src/components/SignInForm.tsx) | [`src/features/auth/schema.ts`](../src/features/auth/schema.ts); search `redirect` |
+| Sign up | `/sign-up` | [`src/routes/sign-up.tsx`](../src/routes/sign-up.tsx) | Auth split + [`SignUpForm`](../src/components/SignUpForm.tsx) | After success → `/verify-email?sent=true` |
+| Verify email | `/verify-email` | [`src/routes/verify-email.tsx`](../src/routes/verify-email.tsx) | [`VerifyEmailCard`](../src/components/VerifyEmailCard.tsx) | Search `token`, `sent` |
+| Forgot password | `/forgot-password` | [`src/routes/forgot-password.tsx`](../src/routes/forgot-password.tsx) | [`ForgotPasswordForm`](../src/components/ForgotPasswordForm.tsx) | Generic success copy |
+| Reset password | `/reset-password` | [`src/routes/reset-password.tsx`](../src/routes/reset-password.tsx) | [`ResetPasswordForm`](../src/components/ResetPasswordForm.tsx) | Search `token` |
+| Account | `/app/account` | [`src/routes/app.account.tsx`](../src/routes/app.account.tsx) | [`UserMenu`](../src/components/UserMenu.tsx), [`EmailStatusCard`](../src/features/account/components/EmailStatusCard.tsx), [`ChangePasswordForm`](../src/features/account/components/ChangePasswordForm.tsx), [`ApiKeysPanel`](../src/features/account/components/ApiKeysPanel.tsx) | [Account](#account) |
 | Workspaces | `/app/` | [`src/routes/app.index.tsx`](../src/routes/app.index.tsx) | [`UserMenu`](../src/components/UserMenu.tsx), [`WorkspaceList`](../src/features/workspaces/components/WorkspaceList.tsx) | [Workspaces](#workspaces) |
 | Create workspace | `/app/create-workspace` | [`src/routes/app.create-workspace.tsx`](../src/routes/app.create-workspace.tsx) | [`CreateWorkspaceForm`](../src/features/workspaces/components/CreateWorkspaceForm.tsx) | [Workspaces](#workspaces) |
-| Account / API keys | `/app/account` | [`src/routes/app.account.tsx`](../src/routes/app.account.tsx) | [`UserMenu`](../src/components/UserMenu.tsx), [`ApiKeysPanel`](../src/features/account/components/ApiKeysPanel.tsx) | [Account](#account) |
 | Workspace overview | `/app/$code/` | [`src/routes/app.$code.index.tsx`](../src/routes/app.$code.index.tsx) | [`IssueViewTabs`](../src/features/issues/components/IssueViewTabs.tsx), [`IssueList`](../src/features/issues/components/IssueList.tsx) | [Issues](#issues) — same views as Issues page |
 | Issues | `/app/$code/issues/` | [`src/routes/app.$code.issues.index.tsx`](../src/routes/app.$code.issues.index.tsx) | Same as overview | [Issues](#issues) |
 | Issue detail | `/app/$code/issues/$issueNumber` | [`src/routes/app.$code.issues.$issueNumber.tsx`](../src/routes/app.$code.issues.$issueNumber.tsx) | [`IssueDetailForm`](../src/features/issues/components/IssueDetailForm.tsx) | Issues, comments, tags, linked docs, history |
@@ -153,17 +156,19 @@ Change log on issue and document detail.
 
 ### Account
 
-API keys for MCP.
+Email status, change password, and API keys for MCP.
 
 | Piece | File |
 |-------|------|
+| Email | [`EmailStatusCard.tsx`](../src/features/account/components/EmailStatusCard.tsx) |
+| Password | [`ChangePasswordForm.tsx`](../src/features/account/components/ChangePasswordForm.tsx) |
 | Panel | [`ApiKeysPanel.tsx`](../src/features/account/components/ApiKeysPanel.tsx) |
 | Schema | [`src/features/account/schema.ts`](../src/features/account/schema.ts) |
 | MCP auth | [`src/mcp/auth.ts`](../src/mcp/auth.ts) |
 
 ### Auth (session)
 
-better-auth; session via `getSession` / `getAuthSession`. Client: [`src/lib/auth-client.ts`](../src/lib/auth-client.ts). **Screens:** sign-in, sign-up, landing navbar.
+better-auth; session via `getSession` / `getAuthSession`. Client: [`src/lib/auth-client.ts`](../src/lib/auth-client.ts). Email via Resend (`RESEND_API_KEY`, `EMAIL_FROM`) in [`src/lib/email.ts`](../src/lib/email.ts). Unverified users can use the app with [`EmailUnverifiedBanner`](../src/components/EmailUnverifiedBanner.tsx). **Screens:** sign-in, sign-up, verify, forgot/reset password, landing navbar.
 
 ---
 
@@ -208,14 +213,19 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 
 | ID | File | Role | Screens | Status |
 |----|------|------|---------|--------|
-| logo | [`Logo.tsx`](../src/components/Logo.tsx) | Wordmark | Landing, sign-in, sign-up | wrap |
+| logo | [`Logo.tsx`](../src/components/Logo.tsx) | Wordmark | Landing, auth split | wrap |
+| auth-split-layout | [`AuthSplitLayout.tsx`](../src/components/AuthSplitLayout.tsx) | Primary/accent auth shell | Sign-in, sign-up, verify, forgot, reset | wrap |
 | landing-navbar | [`LandingNavbar.tsx`](../src/components/LandingNavbar.tsx) | Public header | `/` | wrap |
 | app-sidebar | [`AppSidebar.tsx`](../src/components/AppSidebar.tsx) | Nav: overview, issues, saved views, documents, settings; workspace switch | `/app/$code/*` | wrap |
 | list-sort-header | [`ListSortHeader.tsx`](../src/components/ListSortHeader.tsx) | Ghost button + chevron for active `asc`/`desc` | Issue/document/workspace list headers | wrap |
 | list-sort-popover | [`ListSortPopover.tsx`](../src/components/ListSortPopover.tsx) | Filters-style Sort trigger, field/direction choices, reset chip | Issue/document/workspace list toolbars | wrap |
-| user-menu | [`UserMenu.tsx`](../src/components/UserMenu.tsx) | Account, API keys, sign out | `/app`, `/app/account`, sidebar footer | wrap |
-| sign-in-form | [`SignInForm.tsx`](../src/components/SignInForm.tsx) | Email/password | `/sign-in` | wrap |
+| user-menu | [`UserMenu.tsx`](../src/components/UserMenu.tsx) | Account, sign out | `/app`, `/app/account`, sidebar footer | wrap |
+| sign-in-form | [`SignInForm.tsx`](../src/components/SignInForm.tsx) | Email/password + forgot link | `/sign-in` | wrap |
 | sign-up-form | [`SignUpForm.tsx`](../src/components/SignUpForm.tsx) | Registration | `/sign-up` | wrap |
+| forgot-password-form | [`ForgotPasswordForm.tsx`](../src/components/ForgotPasswordForm.tsx) | Request reset | `/forgot-password` | wrap |
+| reset-password-form | [`ResetPasswordForm.tsx`](../src/components/ResetPasswordForm.tsx) | Set new password | `/reset-password` | wrap |
+| verify-email-card | [`VerifyEmailCard.tsx`](../src/components/VerifyEmailCard.tsx) | Confirm token / check inbox | `/verify-email` | wrap |
+| email-unverified-banner | [`EmailUnverifiedBanner.tsx`](../src/components/EmailUnverifiedBanner.tsx) | Resend verification | `/app` when unverified | wrap |
 | page-loading | [`PageLoading.tsx`](../src/components/PageLoading.tsx) | Route pending | Most `/app` routes | keep |
 | page-error | [`PageError.tsx`](../src/components/PageError.tsx) | Route error | Same | keep |
 | page-not-found | [`PageNotFound.tsx`](../src/components/PageNotFound.tsx) | 404 / no access | Root, workspace, issue, document | keep |
@@ -236,7 +246,7 @@ Grouped by [features](#4-features). Treat as product surfaces: Query + server fu
 
 **History:** ChangeHistory.
 
-**Account:** ApiKeysPanel.
+**Account:** EmailStatusCard, ChangePasswordForm, ApiKeysPanel.
 
 ---
 

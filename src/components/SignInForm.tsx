@@ -147,8 +147,13 @@ const SignInForm = ({ next = "/app" }: { next?: string }) => {
 						)}
 					</Button>
 					<p className="text-sm">
+						<Link to="/forgot-password" className="text-primary underline">
+							Forgot password?
+						</Link>
+					</p>
+					<p className="text-sm">
 						Don&apos;t have an account?{" "}
-						<Link to="/sign-up" className="underline text-primary">
+						<Link to="/sign-up" className="text-primary underline">
 							Sign Up
 						</Link>
 					</p>

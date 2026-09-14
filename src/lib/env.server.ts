@@ -18,7 +18,15 @@ function readEnv(name: ServerEnvName): string | undefined {
 	return fromProcess && fromProcess.length > 0 ? fromProcess : undefined;
 }
 
-function requireEnv(name: Exclude<ServerEnvName, "BETTER_AUTH_URL">): string {
+function requireEnv(
+	name: Exclude<
+		ServerEnvName,
+		| "BETTER_AUTH_URL"
+		| "QUOTA_EXEMPT_USER_IDS"
+		| "RESEND_API_KEY"
+		| "EMAIL_FROM"
+	>,
+): string {
 	const value = readEnv(name);
 	if (!value) {
 		throw new Error(`${name} is not set`);
@@ -34,6 +42,13 @@ export function getAuthEnv() {
 	return {
 		secret: requireEnv("BETTER_AUTH_SECRET"),
 		baseURL: readEnv("BETTER_AUTH_URL"),
+	};
+}
+
+export function getEmailEnv() {
+	return {
+		apiKey: readEnv("RESEND_API_KEY"),
+		from: readEnv("EMAIL_FROM") ?? "Task <onboarding@resend.dev>",
 	};
 }
 

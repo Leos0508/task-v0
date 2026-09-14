@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -42,6 +45,16 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -50,6 +63,11 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkspacesRoute = WorkspacesRouteImport.update({
@@ -148,8 +166,11 @@ const AppCodeIssuesIssueNumberRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/app/$code': typeof AppCodeRouteWithChildren
@@ -171,8 +192,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/app/account': typeof AppAccountRoute
@@ -193,8 +217,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/workspaces': typeof WorkspacesRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/app/$code': typeof AppCodeRouteWithChildren
@@ -219,8 +246,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/forgot-password'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verify-email'
     | '/workspaces'
     | '/api/mcp'
     | '/app/$code'
@@ -242,8 +272,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verify-email'
     | '/workspaces'
     | '/api/mcp'
     | '/app/account'
@@ -263,8 +296,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/forgot-password'
+    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
+    | '/verify-email'
     | '/workspaces'
     | '/api/mcp'
     | '/app/$code'
@@ -288,8 +324,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   WorkspacesRoute: typeof WorkspacesRouteWithChildren
   ApiMcpRoute: typeof ApiMcpRoute
   FilesFileIdRoute: typeof FilesFileIdRoute
@@ -313,6 +352,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -325,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workspaces': {
@@ -531,8 +591,11 @@ const WorkspacesRouteWithChildren = WorkspacesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   WorkspacesRoute: WorkspacesRouteWithChildren,
   ApiMcpRoute: ApiMcpRoute,
   FilesFileIdRoute: FilesFileIdRoute,

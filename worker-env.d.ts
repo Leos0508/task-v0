@@ -4,6 +4,8 @@ declare namespace Cloudflare {
 		BETTER_AUTH_SECRET: string;
 		BETTER_AUTH_URL: string;
 		QUOTA_EXEMPT_USER_IDS: string;
+		RESEND_API_KEY: string;
+		EMAIL_FROM: string;
 		UPLOADS: R2Bucket;
 	}
 }
