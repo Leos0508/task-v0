@@ -54,7 +54,7 @@ Shared layout classes (critical CSS in root): `.dashboard-page`, `.detail-form-l
 
 Path-only layouts (outlet only): [`app.$code.issues.tsx`](../src/routes/app.$code.issues.tsx), [`app.$code.documents.tsx`](../src/routes/app.$code.documents.tsx).
 
-Search on overview + issues: `view` (`list` \| `board` \| `gantt`), `viewId`, `status[]`, `priority[]`, `tag[]`, `sort`, `dir`, `graph`, `groupBy`, `card[]` — [`src/features/issues/view-search.ts`](../src/features/issues/view-search.ts). Search on documents: `sort`, `dir` — [`src/features/documents/schema.ts`](../src/features/documents/schema.ts). List/gantt share issue sort; board hides the sort popover and stays rank-ordered. Toolbar sort is [`ListSortPopover`](../src/components/ListSortPopover.tsx); table headers that map to a sort field toggle the same `sort`/`dir`. Board-only [`IssueBoardCardPopover`](../src/features/issues/components/IssueBoardCardPopover.tsx) toggles card fields (`priority`, `dates`, `tags`).
+Search on overview + issues: `view` (`list` \| `board` \| `gantt`), `viewId`, `status[]`, `priority[]`, `tag[]`, `sort`, `dir`, `card[]` — [`src/features/issues/view-search.ts`](../src/features/issues/view-search.ts). Search on documents: `sort`, `dir` — [`src/features/documents/schema.ts`](../src/features/documents/schema.ts). List/gantt share issue sort; board hides the sort popover and stays rank-ordered. Toolbar sort is [`ListSortPopover`](../src/components/ListSortPopover.tsx); table headers that map to a sort field toggle the same `sort`/`dir`. Board-only [`IssueBoardCardPopover`](../src/features/issues/components/IssueBoardCardPopover.tsx) toggles card fields (`priority`, `dates`, `tags`).
 
 ---
 
@@ -91,7 +91,7 @@ Multi-tenant spaces (`code`, `name`, `color`). List/create/switch. Server quotas
 
 ### Issues
 
-Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Priority: `LOW`–`URGENT` or none. Layouts: list table, board, Gantt. Named workspace views persist default filters, sort, layout, graph, and board card fields. Session edits stay in the URL until **Update view**.
+Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Priority: `LOW`–`URGENT` or none. Layouts: list table, board, Gantt. Named workspace views persist default filters, sort, layout, and board card fields. Session edits stay in the URL until **Update view**.
 
 | Piece | File |
 |-------|------|
@@ -100,7 +100,6 @@ Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Prio
 | View tabs | [`IssueViewTabs.tsx`](../src/features/issues/components/IssueViewTabs.tsx) |
 | Filters | [`IssueFiltersPopover.tsx`](../src/features/issues/components/IssueFiltersPopover.tsx) |
 | Sort | [`ListSortPopover.tsx`](../src/components/ListSortPopover.tsx) — issues, documents, workspaces |
-| Chart panel | [`IssueChartPanel.tsx`](../src/features/issues/components/IssueChartPanel.tsx) (lazy; Recharts via [`chart.tsx`](../src/components/ui/chart.tsx)) |
 | Table | [`IssueTableView.tsx`](../src/features/issues/components/IssueTableView.tsx), [`issue-columns.tsx`](../src/features/issues/components/issue-columns.tsx) |
 | Board | [`IssueBoardView.tsx`](../src/features/issues/components/IssueBoardView.tsx), [`board-drop.ts`](../src/features/issues/board-drop.ts), [`reorder-issue.ts`](../src/features/issues/reorder-issue.ts), [`IssueBoardCardPopover.tsx`](../src/features/issues/components/IssueBoardCardPopover.tsx) — status-tinted columns, one drop placeholder, card field toggles, keyboard move |
 | Gantt | [`IssueGanttView.tsx`](../src/features/issues/components/IssueGanttView.tsx) (lazy) |
@@ -193,7 +192,6 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 | card | [`card.tsx`](../src/components/ui/card.tsx) | Card, Header, Title, Description, Content, Footer, Action | Auth, create workspace, invite, API keys | keep |
 | tabs | [`tabs.tsx`](../src/components/ui/tabs.tsx) | TabsList `variant`: default, line | Issue views, settings | keep |
 | table | [`table.tsx`](../src/components/ui/table.tsx) | Table, Header, Body, Row, Head, Cell, Caption | Via DataTable | keep |
-| chart | [`chart.tsx`](../src/components/ui/chart.tsx) | ChartContainer, Tooltip, Legend, Style | Issue chart panel | keep |
 | data-table | [`data-table.tsx`](../src/components/ui/data-table.tsx) | `table`, `emptyMessage`; sortable columns wrap headers in [`ListSortHeader`](../src/components/ListSortHeader.tsx) | Workspaces, issues list, documents, members | keep |
 | dropdown-menu | [`dropdown-menu.tsx`](../src/components/ui/dropdown-menu.tsx) | | UserMenu, detail overflow, columns | keep |
 | popover | [`popover.tsx`](../src/components/ui/popover.tsx) | | Sidebar switcher, filters, tags, links, columns | keep |
@@ -236,7 +234,7 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 
 Grouped by [features](#4-features). Treat as product surfaces: Query + server functions stay; visual chrome can change.
 
-**Issues:** IssueList, IssueViewControls, IssueSaveViewDialog, IssueViewTabs, IssueFiltersPopover, IssueBoardCardPopover, ListSortPopover, IssueChartPanel, IssueTableView, IssueBoardView, IssueGanttView, IssueDetailForm, IssueEditor, TableToolbar, SlashCommandList, MermaidNodeView, IssueBadges, IssueTags, IssueTagBadge, IssueListTags, IssueComments, IssueLinkedDocuments.
+**Issues:** IssueList, IssueViewControls, IssueSaveViewDialog, IssueViewTabs, IssueFiltersPopover, IssueBoardCardPopover, ListSortPopover, IssueTableView, IssueBoardView, IssueGanttView, IssueDetailForm, IssueEditor, TableToolbar, SlashCommandList, MermaidNodeView, IssueBadges, IssueTags, IssueTagBadge, IssueListTags, IssueComments, IssueLinkedDocuments.
 
 **Documents:** DocumentList, DocumentDetailForm, DocumentTags, DocumentLinkedIssues. URL `sort` + `dir` via ListSortPopover; title and last-edited headers toggle the same state.
 

@@ -3,10 +3,8 @@ import type { IssuePriority, IssueStatus } from "#/db/schema";
 import {
 	defaultBoardCardFields,
 	defaultIssueViewConfig,
-	ISSUE_GRAPH_GROUP_BY,
 	ISSUE_SORT_FIELDS,
 	type IssueBoardCardField,
-	type IssueGraphGroupBy,
 	type IssueSortField,
 	type IssueViewConfig,
 	normalizeBoardCardFields,
@@ -38,12 +36,6 @@ export const issueViewSearchSchema = z.object({
 	tag: z.array(z.string().min(1)).default([]).catch([]),
 	sort: z.enum(ISSUE_SORT_FIELDS).default("number").catch("number"),
 	dir: z.enum(["asc", "desc"]).default("desc").catch("desc"),
-	graph: z
-		.union([z.boolean(), z.literal("true"), z.literal("false")])
-		.transform((value) => value === true || value === "true")
-		.default(false)
-		.catch(false),
-	groupBy: z.enum(ISSUE_GRAPH_GROUP_BY).default("status").catch("status"),
 	card: z
 		.array(z.enum(["priority", "status", "dates", "tags"]))
 		.default([...defaultBoardCardFields])
@@ -65,8 +57,6 @@ export type IssueViewSearch = {
 	tag: string[];
 	sort: IssueSortField;
 	dir: "asc" | "desc";
-	graph: boolean;
-	groupBy: IssueGraphGroupBy;
 	card: IssueBoardCardField[];
 };
 
@@ -81,8 +71,6 @@ export const issueSearchDefaults: IssueViewSearch = {
 	...emptyIssueFilters,
 	sort: "number",
 	dir: "desc",
-	graph: false,
-	groupBy: "status",
 	card: [...defaultBoardCardFields],
 };
 
@@ -113,10 +101,6 @@ export function viewConfigFromSearch(search: IssueViewSearch): IssueViewConfig {
 			field: search.sort,
 			direction: search.dir,
 		},
-		graph: {
-			visible: search.graph,
-			groupBy: search.groupBy,
-		},
 		board: {
 			card: normalizeBoardCardFields(search.card),
 		},
@@ -135,8 +119,6 @@ export function searchFromViewConfig(
 		tag: config.filters.tag,
 		sort: config.sort.field,
 		dir: config.sort.direction,
-		graph: config.graph.visible,
-		groupBy: config.graph.groupBy,
 		card: normalizeBoardCardFields(config.board.card),
 	};
 }
@@ -155,8 +137,6 @@ export function isViewSearchDirty(
 		search.view !== config.layout ||
 		search.sort !== config.sort.field ||
 		search.dir !== config.sort.direction ||
-		search.graph !== config.graph.visible ||
-		search.groupBy !== config.graph.groupBy ||
 		!sameStringList(search.status, config.filters.status) ||
 		!sameStringList(search.priority, config.filters.priority) ||
 		!sameStringList(search.tag, config.filters.tag) ||

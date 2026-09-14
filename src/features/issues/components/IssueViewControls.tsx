@@ -237,7 +237,7 @@ export default function IssueViewControls({
 				description={
 					dialog === "rename"
 						? "Change the name of this workspace view."
-						: "Save the current filters, sort, layout, and graph as a named view."
+						: "Save the current filters, sort, layout, and board card fields as a named view."
 				}
 				initialName={dialog === "rename" ? (activeView?.name ?? "") : ""}
 				submitLabel={dialog === "rename" ? "Rename" : "Save"}

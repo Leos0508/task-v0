@@ -6,15 +6,6 @@ import { toast } from "sonner";
 import ListSortPopover from "#/components/ListSortPopover";
 import PageLoading from "#/components/PageLoading";
 import { Button } from "#/components/ui/button";
-import { Label } from "#/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
-import { Switch } from "#/components/ui/switch";
 import IssueBoardCardPopover from "#/features/issues/components/IssueBoardCardPopover";
 import IssueBoardView from "#/features/issues/components/IssueBoardView";
 import IssueFiltersPopover from "#/features/issues/components/IssueFiltersPopover";
@@ -25,9 +16,7 @@ import {
 	tagsQueryOptions,
 } from "#/features/issues/queries";
 import {
-	ISSUE_GRAPH_GROUP_BY,
 	ISSUE_SORT_FIELDS,
-	type IssueGraphGroupBy,
 	type IssueSortField,
 } from "#/features/issues/schema";
 import { sortIssues } from "#/features/issues/sort-issues";
@@ -45,10 +34,6 @@ const IssueGanttView = lazyImport(
 	() => import("#/features/issues/components/IssueGanttView"),
 );
 
-const IssueChartPanel = lazyImport(
-	() => import("#/features/issues/components/IssueChartPanel"),
-);
-
 const SORT_LABELS: Record<IssueSortField, string> = {
 	number: "Number",
 	title: "Title",
@@ -64,12 +49,6 @@ const SORT_FIELDS = ISSUE_SORT_FIELDS.map((field) => ({
 	value: field,
 	label: SORT_LABELS[field],
 }));
-
-const GROUP_BY_LABELS: Record<IssueGraphGroupBy, string> = {
-	status: "Status",
-	priority: "Priority",
-	tag: "Tag",
-};
 
 export default function IssueList({
 	workspaceCode,
@@ -166,41 +145,24 @@ export default function IssueList({
 
 	return (
 		<div className="flex h-full min-h-0 min-w-0 flex-col gap-4 p-4">
-			{search.graph ? (
-				<Suspense
-					fallback={
-						<div className="flex h-44 items-center justify-center rounded-lg border">
-							<PageLoading />
-						</div>
-					}
-				>
-					<IssueChartPanel
-						issues={filteredIssues}
-						tags={tags}
-						groupBy={search.groupBy}
-						emptyMessage={emptyMessage}
-					/>
-				</Suspense>
-			) : (
-				<div className="grid gap-3 sm:grid-cols-4">
-					<div className="rounded-lg border p-3">
-						<p className="text-xs text-muted-foreground">Total</p>
-						<p className="text-lg font-semibold">{counts.total}</p>
-					</div>
-					<div className="rounded-lg border p-3">
-						<p className="text-xs text-muted-foreground">Todo</p>
-						<p className="text-lg font-semibold">{counts.todo}</p>
-					</div>
-					<div className="rounded-lg border p-3">
-						<p className="text-xs text-muted-foreground">In progress</p>
-						<p className="text-lg font-semibold">{counts.inProgress}</p>
-					</div>
-					<div className="rounded-lg border p-3">
-						<p className="text-xs text-muted-foreground">Done</p>
-						<p className="text-lg font-semibold">{counts.done}</p>
-					</div>
+			<div className="grid gap-3 sm:grid-cols-4">
+				<div className="rounded-lg border p-3">
+					<p className="text-xs text-muted-foreground">Total</p>
+					<p className="text-lg font-semibold">{counts.total}</p>
 				</div>
-			)}
+				<div className="rounded-lg border p-3">
+					<p className="text-xs text-muted-foreground">Todo</p>
+					<p className="text-lg font-semibold">{counts.todo}</p>
+				</div>
+				<div className="rounded-lg border p-3">
+					<p className="text-xs text-muted-foreground">In progress</p>
+					<p className="text-lg font-semibold">{counts.inProgress}</p>
+				</div>
+				<div className="rounded-lg border p-3">
+					<p className="text-xs text-muted-foreground">Done</p>
+					<p className="text-lg font-semibold">{counts.done}</p>
+				</div>
+			</div>
 			<div className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-2">
 					<IssueFiltersPopover
@@ -229,41 +191,6 @@ export default function IssueList({
 							}
 						/>
 					)}
-					<div className="flex items-center gap-2">
-						<Switch
-							id="issue-graph"
-							size="sm"
-							checked={search.graph}
-							onCheckedChange={(checked) =>
-								onSearchChange({ ...search, graph: checked })
-							}
-						/>
-						<Label htmlFor="issue-graph" className="font-normal">
-							Graph
-						</Label>
-					</div>
-					{search.graph ? (
-						<Select
-							value={search.groupBy}
-							onValueChange={(value) =>
-								onSearchChange({
-									...search,
-									groupBy: value as IssueGraphGroupBy,
-								})
-							}
-						>
-							<SelectTrigger aria-label="Group graph by" className="min-w-32">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{ISSUE_GRAPH_GROUP_BY.map((groupBy) => (
-									<SelectItem key={groupBy} value={groupBy}>
-										{GROUP_BY_LABELS[groupBy]}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					) : null}
 				</div>
 				<Button onClick={handleNewIssue} disabled={isCreating}>
 					{isCreating ? (
