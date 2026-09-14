@@ -44,7 +44,7 @@ function SettingsPage() {
 				</p>
 			</div>
 			<Separator />
-			<div className="flex-1 overflow-y-auto p-6">
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-6">
 				<Tabs defaultValue="general">
 					<TabsList>
 						<TabsTrigger value="general">General</TabsTrigger>
