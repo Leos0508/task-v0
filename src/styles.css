@@ -163,6 +163,15 @@
     .detail-form-layout {
       grid-template-columns: minmax(0, 1fr) 15rem;
     }
+
+    .detail-form-aside {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+      max-height: calc(100svh - 10rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
   }
 
   @media (max-width: 767px) {
