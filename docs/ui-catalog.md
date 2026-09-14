@@ -27,7 +27,7 @@ Imports use `#/` (`#/components/ui/button`). Forms: TanStack Form + Zod. Tables:
 | Auth app | `/app` | [`src/routes/app.tsx`](../src/routes/app.tsx) | Session `beforeLoad`; unauthenticated → `/sign-in?redirect=` | Workspace picker, account, create workspace, `$code` |
 | Workspace | `/app/$code` | [`src/routes/app.$code.tsx`](../src/routes/app.$code.tsx) | [`SidebarProvider`](../src/components/ui/sidebar.tsx) + [`AppSidebar`](../src/components/AppSidebar.tsx) + `SidebarInset`; access via `getWorkspaceAccessFn`; missing membership → `notFound()` | Overview, issues, documents, settings |
 
-Shared layout classes (critical CSS in root): `.dashboard-page`, `.detail-form-layout`, `.detail-form-main`, `.detail-form-aside`, `.tiptap-editor`. Tokens live in [`src/styles.css`](../src/styles.css) (editorial paper canvas, near-black primary, Space Grotesk headings).
+Shared layout classes (critical CSS in root): `.dashboard-page`, `.detail-form-layout`, `.detail-form-main`, `.detail-form-aside` (sticky metadata on `md+`), `.tiptap-editor`. Tokens live in [`src/styles.css`](../src/styles.css) (editorial paper canvas, near-black primary, Space Grotesk headings).
 
 ---
 
