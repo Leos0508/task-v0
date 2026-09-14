@@ -1,4 +1,4 @@
-import { ArrowUpDownIcon, CheckIcon, XIcon } from "lucide-react";
+import { ArrowUpDownIcon, CheckIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -51,19 +51,25 @@ export default function ListSortPopover<F extends string>({
 	}
 
 	return (
-		<div className="flex flex-wrap items-center gap-2">
-			<Popover>
-				<PopoverTrigger asChild>
-					<Button
-						type="button"
-						variant="outline"
-						aria-label={isCustom ? `Sort, ${summary}` : "Sort"}
-					>
-						<ArrowUpDownIcon />
-						Sort
-						{isCustom ? <Badge variant="secondary">1</Badge> : null}
-					</Button>
-				</PopoverTrigger>
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button
+					type="button"
+					variant="outline"
+					aria-label={isCustom ? `Sort, ${summary}` : "Sort"}
+				>
+					<ArrowUpDownIcon />
+					Sort
+					{isCustom ? (
+						<Badge
+							variant="destructive"
+							className="size-5 rounded-full p-0 text-[12px] leading-none tabular-nums"
+						>
+							1
+						</Badge>
+					) : null}
+				</Button>
+			</PopoverTrigger>
 				<PopoverContent
 					align="start"
 					className="flex max-h-[var(--radix-popover-content-available-height)] w-72 flex-col overflow-hidden p-0"
@@ -113,26 +119,7 @@ export default function ListSortPopover<F extends string>({
 					</div>
 				</PopoverContent>
 			</Popover>
-			{isCustom ? (
-				<>
-					<Badge variant="secondary" className="pr-0.5">
-						{summary}
-						<button
-							type="button"
-							className="rounded-full p-0.5 hover:bg-foreground/10"
-							onClick={reset}
-						>
-							<XIcon className="size-3" />
-							<span className="sr-only">Reset sort</span>
-						</button>
-					</Badge>
-					<Button type="button" variant="ghost" size="sm" onClick={reset}>
-						Reset
-					</Button>
-				</>
-			) : null}
-		</div>
-	);
+		);
 }
 
 function SortSection({
