@@ -1,4 +1,4 @@
-import { ListFilterIcon, XIcon } from "lucide-react";
+import { ListFilterIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -15,9 +15,7 @@ import { Separator } from "#/components/ui/separator";
 import { Switch } from "#/components/ui/switch";
 import type { IssuePriority, IssueStatus } from "#/db/schema";
 import {
-	PRIORITY_LABELS,
 	PriorityBadge,
-	STATUS_LABELS,
 	STATUSES,
 	StatusBadge,
 } from "#/features/issues/components/IssueBadges";
@@ -42,7 +40,6 @@ export default function IssueFiltersPopover({
 	onFiltersChange: (filters: IssueFilters) => void;
 }) {
 	const activeCount = countIssueFilters(filters);
-	const tagsById = new Map(tags.map((tag) => [tag.id, tag]));
 
 	function setStatus(status: IssueStatus, checked: boolean) {
 		onFiltersChange({
@@ -66,23 +63,27 @@ export default function IssueFiltersPopover({
 	}
 
 	return (
-		<div className="flex flex-wrap items-center gap-2">
-			<Popover>
-				<PopoverTrigger asChild>
-					<Button
-						type="button"
-						variant="outline"
-						aria-label={
-							activeCount > 0 ? `Filters, ${activeCount} active` : "Filters"
-						}
-					>
-						<ListFilterIcon />
-						Filters
-						{activeCount > 0 ? (
-							<Badge variant="secondary">{activeCount}</Badge>
-						) : null}
-					</Button>
-				</PopoverTrigger>
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button
+					type="button"
+					variant="outline"
+					aria-label={
+						activeCount > 0 ? `Filters, ${activeCount} active` : "Filters"
+					}
+				>
+					<ListFilterIcon />
+					Filters
+					{activeCount > 0 ? (
+						<Badge
+							variant="destructive"
+							className="size-5 rounded-full p-0 text-[12px] leading-none tabular-nums"
+						>
+							{activeCount}
+						</Badge>
+					) : null}
+				</Button>
+			</PopoverTrigger>
 				<PopoverContent
 					align="start"
 					className="flex max-h-[var(--radix-popover-content-available-height)] w-80 flex-col overflow-hidden p-0"
@@ -163,47 +164,7 @@ export default function IssueFiltersPopover({
 					</div>
 				</PopoverContent>
 			</Popover>
-			{STATUSES.filter((status) => filters.status.includes(status)).map(
-				(status) => (
-					<FilterChip
-						key={status}
-						label={STATUS_LABELS[status]}
-						onRemove={() => setStatus(status, false)}
-					/>
-				),
-			)}
-			{FILTER_PRIORITIES.filter((priority) =>
-				filters.priority.includes(priority),
-			).map((priority) => (
-				<FilterChip
-					key={priority}
-					label={PRIORITY_LABELS[priority]}
-					onRemove={() => setPriority(priority, false)}
-				/>
-			))}
-			{filters.tag.map((tagId) => {
-				const tag = tagsById.get(tagId);
-				if (!tag) return null;
-				return (
-					<IssueTagBadge
-						key={tag.id}
-						tag={tag}
-						onRemove={() => setTag(tag.id, false)}
-					/>
-				);
-			})}
-			{activeCount > 0 ? (
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					onClick={() => onFiltersChange(emptyIssueFilters)}
-				>
-					Clear
-				</Button>
-			) : null}
-		</div>
-	);
+		);
 }
 
 function FilterSection({
@@ -246,27 +207,5 @@ function FilterSwitchRow({
 				onCheckedChange={onCheckedChange}
 			/>
 		</div>
-	);
-}
-
-function FilterChip({
-	label,
-	onRemove,
-}: {
-	label: string;
-	onRemove: () => void;
-}) {
-	return (
-		<Badge variant="secondary" className="pr-0.5">
-			{label}
-			<button
-				type="button"
-				className="rounded-full p-0.5 hover:bg-foreground/10"
-				onClick={onRemove}
-			>
-				<XIcon className="size-3" />
-				<span className="sr-only">Remove {label} filter</span>
-			</button>
-		</Badge>
 	);
 }

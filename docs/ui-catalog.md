@@ -98,7 +98,7 @@ Numbered per workspace. Status: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`. Prio
 | List + create | [`IssueList.tsx`](../src/features/issues/components/IssueList.tsx) |
 | Saved views | [`IssueViewControls.tsx`](../src/features/issues/components/IssueViewControls.tsx), [`IssueSaveViewDialog.tsx`](../src/features/issues/components/IssueSaveViewDialog.tsx) |
 | View tabs | [`IssueViewTabs.tsx`](../src/features/issues/components/IssueViewTabs.tsx) |
-| Filters | [`IssueFiltersPopover.tsx`](../src/features/issues/components/IssueFiltersPopover.tsx) |
+| Filters | [`IssueFiltersPopover.tsx`](../src/features/issues/components/IssueFiltersPopover.tsx) — red count badge when active |
 | Sort | [`ListSortPopover.tsx`](../src/components/ListSortPopover.tsx) — issues, documents, workspaces |
 | Table | [`IssueTableView.tsx`](../src/features/issues/components/IssueTableView.tsx), [`issue-columns.tsx`](../src/features/issues/components/issue-columns.tsx) |
 | Board | [`IssueBoardView.tsx`](../src/features/issues/components/IssueBoardView.tsx), [`board-drop.ts`](../src/features/issues/board-drop.ts), [`reorder-issue.ts`](../src/features/issues/reorder-issue.ts), [`IssueBoardCardPopover.tsx`](../src/features/issues/components/IssueBoardCardPopover.tsx) — status-tinted columns, one drop placeholder, card field toggles, keyboard move |
@@ -216,7 +216,7 @@ Do not add a parallel primitive. Prefer `shadcn@latest add` then catalog the res
 | landing-navbar | [`LandingNavbar.tsx`](../src/components/LandingNavbar.tsx) | Public header | `/` | wrap |
 | app-sidebar | [`AppSidebar.tsx`](../src/components/AppSidebar.tsx) | Nav: overview, issues, saved views, documents, settings; workspace switch | `/app/$code/*` | wrap |
 | list-sort-header | [`ListSortHeader.tsx`](../src/components/ListSortHeader.tsx) | Ghost button + chevron for active `asc`/`desc` | Issue/document/workspace list headers | wrap |
-| list-sort-popover | [`ListSortPopover.tsx`](../src/components/ListSortPopover.tsx) | Filters-style Sort trigger, field/direction choices, reset chip | Issue/document/workspace list toolbars | wrap |
+| list-sort-popover | [`ListSortPopover.tsx`](../src/components/ListSortPopover.tsx) | Filters-style Sort trigger, red count badge when custom, field/direction choices, header Reset | Issue/document/workspace list toolbars | wrap |
 | user-menu | [`UserMenu.tsx`](../src/components/UserMenu.tsx) | Account, sign out | `/app`, `/app/account`, sidebar footer | wrap |
 | sign-in-form | [`SignInForm.tsx`](../src/components/SignInForm.tsx) | Email/password + forgot link | `/sign-in` | wrap |
 | sign-up-form | [`SignUpForm.tsx`](../src/components/SignUpForm.tsx) | Registration | `/sign-up` | wrap |
